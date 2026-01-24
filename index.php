@@ -86,6 +86,7 @@ usort($vehiculos_filtrados, function ($a, $b) {
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    <meta http-equiv="refresh" content="10">
     <meta charset="UTF-8">
     <title>Página Principal - Gestión de ITV</title>
     <link rel="stylesheet" href="style.css">
