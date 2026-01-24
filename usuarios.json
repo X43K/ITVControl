@@ -1,0 +1,12 @@
+[
+    {
+        "usuario": "admin",
+        "contrase\u00f1a": "$2y$10$QbBi8YvGkZ35pI8CjxaY1eSXUWbiKPW.7LyFs5Ee\/CD2DWJYtHiFW",
+        "tipo": "Administrador"
+    },
+    {
+        "usuario": "usuario",
+        "contrase\u00f1a": "$2y$10$lJuS1W4RFge8vv8Hbtq84em\/Oj2x0C6aecu\/Nos0OHBySreWvjekq",
+        "tipo": "Usuario"
+    }
+]
