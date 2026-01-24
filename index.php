@@ -103,7 +103,7 @@ usort($vehiculos_filtrados, function ($a, $b) {
     </style>
 </head>
 <body>
-    <h1>Página Principal - Gestión de ITV</h1>
+    <h1><img src="logo.webp" alt="Logo" width="25" style="vertical-align: middle;">Página Principal - Gestión de ITV</h1>
 
     <div class="menu">
         <a href="index.php">Página Principal</a>

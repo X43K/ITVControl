@@ -109,7 +109,7 @@ function formatear_fecha($fecha) {
     </style>
 </head>
 <body>
-    <h1>Gestionar Vehículos</h1>
+    <h1><img src="logo.webp" alt="Logo" width="25" style="vertical-align: middle;">Gestionar Vehículos</h1>
 
     <div class="menu">
         <a href="index.php">Página Principal</a>
