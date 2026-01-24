@@ -70,7 +70,7 @@ if (isset($_GET['eliminar'])) {
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Gestionar Estaciones</h1>
+    <h1><img src="logo.webp" alt="Logo" width="25" style="vertical-align: middle;">Gestionar Estaciones</h1>
 
     <div class="menu">
         <a href="index.php">Página Principal</a>
