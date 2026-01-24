@@ -1,0 +1,9 @@
+[
+    {
+        "fecha_cita": "2026-02-01",
+        "hora_cita": "10:30",
+        "estacion": "Tambre",
+        "tipo_cita": "Primera",
+        "vehiculo": "123ABC"
+    }
+]
