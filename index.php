@@ -98,10 +98,10 @@ usort($vehiculos_filtrados, function ($a, $b) {
     <title>Página Principal - Gestión de ITV</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        .negro { background-color: black; color: white; }
+        .negro { background-color: black; color: grey; }
         .rojo_intenso { background-color: #cc0000; color: white; }
         .naranja_intenso { background-color: #ff6600; color: white; }
-        .naranja_suave { background-color: #ffae0d; color: black; }
+        .naranja_suave { background-color: #ffae0d; color: white; }
         .azul { background-color: #3399ff; color: white; }
         .verde { background-color: #4CAF50; color: white; }
 
