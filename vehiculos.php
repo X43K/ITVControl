@@ -109,18 +109,19 @@ function formatear_fecha($fecha) {
     </style>
 </head>
 <body>
-    <h1><img src="logo.webp" alt="Logo" width="25" style="vertical-align: middle;">Gestionar Vehículos</h1>
+    <h1><img src="images/logo.webp" alt="Logo" width="30" style="vertical-align: middle;">Gestionar Vehículos</h1>
 
-    <div class="menu">
-        <a href="index.php">Página Principal</a>
-        <a href="citas.php">Gestionar Citas</a>
-        <a href="vehiculos.php">Gestionar Vehículos</a>
-        <?php if (isset($_SESSION['tipo']) && $_SESSION['tipo'] === 'Administrador'): ?>
-            <a href="estaciones.php">Gestionar Estaciones</a>
-            <a href="usuarios.php">Gestionar Usuarios</a>
+<div class="menu">
+    <a title="index" href="index.php"><img src="images/index.webp" alt="index" width="40" style="vertical-align: middle;"></a>
+    <a title="citas" href="citas.php"><img src="images/citas.webp" alt="citas" width="40" style="vertical-align: middle;"></a>
+    <a title="vehiculos" href="vehiculos.php"><img src="images/vehiculos.webp" alt="vehiculos" width="40" style="vertical-align: middle;"></a>
+        <?php if ($is_admin): ?>
+    <a title="estaciones" href="estaciones.php"><img src="images/estaciones.webp" alt="estaciones" width="40" style="vertical-align: middle;"></a>
+    <a title="usuarios" href="usuarios.php"><img src="images/usuarios.webp" alt="usuarios" width="40" style="vertical-align: middle;"></a>
         <?php endif; ?>
-        <a href="logout.php">Cerrar Sesión</a>
-    </div>
+    <a title="imprimir" href="imprimir.php"><img src="images/imprimir.webp" alt="imprimir" width="40" style="vertical-align: middle;"></a>
+    <a title="logout" href="logout.php"><img src="images/logout.webp" alt="logout" width="40" style="vertical-align: middle;"></a>
+</div>
 
     <?php if (isset($error)): ?>
         <p style="color: red;"><?= $error ?></p>
@@ -131,12 +132,21 @@ function formatear_fecha($fecha) {
         <form method="POST">
             <label>Vehículo:</label><input type="text" name="vehiculo" required><br><br>
             <label>Matrícula:</label><input type="text" name="matricula" required><br><br>
-            <label>Tipo:</label>
-            <select name="tipo" required>
-                <option value="BUS/MICROBUS">BUS/MICROBUS</option>
-                <option value="COCHE/FURGO">COCHE/FURGO</option>
-                <option value="MOTO">MOTO</option>
-            </select><br><br>
+<label>Tipo:</label>
+<select name="tipo" required>
+    <option value="Turismo, Transporte mercancías hasta 3500 kg y cuadriciclos">Turismo, Transporte mercancías hasta 3500 kg y cuadriciclos</option>
+    <option value="Transporte mercancías más de 3500 kg">Transporte mercancías más de 3500 kg</option>
+    <option value="Transporte mercancías más de 3500 kg (Cabeza tractora + Remolque)">Transporte mercancías más de 3500 kg (Cabeza tractora + Remolque)</option>
+    <option value="Autobuses y microbuses">Autobuses y microbuses</option>
+    <option value="Verificación taxímetro">Verificación taxímetro</option>
+    <option value="Periódica taxi con verificación taxímetro">Periódica taxi con verificación taxímetro</option>
+    <option value="Periódica taxi sin verificación taxímetro">Periódica taxi sin verificación taxímetro</option>
+    <option value="Ciclomotores de 2 y 3 ruedas, motocicletas y quads/vehículos similares y ATVs">Ciclomotores de 2 y 3 ruedas, motocicletas y quads/vehículos similares y ATVs</option>
+    <option value="Agrícolas y Obras y Servicios (excepto quads/vehículos similares y ATVs)">Agrícolas y Obras y Servicios (excepto quads/vehículos similares y ATVs)</option>
+    <option value="Tractor + Remolque (Agrícolas y Obras y Servicios)">Tractor + Remolque (Agrícolas y Obras y Servicios)</option>
+</select>
+
+<br><br>
             <label>Estado:</label>
             <select name="estado">
                 <option value="ACTIVO">ACTIVO</option>
@@ -185,5 +195,8 @@ function formatear_fecha($fecha) {
             <?php endforeach; ?>
         </tbody>
     </table>
+
+        <h4 class="small" style="margin-top:12px;">ITVControl v.1.1</h4>
+        <p class="small">B174M3 // XaeK</p>
 </body>
 </html>
