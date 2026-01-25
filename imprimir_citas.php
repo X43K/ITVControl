@@ -26,7 +26,7 @@ $citas = file_exists($citas_file)
     : [];
 
 // =====================
-// MES / AÑO POR DEFECTO
+// MES / AÑO
 // =====================
 $mes_actual  = date('m');
 $anio_actual = date('Y');
@@ -56,7 +56,7 @@ function mostrar_vehiculo_completo($matricula, $vehiculos) {
             return $v['vehiculo'] . ' - ' . $v['matricula'];
         }
     }
-    return $matricula;
+    return '-';
 }
 
 function obtener_caducidad_itv($matricula, $vehiculos) {
@@ -68,7 +68,9 @@ function obtener_caducidad_itv($matricula, $vehiculos) {
     return '-';
 }
 
-// Textos de meses y fecha impresión
+// =====================
+// TEXTOS
+// =====================
 $meses_txt = [
     '01'=>'Enero','02'=>'Febrero','03'=>'Marzo','04'=>'Abril',
     '05'=>'Mayo','06'=>'Junio','07'=>'Julio','08'=>'Agosto',
@@ -77,13 +79,11 @@ $meses_txt = [
 
 $fecha_impresion = date('d/m/Y H:i');
 ?>
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <title>Impresión de Citas ITV</title>
-<link rel="stylesheet" href="style.css">
 
 <style>
 table {
@@ -92,19 +92,44 @@ table {
 }
 th, td {
     border: 1px solid #ccc;
-    padding: 6px;
+    padding: 3px 6px; /* filas más estrechas */
+    line-height: 1.1;
     text-align: left;
 }
 th {
     background-color: #eee;
 }
 
-/* Cabecera solo para impresión */
-.print-header {
+/* Decorativo (no crítico) */
+.fila-roja {
+    border-left: 6px solid #c00000;
+}
+.fila-azul {
+    border-left: 6px solid #004aad;
+}
+.fila-amarilla {
+    border-left: 6px solid #c9a600;
+}
+
+/* Texto oficial */
+.estado {
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 0.4px;
+}
+
+/* Matrícula más pequeña */
+.matricula {
+    font-size: 10px;
+}
+
+/* Impresión */
+.print-header,
+.print-footer {
     display: none;
 }
 
-/* Impresión limpia */
 @media print {
 
     @page {
@@ -114,8 +139,8 @@ th {
     .menu,
     form,
     button,
-    .small,
-    h1 {
+    h1,
+    .small {
         display: none !important;
     }
 
@@ -124,6 +149,22 @@ th {
         margin-bottom: 15px;
         border-bottom: 2px solid #000;
         padding-bottom: 10px;
+    }
+
+    .print-footer {
+        display: block;
+        margin-top: 20px;
+        font-size: 12px;
+    }
+
+    /* Ajustes para impresión */
+    th, td {
+        padding: 3px 4px;
+        line-height: 1.1;
+    }
+
+    td .matricula {
+        font-size: 10px;
     }
 }
 </style>
@@ -148,10 +189,10 @@ th {
     <a href="logout.php"><img src="images/logout.webp" width="40"></a>
 </div>
 
-<!-- CABECERA IMPRESA -->
+<!-- CABECERA IMPRESIÓN -->
 <div class="print-header">
     <div style="display:flex; align-items:center;">
-        <img src="images/logo.webp" alt="Logo" width="40" style="margin-right:10px;">
+        <img src="images/logo.webp" width="40" style="margin-right:10px;">
         <div>
             <h2 style="margin:0;">Hoja de Citas ITV</h2>
             <div>
@@ -190,30 +231,83 @@ th {
     <th>Hora</th>
     <th>Estación</th>
     <th>Caducidad ITV</th>
+    <th>Estado</th>
 </tr>
 </thead>
 <tbody>
+
 <?php if (empty($citas_filtradas)): ?>
-    <tr>
-        <td colspan="6">No hay citas para este periodo</td>
-    </tr>
+<tr>
+    <td colspan="7">No hay citas para este periodo</td>
+</tr>
 <?php else: ?>
-    <?php foreach ($citas_filtradas as $cita): ?>
-        <tr>
-            <td><?= htmlspecialchars(mostrar_vehiculo_completo($cita['vehiculo'], $vehiculos)) ?></td>
-            <td><?= htmlspecialchars($cita['tipo_cita'] ?? '-') ?></td>
-            <td><?= formatear_fecha($cita['fecha_cita']) ?></td>
-            <td><?= htmlspecialchars($cita['hora_cita']) ?></td>
-            <td><?= htmlspecialchars($cita['estacion'] ?? $cita['estacion_cita'] ?? '-') ?></td>
-            <td><?= obtener_caducidad_itv($cita['vehiculo'], $vehiculos) ?></td>
-        </tr>
-    <?php endforeach; ?>
+<?php foreach ($citas_filtradas as $cita): ?>
+
+<?php
+$clase_fila = '';
+$estado = 'NORMAL';
+
+$tipo = strtolower($cita['tipo_cita'] ?? '');
+$vehiculo = $cita['vehiculo'] ?? '';
+
+$fecha_cita = DateTime::createFromFormat('Y-m-d', $cita['fecha_cita']);
+$caducidad = null;
+
+foreach ($vehiculos as $v) {
+    if ($v['matricula'] === $vehiculo) {
+        $caducidad = DateTime::createFromFormat('Y-m-d', $v['caducidad_itv']);
+        break;
+    }
+}
+
+if ($tipo === 'primera' && $fecha_cita && $caducidad && $fecha_cita > $caducidad) {
+    $clase_fila = 'fila-roja';
+    $estado = 'PRIMERA INSPECCIÓN FUERA DE PLAZO';
+} elseif ($tipo === 'segunda') {
+    $clase_fila = 'fila-azul';
+    $estado = 'SEGUNDA INSPECCIÓN';
+} elseif ($tipo === 'primera' && empty($vehiculo)) {
+    $clase_fila = 'fila-amarilla';
+    $estado = 'PRIMERA INSPECCIÓN SIN VEHÍCULO ASIGNADO';
+}
+?>
+
+<tr class="<?= $clase_fila ?>">
+    <td>
+        <?php
+        $veh = mostrar_vehiculo_completo($vehiculo, $vehiculos);
+        if (strpos($veh, ' - ') !== false) {
+            [$nombre, $mat] = explode(' - ', $veh, 2);
+            echo htmlspecialchars($nombre) . ' - <span class="matricula">' . htmlspecialchars($mat) . '</span>';
+        } else {
+            echo htmlspecialchars($veh);
+        }
+        ?>
+    </td>
+    <td><?= htmlspecialchars($cita['tipo_cita'] ?? '-') ?></td>
+    <td><?= formatear_fecha($cita['fecha_cita']) ?></td>
+    <td><?= htmlspecialchars($cita['hora_cita']) ?></td>
+    <td><?= htmlspecialchars($cita['estacion'] ?? $cita['estacion_cita'] ?? '-') ?></td>
+    <td><?= obtener_caducidad_itv($vehiculo, $vehiculos) ?></td>
+    <td class="estado"><?= $estado ?></td>
+</tr>
+
+<?php endforeach; ?>
 <?php endif; ?>
+
 </tbody>
 </table>
 
-        <h4 class="small" style="margin-top:12px;">ITVControl v.1.1</h4>
-        <p class="small">B174M3 // XaeK</p>
+<!-- PIE IMPRESIÓN -->
+<div class="print-footer">
+    <p>
+        <strong>Aviso importante:</strong><br>
+        Le informamos que, en caso de retraso por parte del usuario, superados los <strong>15 minutos de margen</strong> sobre la hora concertada, esta será anulada a favor de otros usuarios del servicio. Por motivos organizativos, el servicio de inspección empezará en el intervalo de los quince minutos siguientes a la hora concertada.
+    </p>
+</div>
+
+<h4 class="small" style="margin-top:12px;">ITVControl v1.1</h4>
+<p class="small">B174M3 // XaeK</p>
 
 </body>
 </html>
