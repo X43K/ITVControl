@@ -58,7 +58,7 @@ $vehiculos_filtrados = array_filter($vehiculos, function($v) use ($mes_seleccion
 usort($vehiculos_filtrados, function($a, $b) {
     $fechaA = strtotime($a['caducidad_itv']);
     $fechaB = strtotime($b['caducidad_itv']);
-    return $fechaA <=> $fechaB; // operador de comparación
+    return $fechaA <=> $fechaB; 
 });
 
 // =====================
@@ -97,9 +97,7 @@ foreach ($vehiculos as $v) {
     }
 }
 
-// Calcular el mes máximo que se puede imprimir completo
 $fecha_limite_obj = (new DateTime())->modify("+$frecuencia_meses months");
-// ⚠️ Ajuste: restar 1 mes por precaución
 $fecha_limite_obj->modify('-1 month');
 
 $mes_maximo = (int)$fecha_limite_obj->format('m');
@@ -125,10 +123,14 @@ h1 img { vertical-align: middle; }
 
 /* Impresión */
 @media print {
-    .aviso-horizonte, .formulario-filtro, .menu { display: none; }
-    .solo-impresion { display: block; }
+    .aviso-horizonte, .formulario-filtro, .menu, .no-imprimir { 
+        display: none !important; 
+    }
+    .solo-impresion { display: block !important; }
 }
+
 .solo-impresion { display: none; }
+.no-imprimir { display: block; }
 </style>
 </head>
 <body>
@@ -140,10 +142,10 @@ h1 img { vertical-align: middle; }
     <a title="index" href="index.php"><img src="images/index.webp" alt="index" width="40" style="vertical-align: middle;"></a>
     <a title="citas" href="citas.php"><img src="images/citas.webp" alt="citas" width="40" style="vertical-align: middle;"></a>
     <a title="vehiculos" href="vehiculos.php"><img src="images/vehiculos.webp" alt="vehiculos" width="40" style="vertical-align: middle;"></a>
-        <?php if ($is_admin): ?>
+    <?php if ($is_admin): ?>
     <a title="estaciones" href="estaciones.php"><img src="images/estaciones.webp" alt="estaciones" width="40" style="vertical-align: middle;"></a>
     <a title="usuarios" href="usuarios.php"><img src="images/usuarios.webp" alt="usuarios" width="40" style="vertical-align: middle;"></a>
-        <?php endif; ?>
+    <?php endif; ?>
     <a title="imprimir" href="imprimir.php"><img src="images/imprimir.webp" alt="imprimir" width="40" style="vertical-align: middle;"></a>
     <a title="logout" href="logout.php"><img src="images/logout.webp" alt="logout" width="40" style="vertical-align: middle;"></a>
 </div>
@@ -198,8 +200,11 @@ h1 img { vertical-align: middle; }
 <?php endif; ?>
 </tbody>
 </table>
-        <h4 class="small" style="margin-top:12px;">ITVControl v.1.1</h4>
-        <p class="small">B174M3 // XaeK</p>
+
+<!-- Esto ya no se imprimirá -->
+<h4 class="small no-imprimir" style="margin-top:12px;">ITVControl v.1.1</h4>
+<p class="small no-imprimir">B174M3 // XaeK</p>
+
 <!-- Solo visible en impresión -->
 <div class="solo-impresion" style="margin-top:10px;">
 
