@@ -31,14 +31,19 @@ function calcular_dias_restantes($caducidad_itv) {
     return (int)$intervalo->format('%r%a');
 }
 
-// Función para obtener cita asignada
-function obtener_cita_vehiculo($matricula_vehiculo, $citas) {
+// Función para obtener citas asignadas a un vehículo (solo futuras)
+function obtener_citas_vehiculo($matricula_vehiculo, $citas) {
+    $fecha_actual = new DateTime();
+    $citas_vehiculo = [];
     foreach ($citas as $cita) {
         if ($cita['vehiculo'] === $matricula_vehiculo) {
-            return $cita;
+            $fecha_hora_cita = DateTime::createFromFormat('Y-m-d H:i', $cita['fecha_cita'] . ' ' . $cita['hora_cita']);
+            if ($fecha_hora_cita && $fecha_hora_cita >= $fecha_actual) {
+                $citas_vehiculo[] = $cita;
+            }
         }
     }
-    return null;
+    return $citas_vehiculo;
 }
 
 // Formatear fecha DD/MM/YYYY
@@ -74,7 +79,7 @@ function obtener_color_y_texto($vehiculo) {
     return ['color' => $color, 'texto_dias' => $texto_dias];
 }
 
-// Filtrar solo vehículos activos o con ITV rechazada
+// Filtrar solo vehículos activos o con ITV rechazada (BAJA se oculta)
 $vehiculos_filtrados = array_filter($vehiculos, function ($vehiculo) {
     return in_array($vehiculo['estado'], ['ACTIVO', 'ITV RECHAZADA']);
 });
@@ -96,13 +101,14 @@ usort($vehiculos_filtrados, function ($a, $b) {
         .negro { background-color: black; color: white; }
         .rojo_intenso { background-color: #cc0000; color: white; }
         .naranja_intenso { background-color: #ff6600; color: white; }
-        .naranja_suave { background-color: #ffcc66; color: black; }
+        .naranja_suave { background-color: #ffae0d; color: black; }
         .azul { background-color: #3399ff; color: white; }
         .verde { background-color: #4CAF50; color: white; }
 
         table { border-collapse: collapse; width: 100%; }
-        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; vertical-align: top; }
         th { background-color: #eee; }
+        ul { margin:0; padding-left:18px; }
     </style>
 </head>
 <body>
@@ -136,7 +142,7 @@ usort($vehiculos_filtrados, function ($a, $b) {
         <tbody>
             <?php foreach ($vehiculos_filtrados as $vehiculo):
                 $info_color = obtener_color_y_texto($vehiculo);
-                $cita = obtener_cita_vehiculo($vehiculo['matricula'], $citas);
+                $citas_vehiculo = obtener_citas_vehiculo($vehiculo['matricula'], $citas);
 
                 // Ajustar estado mostrado
                 $estado_mostrar = $vehiculo['estado'];
@@ -155,10 +161,16 @@ usort($vehiculos_filtrados, function ($a, $b) {
                     <td><?= formatear_fecha($vehiculo['caducidad_itv']) ?></td>
                     <td><?= $info_color['texto_dias'] ?></td>
                     <td>
-                        <?php if ($cita): ?>
-                            <strong>Fecha:</strong> <?= formatear_fecha($cita['fecha_cita']) ?><br>
-                            <strong>Hora:</strong> <?= htmlspecialchars($cita['hora_cita']) ?><br>
-                            <strong>Estación:</strong> <?= htmlspecialchars($cita['estacion_cita']) ?>
+                        <?php if (!empty($citas_vehiculo)): ?>
+                            <ul>
+                            <?php foreach ($citas_vehiculo as $cita): ?>
+                                <li>
+                                    <strong>Fecha:</strong> <?= formatear_fecha($cita['fecha_cita']) ?>, 
+                                    <strong>Hora:</strong> <?= htmlspecialchars($cita['hora_cita']) ?>, 
+                                    <strong>Estación:</strong> <?= htmlspecialchars($cita['estacion_cita']) . ' ' . ($cita['tipo_cita']==='Primera'?'1ª':'2ª') ?>
+                                </li>
+                            <?php endforeach; ?>
+                            </ul>
                         <?php else: ?>
                             Sin cita asignada
                         <?php endif; ?>
@@ -168,7 +180,7 @@ usort($vehiculos_filtrados, function ($a, $b) {
         </tbody>
     </table>
 
-        <h4 class="small" style="margin-top:12px;">ITVControl v.1.1</h4>
-        <p class="small">B174M3 // XaeK</p>
-    </body>
+    <h4 class="small" style="margin-top:12px;">ITVControl v.1.1</h4>
+    <p class="small">B174M3 // XaeK</p>
+</body>
 </html>
