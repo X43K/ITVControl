@@ -97,10 +97,10 @@ function formatear_fecha($fecha) {
     <title>Gestionar Vehículos</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        .negro { background-color: black; color: white; }
+        .negro { background-color: black; color: grey; }
         .rojo_intenso { background-color: #cc0000; color: white; }
         .naranja_intenso { background-color: #ff6600; color: white; }
-        .naranja_suave { background-color: #ffcc66; color: black; }
+        .naranja_suave { background-color: #ffae0d; color: white; }
         .azul { background-color: #3399ff; color: white; }
         .verde { background-color: #4CAF50; color: white; }
         table { border-collapse: collapse; width: 100%; }
