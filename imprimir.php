@@ -109,7 +109,7 @@ function formatear_fecha($fecha) {
     </style>
 </head>
 <body>
-    <h1><img src="images/logo.webp" alt="Logo" width="30" style="vertical-align: middle;">Gestionar Vehículos</h1>
+    <h1><img src="images/logo.webp" alt="Logo" width="30" style="vertical-align: middle;">Impresora</h1>
 
 <div class="menu">
     <a title="index" href="index.php"><img src="images/index.webp" alt="index" width="40" style="vertical-align: middle;"></a>
@@ -123,78 +123,8 @@ function formatear_fecha($fecha) {
     <a title="logout" href="logout.php"><img src="images/logout.webp" alt="logout" width="40" style="vertical-align: middle;"></a>
 </div>
 
-    <?php if (isset($error)): ?>
-        <p style="color: red;"><?= $error ?></p>
-    <?php endif; ?>
-
-    <?php if ($is_admin): ?>
-        <h2>Añadir Vehículo</h2>
-        <form method="POST">
-            <label>Vehículo:</label><input type="text" name="vehiculo" required><br><br>
-            <label>Matrícula:</label><input type="text" name="matricula" required><br><br>
-<label>Tipo:</label>
-<select name="tipo" required>
-    <option value="Turismo, Transporte mercancías hasta 3500 kg y cuadriciclos">Turismo, Transporte mercancías hasta 3500 kg y cuadriciclos</option>
-    <option value="Transporte mercancías más de 3500 kg">Transporte mercancías más de 3500 kg</option>
-    <option value="Transporte mercancías más de 3500 kg (Cabeza tractora + Remolque)">Transporte mercancías más de 3500 kg (Cabeza tractora + Remolque)</option>
-    <option value="Autobuses y microbuses">Autobuses y microbuses</option>
-    <option value="Verificación taxímetro">Verificación taxímetro</option>
-    <option value="Periódica taxi con verificación taxímetro">Periódica taxi con verificación taxímetro</option>
-    <option value="Periódica taxi sin verificación taxímetro">Periódica taxi sin verificación taxímetro</option>
-    <option value="Ciclomotores de 2 y 3 ruedas, motocicletas y quads/vehículos similares y ATVs">Ciclomotores de 2 y 3 ruedas, motocicletas y quads/vehículos similares y ATVs</option>
-    <option value="Agrícolas y Obras y Servicios (excepto quads/vehículos similares y ATVs)">Agrícolas y Obras y Servicios (excepto quads/vehículos similares y ATVs)</option>
-    <option value="Tractor + Remolque (Agrícolas y Obras y Servicios)">Tractor + Remolque (Agrícolas y Obras y Servicios)</option>
-</select>
-
-<br><br>
-            <label>Estado:</label>
-            <select name="estado">
-                <option value="ACTIVO">ACTIVO</option>
-                <option value="ITV RECHAZADA">ITV RECHAZADA</option>
-                <option value="BAJA">BAJA</option>
-            </select><br><br>
-            <label>Caducidad ITV:</label><input type="date" name="caducidad_itv" required><br><br>
-            <input type="submit" value="Añadir Vehículo">
-        </form>
-    <?php endif; ?>
-
-    <h2>Lista de Vehículos</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Vehículo</th>
-                <th>Matrícula</th>
-                <th>Tipo</th>
-                <th>Estado</th>
-                <th>Caducidad ITV</th>
-                <th>Días para Caducar</th>
-                <?php if ($is_admin): ?>
-                    <th>Acciones</th>
-                <?php endif; ?>
-            </tr>
-        </thead>
-        <tbody>
-            <?php foreach ($vehiculos as $vehiculo): ?>
-                <?php 
-                    $info = obtener_color_y_texto($vehiculo);
-                ?>
-                <tr class="<?= $info['color'] ?>">
-                    <td><?= htmlspecialchars($vehiculo['vehiculo']) ?></td>
-                    <td><?= htmlspecialchars($vehiculo['matricula']) ?></td>
-                    <td><?= htmlspecialchars($vehiculo['tipo']) ?></td>
-                    <td><?= htmlspecialchars($vehiculo['estado']) ?></td>
-                    <td><?= formatear_fecha($vehiculo['caducidad_itv']) ?></td>
-                    <td><?= $info['texto_dias'] ?></td>
-                    <?php if ($is_admin): ?>
-                        <td>
-                            <a href="editar_vehiculo.php?id=<?= urlencode($vehiculo['matricula']) ?>">Editar</a> |
-                            <a href="eliminar_vehiculo.php?id=<?= urlencode($vehiculo['matricula']) ?>">Eliminar</a>
-                        </td>
-                    <?php endif; ?>
-                </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
+<p><a title="imprimir_caducidades" href="imprimir_caducidades.php">IMPRIMIR CADUCIDADES</a></p>
+<p><a title="imprimir_citas" href="imprimir_citas.php">IMPRIMIR CITAS</a></p>
 
         <h4 class="small" style="margin-top:12px;">ITVControl v.1.1</h4>
         <p class="small">B174M3 // XaeK</p>

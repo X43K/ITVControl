@@ -91,17 +91,18 @@ function mostrarVehiculo($matricula, $vehiculos) {
 
 <body>
 
-<h1><img src="logo.webp" alt="Logo" width="25" style="vertical-align: middle;">Gestionar Citas de ITV</h1>
+<h1><img src="images/logo.webp" alt="Logo" width="30" style="vertical-align: middle;">Gestionar Citas de ITV</h1>
 
 <div class="menu">
-    <a href="index.php">Página Principal</a>
-    <a href="citas.php">Gestionar Citas</a>
-    <a href="vehiculos.php">Gestionar Vehículos</a>
-    <?php if ($is_admin): ?>
-        <a href="estaciones.php">Gestionar Estaciones</a>
-        <a href="usuarios.php">Gestionar Usuarios</a>
-    <?php endif; ?>
-    <a href="logout.php">Cerrar Sesión</a>
+    <a title="index" href="index.php"><img src="images/index.webp" alt="index" width="40" style="vertical-align: middle;"></a>
+    <a title="citas" href="citas.php"><img src="images/citas.webp" alt="citas" width="40" style="vertical-align: middle;"></a>
+    <a title="vehiculos" href="vehiculos.php"><img src="images/vehiculos.webp" alt="vehiculos" width="40" style="vertical-align: middle;"></a>
+        <?php if ($is_admin): ?>
+    <a title="estaciones" href="estaciones.php"><img src="images/estaciones.webp" alt="estaciones" width="40" style="vertical-align: middle;"></a>
+    <a title="usuarios" href="usuarios.php"><img src="images/usuarios.webp" alt="usuarios" width="40" style="vertical-align: middle;"></a>
+        <?php endif; ?>
+    <a title="imprimir" href="imprimir.php"><img src="images/imprimir.webp" alt="imprimir" width="40" style="vertical-align: middle;"></a>
+    <a title="logout" href="logout.php"><img src="images/logout.webp" alt="logout" width="40" style="vertical-align: middle;"></a>
 </div>
 
 <?php if (isset($error)): ?>
@@ -180,5 +181,7 @@ function mostrarVehiculo($matricula, $vehiculos) {
 </tbody>
 </table>
 
+        <h4 class="small" style="margin-top:12px;">ITVControl v.1.1</h4>
+        <p class="small">B174M3 // XaeK</p>
 </body>
 </html>

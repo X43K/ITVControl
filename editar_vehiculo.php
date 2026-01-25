@@ -77,12 +77,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <label>Matrícula:</label>
         <input type="text" name="matricula" value="<?= htmlspecialchars($vehiculo_editar['matricula']) ?>" required><br><br>
 
-        <label>Tipo:</label>
-        <select name="tipo" required>
-            <option value="BUS/MICROBUS" <?= $vehiculo_editar['tipo'] === 'BUS/MICROBUS' ? 'selected' : '' ?>>BUS/MICROBUS</option>
-            <option value="COCHE/FURGO" <?= $vehiculo_editar['tipo'] === 'COCHE/FURGO' ? 'selected' : '' ?>>COCHE/FURGO</option>
-            <option value="MOTO" <?= $vehiculo_editar['tipo'] === 'MOTO' ? 'selected' : '' ?>>MOTO</option>
-        </select><br><br>
+<label>Tipo:</label>
+<select name="tipo" required>
+    <option value="Turismo, Transporte mercancías hasta 3500 kg y cuadriciclos">Turismo, Transporte mercancías hasta 3500 kg y cuadriciclos</option>
+    <option value="Transporte mercancías más de 3500 kg">Transporte mercancías más de 3500 kg</option>
+    <option value="Transporte mercancías más de 3500 kg (Cabeza tractora + Remolque)">Transporte mercancías más de 3500 kg (Cabeza tractora + Remolque)</option>
+    <option value="Autobuses y microbuses">Autobuses y microbuses</option>
+    <option value="Verificación taxímetro">Verificación taxímetro</option>
+    <option value="Periódica taxi con verificación taxímetro">Periódica taxi con verificación taxímetro</option>
+    <option value="Periódica taxi sin verificación taxímetro">Periódica taxi sin verificación taxímetro</option>
+    <option value="Ciclomotores de 2 y 3 ruedas, motocicletas y quads/vehículos similares y ATVs">Ciclomotores de 2 y 3 ruedas, motocicletas y quads/vehículos similares y ATVs</option>
+    <option value="Agrícolas y Obras y Servicios (excepto quads/vehículos similares y ATVs)">Agrícolas y Obras y Servicios (excepto quads/vehículos similares y ATVs)</option>
+    <option value="Tractor + Remolque (Agrícolas y Obras y Servicios)">Tractor + Remolque (Agrícolas y Obras y Servicios)</option>
+</select>
+<br><br>
 
         <label>Estado:</label>
         <select name="estado">
@@ -101,5 +109,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <p style="color: red;"><?= $error ?></p>
     <?php endif; ?>
 
+        <h4 class="small" style="margin-top:12px;">ITVControl v.1.1</h4>
+        <p class="small">B174M3 // XaeK</p>
 </body>
 </html>

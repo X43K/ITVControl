@@ -57,7 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Iniciar Sesión</h1>
+    <h1><img src="images/logo.webp" alt="Logo" width="30" style="vertical-align: middle;">Iniciar Sesión</h1>
 
     <form method="POST">
         <label>Usuario:</label><input type="text" name="usuario" required><br><br>
@@ -69,5 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <p style="color: red;"><?= $error ?></p>
     <?php endif; ?>
 
+        <h4 class="small" style="margin-top:12px;">ITVControl v.1.1</h4>
+        <p class="small">B174M3 // XaeK</p>
 </body>
 </html>
