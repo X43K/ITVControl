@@ -39,10 +39,9 @@ if ($vehiculo_editar === null) {
 // Procesar formulario de edición
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Validar que los campos no estén vacíos
-    if (!empty($_POST['vehiculo']) && !empty($_POST['matricula']) && !empty($_POST['estado']) && !empty($_POST['caducidad_itv']) && !empty($_POST['tipo'])) {
+    if (!empty($_POST['vehiculo']) && !empty($_POST['matricula']) && !empty($_POST['estado']) && !empty($_POST['caducidad_itv'])) {
         $vehiculo_editar['vehiculo'] = $_POST['vehiculo'];
         $vehiculo_editar['matricula'] = $_POST['matricula'];
-        $vehiculo_editar['tipo'] = $_POST['tipo']; // Guardar tipo
         $vehiculo_editar['estado'] = $_POST['estado'];
         $vehiculo_editar['caducidad_itv'] = $_POST['caducidad_itv'];
 
