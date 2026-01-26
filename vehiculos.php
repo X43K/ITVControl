@@ -76,12 +76,20 @@ function obtener_color_y_texto($vehiculo) {
     return ['color' => $color, 'texto_dias' => $texto_dias];
 }
 
-// Ordenar vehículos: por días restantes, BAJA al final
+// Ordenar vehículos: primero "ITV RECHAZADA", luego por días restantes, y "BAJA" al final
 usort($vehiculos, function($a, $b) {
-    if ($a['estado'] == 'BAJA' && $b['estado'] != 'BAJA') return 1;
-    if ($b['estado'] == 'BAJA' && $a['estado'] != 'BAJA') return -1;
+    // Prioridad 1: ITV RECHAZADA arriba del todo
+    if ($a['estado'] === 'ITV RECHAZADA' && $b['estado'] !== 'ITV RECHAZADA') return -1;
+    if ($b['estado'] === 'ITV RECHAZADA' && $a['estado'] !== 'ITV RECHAZADA') return 1;
+
+    // Prioridad 2: BAJA al final
+    if ($a['estado'] === 'BAJA' && $b['estado'] !== 'BAJA') return 1;
+    if ($b['estado'] === 'BAJA' && $a['estado'] !== 'BAJA') return -1;
+
+    // Prioridad 3: Ordenar por días restantes (menor a mayor)
     return calcular_dias_restantes($a['caducidad_itv']) - calcular_dias_restantes($b['caducidad_itv']);
 });
+
 
 // Función para formatear fecha en DD/MM/YYYY
 function formatear_fecha($fecha) {
@@ -196,7 +204,7 @@ function formatear_fecha($fecha) {
         </tbody>
     </table>
 
-        <h4 class="small" style="margin-top:12px;">ITVControl v.1.1</h4>
+        <h4 class="small" style="margin-top:12px;">ITVControl v.1.2</h4>
         <p class="small">B174M3 // XaeK</p>
 </body>
 </html>
