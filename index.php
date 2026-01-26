@@ -84,10 +84,20 @@ $vehiculos_filtrados = array_filter($vehiculos, function ($vehiculo) {
     return in_array($vehiculo['estado'], ['ACTIVO', 'ITV RECHAZADA']);
 });
 
-// Ordenar por días restantes
+// Ordenar: primero los "ITV RECHAZADA", luego por días restantes
 usort($vehiculos_filtrados, function ($a, $b) {
+    // Si uno es "ITV RECHAZADA" y el otro no, va primero
+    if ($a['estado'] === 'ITV RECHAZADA' && $b['estado'] !== 'ITV RECHAZADA') {
+        return -1;
+    }
+    if ($b['estado'] === 'ITV RECHAZADA' && $a['estado'] !== 'ITV RECHAZADA') {
+        return 1;
+    }
+
+    // Si ambos tienen el mismo estado, ordenar por días restantes (menor a mayor)
     return calcular_dias_restantes($a['caducidad_itv']) - calcular_dias_restantes($b['caducidad_itv']);
 });
+
 ?>
 
 <!DOCTYPE html>
@@ -180,7 +190,7 @@ usort($vehiculos_filtrados, function ($a, $b) {
         </tbody>
     </table>
 
-    <h4 class="small" style="margin-top:12px;">ITVControl v.1.1</h4>
+    <h4 class="small" style="margin-top:12px;">ITVControl v.1.2</h4>
     <p class="small">B174M3 // XaeK</p>
 </body>
 </html>

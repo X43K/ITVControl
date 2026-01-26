@@ -109,7 +109,7 @@ if (isset($_GET['eliminar'])) {
         <input type="submit" name="editar_estaciones" value="Guardar Cambios">
     </form>
 
-        <h4 class="small" style="margin-top:12px;">ITVControl v.1.1</h4>
+        <h4 class="small" style="margin-top:12px;">ITVControl v.1.2</h4>
         <p class="small">B174M3 // XaeK</p>
 </body>
 </html>

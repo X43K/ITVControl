@@ -295,6 +295,8 @@ if ($tipo === 'primera' && $fecha_cita && $caducidad && $fecha_cita > $caducidad
         Le informamos que, en caso de retraso por parte del usuario, superados los <strong>15 minutos de margen</strong> sobre la hora concertada, esta será anulada a favor de otros usuarios del servicio. Por motivos organizativos, el servicio de inspección empezará en el intervalo de los quince minutos siguientes a la hora concertada.
     </p>
 </div>
-
+<!-- Esto ya no se imprimirá -->
+<h4 class="small no-imprimir" style="margin-top:12px;">ITVControl v.1.2</h4>
+<p class="small no-imprimir">B174M3 // XaeK</p>
 </body>
 </html>

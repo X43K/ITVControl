@@ -126,7 +126,7 @@ function formatear_fecha($fecha) {
 <p><a title="imprimir_caducidades" href="imprimir_caducidades.php">IMPRIMIR CADUCIDADES</a></p>
 <p><a title="imprimir_citas" href="imprimir_citas.php">IMPRIMIR CITAS</a></p>
 
-        <h4 class="small" style="margin-top:12px;">ITVControl v.1.1</h4>
+        <h4 class="small" style="margin-top:12px;">ITVControl v.1.2</h4>
         <p class="small">B174M3 // XaeK</p>
 </body>
 </html>
