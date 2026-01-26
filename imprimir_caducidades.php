@@ -110,7 +110,7 @@ $fecha_impresion = date('d/m/Y H:i');
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Hoja de impresión Caducidad ITV</title>
+<title>Hoja de Caducidad ITV</title>
 <link rel="stylesheet" href="style.css">
 <style>
 body { font-family: Arial, sans-serif; }
@@ -136,7 +136,7 @@ h1 img { vertical-align: middle; }
 <body>
 
 <h1>
-    <img src="images/logo.webp" alt="Logo" width="30"> Hoja de impresión Caducidad ITV - <?= $meses_es[(int)$mes_seleccionado] ?> <?= $anio_seleccionado ?>
+    <img src="images/logo.webp" alt="Logo" width="30"> Hoja de Caducidad ITV - <?= $meses_es[(int)$mes_seleccionado] ?> <?= $anio_seleccionado ?>
 </h1>
 <div class="menu">
     <a title="index" href="index.php"><img src="images/index.webp" alt="index" width="40" style="vertical-align: middle;"></a>
