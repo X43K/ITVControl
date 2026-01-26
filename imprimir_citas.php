@@ -43,6 +43,16 @@ $citas_filtradas = array_filter($citas, function ($cita) use ($mes, $anio) {
 });
 
 // =====================
+// >>> AÑADIDO <<<
+// ORDENAR CITAS POR FECHA Y HORA
+// =====================
+usort($citas_filtradas, function ($a, $b) {
+    $fa = strtotime($a['fecha_cita'] . ' ' . ($a['hora_cita'] ?? '00:00'));
+    $fb = strtotime($b['fecha_cita'] . ' ' . ($b['hora_cita'] ?? '00:00'));
+    return $fa <=> $fb;
+});
+
+// =====================
 // FUNCIONES
 // =====================
 function formatear_fecha($fecha) {
@@ -92,55 +102,29 @@ table {
 }
 th, td {
     border: 1px solid #ccc;
-    padding: 3px 6px; /* filas más estrechas */
+    padding: 3px 6px;
     line-height: 1.1;
     text-align: left;
 }
-th {
-    background-color: #eee;
-}
+th { background-color: #eee; }
 
-/* Decorativo (no crítico) */
-.fila-roja {
-    border-left: 6px solid #c00000;
-}
-.fila-azul {
-    border-left: 6px solid #004aad;
-}
-.fila-amarilla {
-    border-left: 6px solid #c9a600;
-}
+.fila-roja { border-left: 6px solid #c00000; }
+.fila-azul { border-left: 6px solid #004aad; }
+.fila-amarilla { border-left: 6px solid #c9a600; }
 
-/* Texto oficial */
 .estado {
     font-weight: bold;
     text-transform: uppercase;
     font-size: 12px;
-    letter-spacing: 0.4px;
 }
+.matricula { font-size: 10px; }
 
-/* Matrícula más pequeña */
-.matricula {
-    font-size: 10px;
-}
-
-/* Impresión */
-.print-header,
-.print-footer {
-    display: none;
-}
+.print-header, .print-footer { display: none; }
 
 @media print {
+    @page { margin: 20mm; }
 
-    @page {
-        margin: 20mm;
-    }
-
-    .menu,
-    form,
-    button,
-    h1,
-    .small {
+    .menu, form, button, h1, .small {
         display: none !important;
     }
 
@@ -156,16 +140,6 @@ th {
         margin-top: 20px;
         font-size: 12px;
     }
-
-    /* Ajustes para impresión */
-    th, td {
-        padding: 3px 4px;
-        line-height: 1.1;
-    }
-
-    td .matricula {
-        font-size: 10px;
-    }
 }
 </style>
 </head>
@@ -173,7 +147,7 @@ th {
 <body>
 
 <h1>
-    <img src="images/logo.webp" alt="Logo" width="30" style="vertical-align: middle;">
+    <img src="images/logo.webp" width="30" style="vertical-align: middle;">
     Hoja de impresión ITV
 </h1>
 
@@ -189,23 +163,12 @@ th {
     <a href="logout.php"><img src="images/logout.webp" width="40"></a>
 </div>
 
-<!-- CABECERA IMPRESIÓN -->
 <div class="print-header">
-    <div style="display:flex; align-items:center;">
-        <img src="images/logo.webp" width="40" style="margin-right:10px;">
-        <div>
-            <h2 style="margin:0;">Hoja de Citas ITV</h2>
-            <div>
-                <?= $meses_txt[$mes] ?> <?= $anio ?> |
-                Impreso el <?= $fecha_impresion ?>
-            </div>
-        </div>
-    </div>
+    <h2>Hoja de Citas ITV</h2>
+    <?= $meses_txt[$mes] ?> <?= $anio ?> | Impreso el <?= $fecha_impresion ?>
 </div>
 
-<!-- FILTRO -->
 <form method="GET" style="margin:15px 0;">
-    <label>Mes:</label>
     <select name="mes">
         <?php foreach ($meses_txt as $num => $nombre): ?>
             <option value="<?= $num ?>" <?= $mes == $num ? 'selected' : '' ?>>
@@ -213,15 +176,11 @@ th {
             </option>
         <?php endforeach; ?>
     </select>
-
-    <label style="margin-left:10px;">Año:</label>
     <input type="number" name="anio" value="<?= $anio ?>" style="width:80px;">
-
     <button type="submit">Mostrar</button>
     <button type="button" onclick="window.print()">Imprimir</button>
 </form>
 
-<!-- TABLA -->
 <table>
 <thead>
 <tr>
@@ -237,9 +196,7 @@ th {
 <tbody>
 
 <?php if (empty($citas_filtradas)): ?>
-<tr>
-    <td colspan="7">No hay citas para este periodo</td>
-</tr>
+<tr><td colspan="7">No hay citas para este periodo</td></tr>
 <?php else: ?>
 <?php foreach ($citas_filtradas as $cita): ?>
 
@@ -298,16 +255,12 @@ if ($tipo === 'primera' && $fecha_cita && $caducidad && $fecha_cita > $caducidad
 </tbody>
 </table>
 
-<!-- PIE IMPRESIÓN -->
 <div class="print-footer">
     <p>
         <strong>Aviso importante:</strong><br>
         Le informamos que, en caso de retraso por parte del usuario, superados los <strong>15 minutos de margen</strong> sobre la hora concertada, esta será anulada a favor de otros usuarios del servicio. Por motivos organizativos, el servicio de inspección empezará en el intervalo de los quince minutos siguientes a la hora concertada.
     </p>
 </div>
-
-<h4 class="small" style="margin-top:12px;">ITVControl v1.1</h4>
-<p class="small">B174M3 // XaeK</p>
 
 </body>
 </html>
