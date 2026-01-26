@@ -15,4 +15,5 @@ Este proyecto permite gestionar una flota de vehículos, sus citas de ITV, las E
 
 ## Usuarios de muestra
 admin (con control total)
+
 usuario (solo puede consultar)
