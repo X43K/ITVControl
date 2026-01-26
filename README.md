@@ -14,5 +14,7 @@ Este proyecto permite gestionar una flota de vehículos, sus citas de ITV, las E
 6. A partir de ahí podrás gestionar los vehículos, las citas, las estaciones y los usuarios.
 
 ## Usuarios de muestra
+
 admin (con control total)
+
 usuario (solo puede consultar)
