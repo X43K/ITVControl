@@ -43,8 +43,7 @@ $citas_filtradas = array_filter($citas, function ($cita) use ($mes, $anio) {
 });
 
 // =====================
-// >>> AÑADIDO <<<
-// ORDENAR CITAS POR FECHA Y HORA
+// ORDENAR CITAS
 // =====================
 usort($citas_filtradas, function ($a, $b) {
     $fa = strtotime($a['fecha_cita'] . ' ' . ($a['hora_cita'] ?? '00:00'));
@@ -100,45 +99,81 @@ table {
     border-collapse: collapse;
     width: 100%;
 }
+
 th, td {
     border: 1px solid #ccc;
-    padding: 3px 6px;
-    line-height: 1.1;
+    padding: 2px 4px;
+    line-height: 1.05;
     text-align: left;
+    font-size: 15px;
 }
-th { background-color: #eee; }
 
-.fila-roja { border-left: 6px solid #c00000; }
-.fila-azul { border-left: 6px solid #004aad; }
-.fila-amarilla { border-left: 6px solid #c9a600; }
+th {
+    background-color: #eee;
+}
+
+.fila-roja { border-left: 5px solid #c00000; }
+.fila-azul { border-left: 5px solid #004aad; }
+.fila-amarilla { border-left: 5px solid #c9a600; }
 
 .estado {
     font-weight: bold;
     text-transform: uppercase;
-    font-size: 12px;
+    font-size: 10px;
 }
-.matricula { font-size: 10px; }
 
-.print-header, .print-footer { display: none; }
+.matricula {
+    font-size: 9px;
+}
+
+.print-header,
+.print-footer {
+    display: none;
+}
 
 @media print {
-    @page { margin: 20mm; }
 
-    .menu, form, button, h1, .small {
+    @page {
+        size: A4 portrait;
+        margin: 12mm;
+    }
+
+    body {
+        font-size: 15px;
+    }
+
+    .menu,
+    form,
+    button,
+    .small {
         display: none !important;
+    }
+
+    h1 {
+        margin: 0 0 6px 0;
+        font-size: 16px;
     }
 
     .print-header {
         display: block;
-        margin-bottom: 15px;
-        border-bottom: 2px solid #000;
-        padding-bottom: 10px;
+        margin-bottom: 6px;
+        padding-bottom: 4px;
+        border-bottom: 1px solid #000;
+        font-size: 12px;
     }
 
     .print-footer {
         display: block;
-        margin-top: 20px;
-        font-size: 12px;
+        margin-top: 8px;
+        font-size: 13px;
+        line-height: 1.2;
+    }
+
+    table,
+    tr,
+    td,
+    th {
+        page-break-inside: avoid !important;
     }
 }
 </style>
@@ -147,8 +182,8 @@ th { background-color: #eee; }
 <body>
 
 <h1>
-    <img src="images/logo.webp" width="30" style="vertical-align: middle;">
-    Hoja de impresión ITV
+    <img src="images/logo.webp" width="28" style="vertical-align: middle;">
+    Hoja de citas ITV
 </h1>
 
 <div class="menu">
@@ -164,8 +199,7 @@ th { background-color: #eee; }
 </div>
 
 <div class="print-header">
-    <h2>Hoja de Citas ITV</h2>
-    <?= $meses_txt[$mes] ?> <?= $anio ?> | Impreso el <?= $fecha_impresion ?>
+    <?= $meses_txt[$mes] ?> <?= $anio ?> — Impreso el <?= $fecha_impresion ?>
 </div>
 
 <form method="GET" style="margin:15px 0;">
@@ -186,10 +220,10 @@ th { background-color: #eee; }
 <tr>
     <th>Vehículo</th>
     <th>Tipo</th>
-    <th>Día cita</th>
+    <th>Día</th>
     <th>Hora</th>
     <th>Estación</th>
-    <th>Caducidad ITV</th>
+    <th>Caducidad</th>
     <th>Estado</th>
 </tr>
 </thead>
@@ -225,7 +259,7 @@ if ($tipo === 'primera' && $fecha_cita && $caducidad && $fecha_cita > $caducidad
     $estado = 'SEGUNDA INSPECCIÓN';
 } elseif ($tipo === 'primera' && empty($vehiculo)) {
     $clase_fila = 'fila-amarilla';
-    $estado = 'PRIMERA INSPECCIÓN SIN VEHÍCULO ASIGNADO';
+    $estado = 'PRIMERA INSPECCIÓN SIN VEHÍCULO';
 }
 ?>
 
