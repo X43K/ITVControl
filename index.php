@@ -103,7 +103,7 @@ usort($vehiculos_filtrados, function ($a, $b) {
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta http-equiv="refresh" content="10">
+    <meta http-equiv="refresh" content="60">
     <link rel="shortcut icon" href="images/logo.webp">
     <link rel="icon" sizes="64x64" href="images/logo.webp">
     <link rel="apple-touch-icon" sices="180x180" href="images/logo.webp">
@@ -196,4 +196,5 @@ usort($vehiculos_filtrados, function ($a, $b) {
     <h4 class="small" style="margin-top:12px;">ITVControl v.1.2</h4>
     <p class="small">B174M3 // XaeK</p>
 </body>
+
 </html>
