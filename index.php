@@ -104,6 +104,9 @@ usort($vehiculos_filtrados, function ($a, $b) {
 <html lang="es">
 <head>
     <meta http-equiv="refresh" content="10">
+    <link rel="shortcut icon" href="images/logo.webp">
+    <link rel="icon" sizes="64x64" href="images/logo.webp">
+    <link rel="apple-touch-icon" sices="180x180" href="images/logo.webp">
     <meta charset="UTF-8">
     <title>Página Principal - Gestión de ITV</title>
     <link rel="stylesheet" href="style.css">
