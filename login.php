@@ -52,6 +52,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    <link rel="shortcut icon" href="images/logo.webp">
+    <link rel="icon" sizes="64x64" href="images/logo.webp">
+    <link rel="apple-touch-icon" sices="180x180" href="images/logo.webp">
     <meta charset="UTF-8">
     <title>Iniciar Sesión</title>
     <link rel="stylesheet" href="style.css">
