@@ -190,15 +190,15 @@ th {
 </h1>
 
 <div class="menu">
-    <a href="index.php"><img src="images/index.webp" width="40"></a>
-    <a href="citas.php"><img src="images/citas.webp" width="40"></a>
-    <a href="vehiculos.php"><img src="images/vehiculos.webp" width="40"></a>
+    <a href="index.php"><img src="images/index.webp" width="80"></a>
+    <a href="citas.php"><img src="images/citas.webp" width="80"></a>
+    <a href="vehiculos.php"><img src="images/vehiculos.webp" width="80"></a>
     <?php if ($is_admin): ?>
-        <a href="estaciones.php"><img src="images/estaciones.webp" width="40"></a>
-        <a href="usuarios.php"><img src="images/usuarios.webp" width="40"></a>
+        <a href="estaciones.php"><img src="images/estaciones.webp" width="80"></a>
+        <a href="usuarios.php"><img src="images/usuarios.webp" width="80"></a>
     <?php endif; ?>
-    <a href="imprimir.php"><img src="images/imprimir.webp" width="40"></a>
-    <a href="logout.php"><img src="images/logout.webp" width="40"></a>
+    <a href="imprimir.php"><img src="images/imprimir.webp" width="80"></a>
+    <a href="logout.php"><img src="images/logout.webp" width="80"></a>
 </div>
 
 <div class="print-header">
