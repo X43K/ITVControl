@@ -13,6 +13,8 @@ Este proyecto permite gestionar una flota de vehículos, sus citas de ITV, las E
    - Contraseña: `admin`
 6. A partir de ahí podrás gestionar los vehículos, las citas, las estaciones y los usuarios.
 
+## Válido para instalar como aplicacion web
+
 ## Usuarios de muestra
 admin (con control total)
 usuario (solo puede consultar)
