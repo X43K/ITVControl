@@ -2,7 +2,7 @@
 session_start();
 
 // Verificar si el usuario está logueado y tiene permisos
-if (!isset($_SESSION['usuario']) || !in_array($_SESSION['tipo'], ['Administrador', 'SuperAdministrador'])) {
+if (!isset($_SESSION['usuario']) || !in_array($_SESSION['tipo'], ['SuperAdministrador'])) {
     header('Location: index.php');
     exit();
 }
