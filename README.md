@@ -22,5 +22,6 @@ Este proyecto permite gestionar una flota de vehículos, sus citas de ITV, las E
 ## Tipos de usuario
 - Usuario - Puede consultar e imprimir
 - Colaborador - Puede hacer todo lo anterior + añadir citas, añadir vehiculos y modificar estados y caducidades vehiculos.
-- Administrador - Puede hacer todo lo anterior + modificar/eliminar citas y eliminar vehiculos.
+- Administrador - Puede hacer todo lo anterior + modificar/eliminar citas, eliminar vehiculos y gestionar estaciones.
 - SuperAdministrador - Puede hacer todo lo anterior + añadir/modificar/eliminar usuarios.
+
