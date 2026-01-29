@@ -72,7 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <p style="color: red;"><?= $error ?></p>
     <?php endif; ?>
 
-        <h4 class="small" style="margin-top:12px;">ITVControl v.1.2</h4>
+        <h4 class="small" style="margin-top:12px;">ITVControl v.1.3</h4>
         <p class="small">B174M3 // XaeK</p>
 </body>
 </html>

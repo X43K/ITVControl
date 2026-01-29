@@ -7,7 +7,9 @@ if (!isset($_SESSION['usuario'])) {
     exit();
 }
 
-$is_admin = ($_SESSION['tipo'] == 'Administrador');
+$is_admin = isset($_SESSION['tipo']) && in_array($_SESSION['tipo'], ['Administrador', 'SuperAdministrador']);
+$is_superadmin = isset($_SESSION['tipo']) && $_SESSION['tipo'] === 'SuperAdministrador';
+
 
 // =====================
 // CARGA DE VEHÍCULOS
@@ -190,15 +192,20 @@ th {
 </h1>
 
 <div class="menu">
-    <a href="index.php"><img src="images/index.webp" width="80"></a>
-    <a href="citas.php"><img src="images/citas.webp" width="80"></a>
-    <a href="vehiculos.php"><img src="images/vehiculos.webp" width="80"></a>
+    <a title="index" href="index.php"><img src="images/index.webp" alt="index" width="80" style="vertical-align: middle;"></a>
+    <a title="citas" href="citas.php"><img src="images/citas.webp" alt="citas" width="80" style="vertical-align: middle;"></a>
+    <a title="vehiculos" href="vehiculos.php"><img src="images/vehiculos.webp" alt="vehiculos" width="80" style="vertical-align: middle;"></a>
+
     <?php if ($is_admin): ?>
-        <a href="estaciones.php"><img src="images/estaciones.webp" width="80"></a>
-        <a href="usuarios.php"><img src="images/usuarios.webp" width="80"></a>
+        <a title="estaciones" href="estaciones.php"><img src="images/estaciones.webp" alt="estaciones" width="80" style="vertical-align: middle;"></a>
     <?php endif; ?>
-    <a href="imprimir.php"><img src="images/imprimir.webp" width="80"></a>
-    <a href="logout.php"><img src="images/logout.webp" width="80"></a>
+
+    <?php if ($is_superadmin): ?>
+        <a title="usuarios" href="usuarios.php"><img src="images/usuarios.webp" alt="usuarios" width="80" style="vertical-align: middle;"></a>
+    <?php endif; ?>
+
+    <a title="imprimir" href="imprimir.php"><img src="images/imprimir.webp" alt="imprimir" width="80" style="vertical-align: middle;"></a>
+    <a title="logout" href="logout.php"><img src="images/logout.webp" alt="logout" width="80" style="vertical-align: middle;"></a>
 </div>
 
 <div class="print-header">
@@ -299,7 +306,7 @@ if ($tipo === 'primera' && $fecha_cita && $caducidad && $fecha_cita > $caducidad
     </p>
 </div>
 <!-- Esto ya no se imprimirá -->
-<h4 class="small no-imprimir" style="margin-top:12px;">ITVControl v.1.2</h4>
+<h4 class="small no-imprimir" style="margin-top:12px;">ITVControl v.1.3</h4>
 <p class="small no-imprimir">B174M3 // XaeK</p>
 </body>
 </html>

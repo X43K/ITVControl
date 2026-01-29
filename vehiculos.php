@@ -8,7 +8,10 @@ if (!isset($_SESSION['usuario'])) {
 }
 
 // Verificar si el usuario es administrador
-$is_admin = ($_SESSION['tipo'] == 'Administrador');
+$is_colab = isset($_SESSION['tipo']) && in_array($_SESSION['tipo'], ['Colaborador', 'Administrador', 'SuperAdministrador']);
+$is_admin = isset($_SESSION['tipo']) && in_array($_SESSION['tipo'], ['Administrador', 'SuperAdministrador']);
+$is_superadmin = isset($_SESSION['tipo']) && $_SESSION['tipo'] === 'SuperAdministrador';
+
 
 // Verificar si el archivo vehiculos.json existe y es accesible
 $vehiculos_file = 'vehiculos.json';
@@ -20,7 +23,7 @@ if (!file_exists($vehiculos_file)) {
 $vehiculos = json_decode(file_get_contents($vehiculos_file), true);
 
 // Procesar formulario de añadir vehículo si es administrador
-if ($is_admin && $_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($is_colab && $_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!empty($_POST['vehiculo']) && !empty($_POST['matricula']) && !empty($_POST['estado']) && !empty($_POST['caducidad_itv']) && !empty($_POST['tipo'])) {
         $nuevo_vehiculo = [
             'vehiculo' => $_POST['vehiculo'],
@@ -126,10 +129,15 @@ function formatear_fecha($fecha) {
     <a title="index" href="index.php"><img src="images/index.webp" alt="index" width="80" style="vertical-align: middle;"></a>
     <a title="citas" href="citas.php"><img src="images/citas.webp" alt="citas" width="80" style="vertical-align: middle;"></a>
     <a title="vehiculos" href="vehiculos.php"><img src="images/vehiculos.webp" alt="vehiculos" width="80" style="vertical-align: middle;"></a>
-        <?php if ($is_admin): ?>
-    <a title="estaciones" href="estaciones.php"><img src="images/estaciones.webp" alt="estaciones" width="80" style="vertical-align: middle;"></a>
-    <a title="usuarios" href="usuarios.php"><img src="images/usuarios.webp" alt="usuarios" width="80" style="vertical-align: middle;"></a>
-        <?php endif; ?>
+
+    <?php if ($is_admin): ?>
+        <a title="estaciones" href="estaciones.php"><img src="images/estaciones.webp" alt="estaciones" width="80" style="vertical-align: middle;"></a>
+    <?php endif; ?>
+
+    <?php if ($is_superadmin): ?>
+        <a title="usuarios" href="usuarios.php"><img src="images/usuarios.webp" alt="usuarios" width="80" style="vertical-align: middle;"></a>
+    <?php endif; ?>
+
     <a title="imprimir" href="imprimir.php"><img src="images/imprimir.webp" alt="imprimir" width="80" style="vertical-align: middle;"></a>
     <a title="logout" href="logout.php"><img src="images/logout.webp" alt="logout" width="80" style="vertical-align: middle;"></a>
 </div>
@@ -138,7 +146,7 @@ function formatear_fecha($fecha) {
         <p style="color: red;"><?= $error ?></p>
     <?php endif; ?>
 
-    <?php if ($is_admin): ?>
+    <?php if ($is_colab): ?>
         <h2>Añadir Vehículo</h2>
         <form method="POST">
             <label>Vehículo:</label><input type="text" name="vehiculo" required><br><br>
@@ -179,8 +187,11 @@ function formatear_fecha($fecha) {
                 <th>Estado</th>
                 <th>Caducidad ITV</th>
                 <th>Días para Caducar</th>
+                <?php if ($is_colab): ?>
+                    <th>Editar</th>
+                <?php endif; ?>
                 <?php if ($is_admin): ?>
-                    <th>Acciones</th>
+                    <th>Eliminar</th>
                 <?php endif; ?>
             </tr>
         </thead>
@@ -196,9 +207,13 @@ function formatear_fecha($fecha) {
                     <td><?= htmlspecialchars($vehiculo['estado']) ?></td>
                     <td><?= formatear_fecha($vehiculo['caducidad_itv']) ?></td>
                     <td><?= $info['texto_dias'] ?></td>
+                    <?php if ($is_colab): ?>
+                        <td>
+                            <a href="editar_vehiculo.php?id=<?= urlencode($vehiculo['matricula']) ?>">Editar</a>
+                        </td>
+                    <?php endif; ?>
                     <?php if ($is_admin): ?>
                         <td>
-                            <a href="editar_vehiculo.php?id=<?= urlencode($vehiculo['matricula']) ?>">Editar</a> |
                             <a href="eliminar_vehiculo.php?id=<?= urlencode($vehiculo['matricula']) ?>">Eliminar</a>
                         </td>
                     <?php endif; ?>
@@ -207,7 +222,7 @@ function formatear_fecha($fecha) {
         </tbody>
     </table>
 
-        <h4 class="small" style="margin-top:12px;">ITVControl v.1.2</h4>
+        <h4 class="small" style="margin-top:12px;">ITVControl v.1.3</h4>
         <p class="small">B174M3 // XaeK</p>
 </body>
 </html>

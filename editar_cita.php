@@ -1,11 +1,18 @@
 <?php
 session_start();
 
-// Verificar si el usuario está logueado y es administrador
-if (!isset($_SESSION['usuario']) || $_SESSION['tipo'] != 'Administrador') {
+// Verificar si el usuario está logueado y es administrador o superadministrador
+if (
+    !isset($_SESSION['usuario']) ||
+    !in_array($_SESSION['tipo'], ['Administrador', 'SuperAdministrador'])
+) {
     header('Location: index.php');
     exit();
 }
+
+// Variables de control para el menú
+$is_admin = in_array($_SESSION['tipo'], ['Administrador', 'SuperAdministrador']);
+$is_superadmin = $_SESSION['tipo'] === 'SuperAdministrador';
 
 // Obtener fecha y hora de la cita a editar
 if (!isset($_GET['fecha']) || !isset($_GET['hora']) || empty($_GET['fecha']) || empty($_GET['hora'])) {
@@ -37,7 +44,9 @@ $vehiculos = json_decode(file_get_contents($vehiculos_file), true);
 
 // Cargar estaciones desde JSON
 $estaciones_file = 'estaciones.json';
-if (!file_exists($estaciones_file)) file_put_contents($estaciones_file, json_encode(['Tambre','Sionlla','Cacheiras'], JSON_PRETTY_PRINT));
+if (!file_exists($estaciones_file)) {
+    file_put_contents($estaciones_file, json_encode(['Tambre','Sionlla','Cacheiras'], JSON_PRETTY_PRINT));
+}
 $estaciones = json_decode(file_get_contents($estaciones_file), true);
 
 // Procesar formulario de edición
@@ -49,7 +58,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $cita_editar['tipo_cita'] = $_POST['tipo_cita'];
         $cita_editar['vehiculo'] = $_POST['vehiculo'] ?? '';
 
-        // Guardar cambios sin bloquear por alertas, estas se manejan en JS
         if (file_put_contents($citas_file, json_encode($citas, JSON_PRETTY_PRINT))) {
             header('Location: citas.php');
             exit();
@@ -74,12 +82,12 @@ function formatear_fecha($fecha) {
     <link rel="shortcut icon" href="images/logo.webp">
     <link rel="icon" sizes="64x64" href="images/logo.webp">
     <link rel="apple-touch-icon" sices="180x180" href="images/logo.webp">
-<meta charset="UTF-8">
-<title>Editar Cita</title>
-<link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <title>Editar Cita</title>
+    <link rel="stylesheet" href="style.css">
+
 
 <script>
-// Función para alertas al editar cita
 function validarCita(form) {
     var fechaCita = new Date(form.fecha_cita.value);
     var tipoCita = form.tipo_cita.value;
@@ -99,17 +107,15 @@ function validarCita(form) {
     var diffTime = caducidadItv - fechaCita;
     var diffDias = Math.floor(diffTime / (1000*60*60*24));
 
-    // Más de 29 días antes (Primera ITV)
     if (tipoCita === 'Primera' && diffDias > 29) {
-        if (!confirm("Atención: La cita de Primera ITV está programada " + diffDias + 
+        if (!confirm("Atención: La cita de Primera ITV está programada " + diffDias +
             " días antes de la caducidad de la ITV.\n¿Desea continuar?")) {
             return false;
         }
     }
 
-    // Cita después de la caducidad
     if (diffDias < 0) {
-        if (!confirm("Atención: La cita se asigna después de la caducidad de la ITV (" + 
+        if (!confirm("Atención: La cita se asigna después de la caducidad de la ITV (" +
             caducidadItv.toLocaleDateString() + ").\n¿Desea continuar igualmente?")) {
             return false;
         }
@@ -121,14 +127,31 @@ function validarCita(form) {
 
 </head>
 <body>
-<h1>Editar Cita</h1>
+    <h1><img src="images/logo.webp" alt="Logo" width="30" style="vertical-align: middle;">Editar Cita</h1>
+<div class="menu">
+    <a title="index" href="index.php"><img src="images/index.webp" alt="index" width="80" style="vertical-align: middle;"></a>
+    <a title="citas" href="citas.php"><img src="images/citas.webp" alt="citas" width="80" style="vertical-align: middle;"></a>
+    <a title="vehiculos" href="vehiculos.php"><img src="images/vehiculos.webp" alt="vehiculos" width="80" style="vertical-align: middle;"></a>
 
+    <?php if ($is_admin): ?>
+        <a title="estaciones" href="estaciones.php"><img src="images/estaciones.webp" alt="estaciones" width="80" style="vertical-align: middle;"></a>
+    <?php endif; ?>
+
+    <?php if ($is_superadmin): ?>
+        <a title="usuarios" href="usuarios.php"><img src="images/usuarios.webp" alt="usuarios" width="80" style="vertical-align: middle;"></a>
+    <?php endif; ?>
+
+    <a title="imprimir" href="imprimir.php"><img src="images/imprimir.webp" alt="imprimir" width="80" style="vertical-align: middle;"></a>
+    <a title="logout" href="logout.php"><img src="images/logout.webp" alt="logout" width="80" style="vertical-align: middle;"></a>
+</div>
+<p></br></p>
 <form method="POST" onsubmit="return validarCita(this);">
     <label>Fecha de Cita:</label>
     <input type="date" name="fecha_cita" value="<?= htmlspecialchars($cita_editar['fecha_cita']) ?>" required><br><br>
+
     <label>Hora de Cita:</label>
     <input type="time" name="hora_cita" value="<?= htmlspecialchars($cita_editar['hora_cita']) ?>" required><br><br>
-    
+
     <label>Estación:</label>
     <select name="estacion_cita" required>
         <?php foreach ($estaciones as $estacion): ?>
@@ -161,7 +184,8 @@ function validarCita(form) {
     <p style="color:red;"><?= $error ?></p>
 <?php endif; ?>
 
-        <h4 class="small" style="margin-top:12px;">ITVControl v.1.2</h4>
-        <p class="small">B174M3 // XaeK</p>
+<h4 class="small" style="margin-top:12px;">ITVControl v.1.3</h4>
+<p class="small">B174M3 // XaeK</p>
 </body>
 </html>
+
