@@ -7,7 +7,8 @@ if (!isset($_SESSION['usuario'])) {
     exit();
 }
 
-$is_admin = ($_SESSION['tipo'] == 'Administrador');
+$is_admin = isset($_SESSION['tipo']) && in_array($_SESSION['tipo'], ['Administrador', 'SuperAdministrador']);
+$is_superadmin = isset($_SESSION['tipo']) && $_SESSION['tipo'] === 'SuperAdministrador';
 
 // Cargar vehículos
 $vehiculos_file = 'vehiculos.json';
@@ -131,13 +132,20 @@ usort($vehiculos_filtrados, function ($a, $b) {
     <a title="index" href="index.php"><img src="images/index.webp" alt="index" width="80" style="vertical-align: middle;"></a>
     <a title="citas" href="citas.php"><img src="images/citas.webp" alt="citas" width="80" style="vertical-align: middle;"></a>
     <a title="vehiculos" href="vehiculos.php"><img src="images/vehiculos.webp" alt="vehiculos" width="80" style="vertical-align: middle;"></a>
-        <?php if ($is_admin): ?>
-    <a title="estaciones" href="estaciones.php"><img src="images/estaciones.webp" alt="estaciones" width="80" style="vertical-align: middle;"></a>
-    <a title="usuarios" href="usuarios.php"><img src="images/usuarios.webp" alt="usuarios" width="80" style="vertical-align: middle;"></a>
-        <?php endif; ?>
+
+    <?php if ($is_admin): ?>
+        <a title="estaciones" href="estaciones.php"><img src="images/estaciones.webp" alt="estaciones" width="80" style="vertical-align: middle;"></a>
+    <?php endif; ?>
+
+    <?php if ($is_superadmin): ?>
+        <a title="usuarios" href="usuarios.php"><img src="images/usuarios.webp" alt="usuarios" width="80" style="vertical-align: middle;"></a>
+    <?php endif; ?>
+
     <a title="imprimir" href="imprimir.php"><img src="images/imprimir.webp" alt="imprimir" width="80" style="vertical-align: middle;"></a>
     <a title="logout" href="logout.php"><img src="images/logout.webp" alt="logout" width="80" style="vertical-align: middle;"></a>
 </div>
+<p></br></p>
+
 
     <h2>Vehículos</h2>
     <table>
@@ -193,7 +201,7 @@ usort($vehiculos_filtrados, function ($a, $b) {
         </tbody>
     </table>
 
-    <h4 class="small" style="margin-top:12px;">ITVControl v.1.2</h4>
+    <h4 class="small" style="margin-top:12px;">ITVControl v.1.3</h4>
     <p class="small">B174M3 // XaeK</p>
 </body>
 </html>

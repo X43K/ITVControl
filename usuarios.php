@@ -1,15 +1,17 @@
 <?php
 session_start();
 
-// Verificar si el usuario está logueado y es administrador
-if (!isset($_SESSION['usuario']) || $_SESSION['tipo'] != 'Administrador') {
+// Verificar si el usuario está logueado y tiene permisos
+if (!isset($_SESSION['usuario']) || !in_array($_SESSION['tipo'], ['Administrador', 'SuperAdministrador'])) {
     header('Location: index.php');
     exit();
 }
 
-$is_admin = ($_SESSION['tipo'] == 'Administrador');
+// Variables para menú
+$is_admin = isset($_SESSION['tipo']) && in_array($_SESSION['tipo'], ['Administrador', 'SuperAdministrador']);
+$is_superadmin = isset($_SESSION['tipo']) && $_SESSION['tipo'] === 'SuperAdministrador';
 
-// Cargar usuarios desde el archivo JSON
+// Cargar usuarios
 $usuarios_file = 'usuarios.json';
 if (!file_exists($usuarios_file)) {
     file_put_contents($usuarios_file, json_encode([])); // Crear archivo vacío si no existe
@@ -26,87 +28,88 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'tipo' => $_POST['tipo']
         ];
 
-        // Añadir el nuevo usuario al array de usuarios
         $usuarios[] = $nuevo_usuario;
-
-        // Guardar el array de usuarios actualizado en el archivo JSON
         file_put_contents($usuarios_file, json_encode($usuarios, JSON_PRETTY_PRINT));
 
-        // Redirigir a la misma página para evitar que se resuba el formulario
         header('Location: usuarios.php');
         exit();
     } else {
         $error = "Todos los campos son obligatorios.";
     }
 }
-
 ?>
 
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <link rel="shortcut icon" href="images/logo.webp">
-    <link rel="icon" sizes="64x64" href="images/logo.webp">
-    <link rel="apple-touch-icon" sices="180x180" href="images/logo.webp">
     <meta charset="UTF-8">
     <title>Gestionar Usuarios</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1><img src="images/logo.webp" alt="Logo" width="30" style="vertical-align: middle;">Gestionar Usuarios</h1>
+<h1><img src="images/logo.webp" width="30" style="vertical-align: middle;">Gestionar Usuarios</h1>
 
 <div class="menu">
-    <a title="index" href="index.php"><img src="images/index.webp" alt="index" width="80" style="vertical-align: middle;"></a>
-    <a title="citas" href="citas.php"><img src="images/citas.webp" alt="citas" width="80" style="vertical-align: middle;"></a>
-    <a title="vehiculos" href="vehiculos.php"><img src="images/vehiculos.webp" alt="vehiculos" width="80" style="vertical-align: middle;"></a>
-        <?php if ($is_admin): ?>
-    <a title="estaciones" href="estaciones.php"><img src="images/estaciones.webp" alt="estaciones" width="80" style="vertical-align: middle;"></a>
-    <a title="usuarios" href="usuarios.php"><img src="images/usuarios.webp" alt="usuarios" width="80" style="vertical-align: middle;"></a>
-        <?php endif; ?>
-    <a title="imprimir" href="imprimir.php"><img src="images/imprimir.webp" alt="imprimir" width="80" style="vertical-align: middle;"></a>
-    <a title="logout" href="logout.php"><img src="images/logout.webp" alt="logout" width="80" style="vertical-align: middle;"></a>
-</div>
+    <a href="index.php"><img src="images/index.webp" width="80"></a>
+    <a href="citas.php"><img src="images/citas.webp" width="80"></a>
+    <a href="vehiculos.php"><img src="images/vehiculos.webp" width="80"></a>
 
-    <?php if (isset($error)): ?>
-        <p style="color: red;"><?= $error ?></p>
+    <?php if ($is_admin): ?>
+        <a href="estaciones.php"><img src="images/estaciones.webp" width="80"></a>
     <?php endif; ?>
 
-    <h2>Añadir Usuario</h2>
-    <form method="POST">
-        <label>Usuario:</label><input type="text" name="usuario" required><br><br>
-        <label>Contraseña:</label><input type="password" name="contraseña" required><br><br>
-        <label>Tipo:</label>
-        <select name="tipo">
-            <option value="Usuario">Usuario</option>
-            <option value="Administrador">Administrador</option>
-        </select><br><br>
-        <input type="submit" value="Añadir Usuario">
-    </form>
+    <?php if ($is_superadmin): ?>
+        <a href="usuarios.php"><img src="images/usuarios.webp" width="80"></a>
+    <?php endif; ?>
 
-    <h2>Lista de Usuarios</h2>
-    <table>
-        <thead>
+    <a href="imprimir.php"><img src="images/imprimir.webp" width="80"></a>
+    <a href="logout.php"><img src="images/logout.webp" width="80"></a>
+</div>
+
+<?php if (isset($error)): ?>
+    <p style="color:red;"><?= $error ?></p>
+<?php endif; ?>
+
+<h2>Añadir Usuario</h2>
+<form method="POST">
+    <label>Usuario:</label><input type="text" name="usuario" required><br><br>
+    <label>Contraseña:</label><input type="password" name="contraseña" required><br><br>
+    <label>Tipo:</label>
+    <select name="tipo">
+        <option value="Usuario">Usuario</option>
+        <option value="Colaborador">Colaborador</option>
+        <option value="Administrador">Administrador</option>
+        <option value="SuperAdministrador">SuperAdministrador</option>
+    </select><br><br>
+    <input type="submit" value="Añadir Usuario">
+</form>
+
+<h2>Lista de Usuarios</h2>
+<table>
+    <thead>
+        <tr>
+            <th>Usuario</th>
+            <th>Tipo</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php foreach ($usuarios as $usuario): ?>
             <tr>
-                <th>Usuario</th>
-                <th>Tipo</th>
-                <th>Acciones</th>
+                <td><?= htmlspecialchars($usuario['usuario']) ?></td>
+                <td><?= htmlspecialchars($usuario['tipo']) ?></td>
+                <td>
+                    <a href="editar_usuario.php?usuario=<?= urlencode($usuario['usuario']) ?>">Editar</a> |
+                    <a href="eliminar_usuario.php?usuario=<?= urlencode($usuario['usuario']) ?>">Eliminar</a>
+                </td>
             </tr>
-        </thead>
-        <tbody>
-            <?php foreach ($usuarios as $usuario): ?>
-                <tr>
-                    <td><?= htmlspecialchars($usuario['usuario']) ?></td>
-                    <td><?= htmlspecialchars($usuario['tipo']) ?></td>
-                    <td>
-                        <a href="editar_usuario.php?usuario=<?= urlencode($usuario['usuario']) ?>">Editar</a> |
-                        <a href="eliminar_usuario.php?usuario=<?= urlencode($usuario['usuario']) ?>">Eliminar</a>
-                    </td>
-                </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
+        <?php endforeach; ?>
+    </tbody>
+</table>
 
-        <h4 class="small" style="margin-top:12px;">ITVControl v.1.2</h4>
-        <p class="small">B174M3 // XaeK</p>
+<h4 class="small" style="margin-top:12px;">ITVControl v.1.3</h4>
+<p class="small">B174M3 // XaeK</p>
 </body>
 </html>
+
