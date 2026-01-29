@@ -2,7 +2,7 @@
 session_start();
 
 // Verificar si el usuario es administrador
-if (!isset($_SESSION['usuario']) || $_SESSION['tipo'] != 'Administrador') {
+if (!isset($_SESSION['usuario']) || $_SESSION['tipo'] != 'SuperAdministrador') {
     header('Location: index.php');
     exit();
 }
