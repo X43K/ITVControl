@@ -16,11 +16,11 @@ Este proyecto permite gestionar una flota de vehículos, sus citas de ITV, las E
 ## Válido para instalar como aplicacion web
 
 ## Usuarios de muestra
-admin (con control total)
-usuario (solo puede consultar)
+- admin (con control total)
+- usuario (solo puede consultar)
 
 ## Tipos de usuario
-Usuario - Puede consultar e imprimir
-Colaborador - Puede hacer todo lo anterior + añadir citas, añadir vehiculos y modificar estados y caducidades vehiculos.
-Administrador - Puede hacer todo lo anterior + modificar/eliminar citas y eliminar vehiculos.
-SuperAdministrador - Puede hacer todo lo anterior + añadir/modificar/eliminar usuarios.
+- Usuario - Puede consultar e imprimir
+- Colaborador - Puede hacer todo lo anterior + añadir citas, añadir vehiculos y modificar estados y caducidades vehiculos.
+- Administrador - Puede hacer todo lo anterior + modificar/eliminar citas y eliminar vehiculos.
+- SuperAdministrador - Puede hacer todo lo anterior + añadir/modificar/eliminar usuarios.
