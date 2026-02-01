@@ -306,7 +306,7 @@ if ($tipo === 'primera' && $fecha_cita && $caducidad && $fecha_cita > $caducidad
     </p>
 </div>
 <!-- Esto ya no se imprimirá -->
-<h4 class="small no-imprimir" style="margin-top:12px;">ITVControl v.1.3</h4>
+<h4 class="small no-imprimir" style="margin-top:12px;">ITVControl v.1.4</h4>
 <p class="small no-imprimir">B174M3 // XaeK</p>
 </body>
 </html>

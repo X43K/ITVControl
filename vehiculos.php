@@ -7,11 +7,10 @@ if (!isset($_SESSION['usuario'])) {
     exit();
 }
 
-// Verificar si el usuario es administrador
+// Verificar tipo de usuario
 $is_colab = isset($_SESSION['tipo']) && in_array($_SESSION['tipo'], ['Colaborador', 'Administrador', 'SuperAdministrador']);
 $is_admin = isset($_SESSION['tipo']) && in_array($_SESSION['tipo'], ['Administrador', 'SuperAdministrador']);
 $is_superadmin = isset($_SESSION['tipo']) && $_SESSION['tipo'] === 'SuperAdministrador';
-
 
 // Verificar si el archivo vehiculos.json existe y es accesible
 $vehiculos_file = 'vehiculos.json';
@@ -22,7 +21,7 @@ if (!file_exists($vehiculos_file)) {
 // Cargar vehículos desde el archivo JSON
 $vehiculos = json_decode(file_get_contents($vehiculos_file), true);
 
-// Procesar formulario de añadir vehículo si es administrador
+// Procesar formulario de añadir vehículo
 if ($is_colab && $_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!empty($_POST['vehiculo']) && !empty($_POST['matricula']) && !empty($_POST['estado']) && !empty($_POST['caducidad_itv']) && !empty($_POST['tipo'])) {
         $nuevo_vehiculo = [
@@ -46,55 +45,61 @@ if ($is_colab && $_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Función para calcular los días restantes para la caducidad
+// ✅ Calcular días restantes con comparación a medianoche
 function calcular_dias_restantes($caducidad_itv) {
-    $fecha_actual = new DateTime();
+    $fecha_actual = new DateTime('today');
     $fecha_caducidad = new DateTime($caducidad_itv);
+    $fecha_caducidad->setTime(0, 0, 0);
     $intervalo = $fecha_actual->diff($fecha_caducidad);
-    return (int)$intervalo->format('%r%a'); // puede ser negativo si ya caducó
+    return (int)$intervalo->format('%r%a'); // Negativo si ya caducó
 }
 
-// Función para obtener color y texto según estado y días restantes
+// ✅ Obtener color y texto de la columna de días
 function obtener_color_y_texto($vehiculo) {
     $estado = $vehiculo['estado'];
     $dias_restantes = calcular_dias_restantes($vehiculo['caducidad_itv']);
-    $texto_dias = $dias_restantes . ' días';
-    $color = 'verde'; // default
+    $color = 'verde';
+    $texto_dias = '';
 
+    // Colores por rango
     if ($estado == 'BAJA') {
         $color = 'negro';
-    } elseif ($estado == 'ITV RECHAZADA' || $dias_restantes <= 0) {
+        $texto_dias = '-';
+    } elseif ($dias_restantes < 0) {
         $color = 'rojo_intenso';
-        if ($dias_restantes <= 0) $texto_dias = "ITV CADUCADA";
+    } elseif ($dias_restantes == 0 || $dias_restantes == 1) {
+        $color = 'rojo_intenso';
     } elseif ($dias_restantes < 10) {
         $color = 'naranja_intenso';
-    } elseif ($dias_restantes >= 10 && $dias_restantes <= 20) {
+    } elseif ($dias_restantes <= 20) {
         $color = 'naranja_suave';
-    } elseif ($dias_restantes > 20 && $dias_restantes <= 35) {
+    } elseif ($dias_restantes <= 35) {
         $color = 'azul';
+    }
+
+    // Texto de días
+    if ($estado == 'BAJA') {
+        $texto_dias = '-';
+    } elseif ($dias_restantes < 0) {
+        $dias_pasados = abs($dias_restantes);
+        $texto_dias = "Caducada hace " . $dias_pasados . " día" . ($dias_pasados != 1 ? "s" : "");
     } else {
-        $color = 'verde';
+        $texto_dias = $dias_restantes . " día" . ($dias_restantes != 1 ? "s" : "");
     }
 
     return ['color' => $color, 'texto_dias' => $texto_dias];
 }
 
-// Ordenar vehículos: primero "ITV RECHAZADA", luego por días restantes, y "BAJA" al final
+// ✅ Ordenar vehículos: ITV RECHAZADA primero, BAJA al final, resto por días restantes
 usort($vehiculos, function($a, $b) {
-    // Prioridad 1: ITV RECHAZADA arriba del todo
     if ($a['estado'] === 'ITV RECHAZADA' && $b['estado'] !== 'ITV RECHAZADA') return -1;
     if ($b['estado'] === 'ITV RECHAZADA' && $a['estado'] !== 'ITV RECHAZADA') return 1;
-
-    // Prioridad 2: BAJA al final
     if ($a['estado'] === 'BAJA' && $b['estado'] !== 'BAJA') return 1;
     if ($b['estado'] === 'BAJA' && $a['estado'] !== 'BAJA') return -1;
-
-    // Prioridad 3: Ordenar por días restantes (menor a mayor)
     return calcular_dias_restantes($a['caducidad_itv']) - calcular_dias_restantes($b['caducidad_itv']);
 });
 
-
-// Función para formatear fecha en DD/MM/YYYY
+// Formatear fecha
 function formatear_fecha($fecha) {
     $fecha_obj = DateTime::createFromFormat('Y-m-d', $fecha);
     return $fecha_obj ? $fecha_obj->format('d/m/Y') : $fecha;
@@ -126,20 +131,17 @@ function formatear_fecha($fecha) {
     <h1><img src="images/logo.webp" alt="Logo" width="30" style="vertical-align: middle;">Gestionar Vehículos</h1>
 
 <div class="menu">
-    <a title="index" href="index.php"><img src="images/index.webp" alt="index" width="80" style="vertical-align: middle;"></a>
-    <a title="citas" href="citas.php"><img src="images/citas.webp" alt="citas" width="80" style="vertical-align: middle;"></a>
-    <a title="vehiculos" href="vehiculos.php"><img src="images/vehiculos.webp" alt="vehiculos" width="80" style="vertical-align: middle;"></a>
-
+    <a title="index" href="index.php"><img src="images/index.webp" alt="index" width="80"></a>
+    <a title="citas" href="citas.php"><img src="images/citas.webp" alt="citas" width="80"></a>
+    <a title="vehiculos" href="vehiculos.php"><img src="images/vehiculos.webp" alt="vehiculos" width="80"></a>
     <?php if ($is_admin): ?>
-        <a title="estaciones" href="estaciones.php"><img src="images/estaciones.webp" alt="estaciones" width="80" style="vertical-align: middle;"></a>
+        <a title="estaciones" href="estaciones.php"><img src="images/estaciones.webp" alt="estaciones" width="80"></a>
     <?php endif; ?>
-
     <?php if ($is_superadmin): ?>
-        <a title="usuarios" href="usuarios.php"><img src="images/usuarios.webp" alt="usuarios" width="80" style="vertical-align: middle;"></a>
+        <a title="usuarios" href="usuarios.php"><img src="images/usuarios.webp" alt="usuarios" width="80"></a>
     <?php endif; ?>
-
-    <a title="imprimir" href="imprimir.php"><img src="images/imprimir.webp" alt="imprimir" width="80" style="vertical-align: middle;"></a>
-    <a title="logout" href="logout.php"><img src="images/logout.webp" alt="logout" width="80" style="vertical-align: middle;"></a>
+    <a title="imprimir" href="imprimir.php"><img src="images/imprimir.webp" alt="imprimir" width="80"></a>
+    <a title="logout" href="logout.php"><img src="images/logout.webp" alt="logout" width="80"></a>
 </div>
 
     <?php if (isset($error)): ?>
@@ -151,21 +153,15 @@ function formatear_fecha($fecha) {
         <form method="POST">
             <label>Vehículo:</label><input type="text" name="vehiculo" required><br><br>
             <label>Matrícula:</label><input type="text" name="matricula" required><br><br>
-<label>Tipo:</label>
-<select name="tipo" required>
-    <option value="Turismo, Transporte mercancías hasta 3500 kg y cuadriciclos">Turismo, Transporte mercancías hasta 3500 kg y cuadriciclos</option>
-    <option value="Transporte mercancías más de 3500 kg">Transporte mercancías más de 3500 kg</option>
-    <option value="Transporte mercancías más de 3500 kg (Cabeza tractora + Remolque)">Transporte mercancías más de 3500 kg (Cabeza tractora + Remolque)</option>
-    <option value="Autobuses y microbuses">Autobuses y microbuses</option>
-    <option value="Verificación taxímetro">Verificación taxímetro</option>
-    <option value="Periódica taxi con verificación taxímetro">Periódica taxi con verificación taxímetro</option>
-    <option value="Periódica taxi sin verificación taxímetro">Periódica taxi sin verificación taxímetro</option>
-    <option value="Ciclomotores de 2 y 3 ruedas, motocicletas y quads/vehículos similares y ATVs">Ciclomotores de 2 y 3 ruedas, motocicletas y quads/vehículos similares y ATVs</option>
-    <option value="Agrícolas y Obras y Servicios (excepto quads/vehículos similares y ATVs)">Agrícolas y Obras y Servicios (excepto quads/vehículos similares y ATVs)</option>
-    <option value="Tractor + Remolque (Agrícolas y Obras y Servicios)">Tractor + Remolque (Agrícolas y Obras y Servicios)</option>
-</select>
-
-<br><br>
+            <label>Tipo:</label>
+            <select name="tipo" required>
+                <option value="Turismo">Turismo</option>
+                <option value="Transporte mercancías hasta 3500 kg">Transporte mercancías hasta 3500 kg</option>
+                <option value="Transporte mercancías más de 3500 kg">Transporte mercancías más de 3500 kg</option>
+                <option value="Autobuses y microbuses">Autobuses y microbuses</option>
+                <option value="Agrícolas">Agrícolas</option>
+                <option value="Motocicletas y quads">Motocicletas y quads</option>
+            </select><br><br>
             <label>Estado:</label>
             <select name="estado">
                 <option value="ACTIVO">ACTIVO</option>
@@ -187,42 +183,50 @@ function formatear_fecha($fecha) {
                 <th>Estado</th>
                 <th>Caducidad ITV</th>
                 <th>Días para Caducar</th>
-                <?php if ($is_colab): ?>
-                    <th>Editar</th>
-                <?php endif; ?>
-                <?php if ($is_admin): ?>
-                    <th>Eliminar</th>
-                <?php endif; ?>
+                <?php if ($is_colab): ?><th>Editar</th><?php endif; ?>
+                <?php if ($is_admin): ?><th>Eliminar</th><?php endif; ?>
             </tr>
         </thead>
         <tbody>
-            <?php foreach ($vehiculos as $vehiculo): ?>
-                <?php 
-                    $info = obtener_color_y_texto($vehiculo);
-                ?>
+            <?php foreach ($vehiculos as $vehiculo):
+                $info = obtener_color_y_texto($vehiculo);
+                $dias_restantes = calcular_dias_restantes($vehiculo['caducidad_itv']);
+            ?>
                 <tr class="<?= $info['color'] ?>">
                     <td><?= htmlspecialchars($vehiculo['vehiculo']) ?></td>
                     <td><?= htmlspecialchars($vehiculo['matricula']) ?></td>
                     <td><?= htmlspecialchars($vehiculo['tipo']) ?></td>
-                    <td><?= htmlspecialchars($vehiculo['estado']) ?></td>
+                    <td>
+                        <?php
+                            if ($vehiculo['estado'] === 'BAJA') {
+                                echo 'BAJA';
+                            } elseif ($vehiculo['estado'] === 'ITV RECHAZADA') {
+                                echo 'ITV RECHAZADA';
+                            } elseif ($dias_restantes < 0) {
+                                echo 'ITV CADUCADA';
+                            } elseif ($dias_restantes == 0) {
+                                echo 'CADUCA HOY';
+                            } elseif ($dias_restantes == 1) {
+                                echo 'CADUCA MAÑANA';
+                            } else {
+                                echo htmlspecialchars($vehiculo['estado']);
+                            }
+                        ?>
+                    </td>
                     <td><?= formatear_fecha($vehiculo['caducidad_itv']) ?></td>
                     <td><?= $info['texto_dias'] ?></td>
                     <?php if ($is_colab): ?>
-                        <td>
-                            <a href="editar_vehiculo.php?id=<?= urlencode($vehiculo['matricula']) ?>">Editar</a>
-                        </td>
+                        <td><a href="editar_vehiculo.php?id=<?= urlencode($vehiculo['matricula']) ?>">Editar</a></td>
                     <?php endif; ?>
                     <?php if ($is_admin): ?>
-                        <td>
-                            <a href="eliminar_vehiculo.php?id=<?= urlencode($vehiculo['matricula']) ?>">Eliminar</a>
-                        </td>
+                        <td><a href="eliminar_vehiculo.php?id=<?= urlencode($vehiculo['matricula']) ?>">Eliminar</a></td>
                     <?php endif; ?>
                 </tr>
             <?php endforeach; ?>
         </tbody>
     </table>
 
-        <h4 class="small" style="margin-top:12px;">ITVControl v.1.3</h4>
-        <p class="small">B174M3 // XaeK</p>
+    <h4 class="small" style="margin-top:12px;">ITVControl v.1.4</h4>
+    <p class="small">B174M3 // XaeK</p>
 </body>
 </html>

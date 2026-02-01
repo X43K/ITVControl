@@ -24,26 +24,35 @@ if (!file_exists($citas_file)) {
 }
 $citas = json_decode(file_get_contents($citas_file), true);
 
-// Función para calcular días restantes
+// ✅ Función para calcular días restantes (comparación a medianoche)
 function calcular_dias_restantes($caducidad_itv) {
-    $fecha_actual = new DateTime();
+    $fecha_actual = new DateTime('today');
     $fecha_caducidad = new DateTime($caducidad_itv);
+    $fecha_caducidad->setTime(0, 0, 0);
     $intervalo = $fecha_actual->diff($fecha_caducidad);
     return (int)$intervalo->format('%r%a');
 }
 
-// Función para obtener citas asignadas a un vehículo (solo futuras)
+// ✅ Función para obtener citas asignadas a un vehículo (solo futuras y ordenadas)
 function obtener_citas_vehiculo($matricula_vehiculo, $citas) {
     $fecha_actual = new DateTime();
     $citas_vehiculo = [];
+
     foreach ($citas as $cita) {
         if ($cita['vehiculo'] === $matricula_vehiculo) {
             $fecha_hora_cita = DateTime::createFromFormat('Y-m-d H:i', $cita['fecha_cita'] . ' ' . $cita['hora_cita']);
             if ($fecha_hora_cita && $fecha_hora_cita >= $fecha_actual) {
+                $cita['timestamp'] = $fecha_hora_cita->getTimestamp();
                 $citas_vehiculo[] = $cita;
             }
         }
     }
+
+    // Ordenar por fecha y hora ascendente
+    usort($citas_vehiculo, function ($a, $b) {
+        return $a['timestamp'] <=> $b['timestamp'];
+    });
+
     return $citas_vehiculo;
 }
 
@@ -53,12 +62,12 @@ function formatear_fecha($fecha) {
     return $fecha_obj ? $fecha_obj->format('d/m/Y') : $fecha;
 }
 
-// Determinar color y texto de días restantes
+// ✅ Determinar color y texto de días restantes (solo color y casos especiales)
 function obtener_color_y_texto($vehiculo) {
     $estado = $vehiculo['estado'];
     $dias_restantes = calcular_dias_restantes($vehiculo['caducidad_itv']);
+    $color = 'verde';
     $texto_dias = $dias_restantes . ' días';
-    $color = 'verde'; // por defecto
 
     if ($estado == 'BAJA') {
         $color = 'negro';
@@ -66,15 +75,28 @@ function obtener_color_y_texto($vehiculo) {
     } elseif ($estado == 'ITV RECHAZADA') {
         $color = 'rojo_intenso';
         $texto_dias = 'ITV RECHAZADA';
-    } elseif ($dias_restantes <= 0) {
+    } elseif ($dias_restantes < 0) {
         $color = 'rojo_intenso';
         $texto_dias = 'ITV CADUCADA';
+    } elseif ($dias_restantes == 0) {
+        $color = 'rojo_intenso';
+    } elseif ($dias_restantes == 1) {
+        $color = 'rojo_intenso';
     } elseif ($dias_restantes < 10) {
         $color = 'naranja_intenso';
     } elseif ($dias_restantes <= 20) {
         $color = 'naranja_suave';
     } elseif ($dias_restantes <= 35) {
         $color = 'azul';
+    }
+
+    // Ajustar el texto de días según el caso
+    if (!in_array($texto_dias, ['ITV CADUCADA', 'ITV RECHAZADA', '-'])) {
+        if ($dias_restantes == 1) {
+            $texto_dias = '1 día';
+        } elseif ($dias_restantes >= 0) {
+            $texto_dias = $dias_restantes . ' días';
+        }
     }
 
     return ['color' => $color, 'texto_dias' => $texto_dias];
@@ -87,15 +109,8 @@ $vehiculos_filtrados = array_filter($vehiculos, function ($vehiculo) {
 
 // Ordenar: primero los "ITV RECHAZADA", luego por días restantes
 usort($vehiculos_filtrados, function ($a, $b) {
-    // Si uno es "ITV RECHAZADA" y el otro no, va primero
-    if ($a['estado'] === 'ITV RECHAZADA' && $b['estado'] !== 'ITV RECHAZADA') {
-        return -1;
-    }
-    if ($b['estado'] === 'ITV RECHAZADA' && $a['estado'] !== 'ITV RECHAZADA') {
-        return 1;
-    }
-
-    // Si ambos tienen el mismo estado, ordenar por días restantes (menor a mayor)
+    if ($a['estado'] === 'ITV RECHAZADA' && $b['estado'] !== 'ITV RECHAZADA') return -1;
+    if ($b['estado'] === 'ITV RECHAZADA' && $a['estado'] !== 'ITV RECHAZADA') return 1;
     return calcular_dias_restantes($a['caducidad_itv']) - calcular_dias_restantes($b['caducidad_itv']);
 });
 
@@ -107,7 +122,7 @@ usort($vehiculos_filtrados, function ($a, $b) {
     <meta http-equiv="refresh" content="60">
     <link rel="shortcut icon" href="images/logo.webp">
     <link rel="icon" sizes="64x64" href="images/logo.webp">
-    <link rel="apple-touch-icon" sices="180x180" href="images/logo.webp">
+    <link rel="apple-touch-icon" sizes="180x180" href="images/logo.webp">
     <meta charset="UTF-8">
     <title>Página Principal - Gestión de ITV</title>
     <link rel="stylesheet" href="style.css">
@@ -122,11 +137,11 @@ usort($vehiculos_filtrados, function ($a, $b) {
         table { border-collapse: collapse; width: 100%; }
         th, td { border: 1px solid #ccc; padding: 8px; text-align: left; vertical-align: top; }
         th { background-color: #eee; }
-        ul { margin:0; padding-left:18px; }
+        ul { margin: 0; padding-left: 18px; }
     </style>
 </head>
 <body>
-    <h1><img src="images/logo.webp" alt="Logo" width="30" style="vertical-align: middle;">Página Principal - Gestión de ITV</h1>
+    <h1><img src="images/logo.webp" alt="Logo" width="30" style="vertical-align: middle;"> Página Principal - Gestión de ITV</h1>
 
 <div class="menu">
     <a title="index" href="index.php"><img src="images/index.webp" alt="index" width="80" style="vertical-align: middle;"></a>
@@ -145,7 +160,6 @@ usort($vehiculos_filtrados, function ($a, $b) {
     <a title="logout" href="logout.php"><img src="images/logout.webp" alt="logout" width="80" style="vertical-align: middle;"></a>
 </div>
 <p></br></p>
-
 
     <h2>Vehículos</h2>
     <table>
@@ -170,8 +184,12 @@ usort($vehiculos_filtrados, function ($a, $b) {
                 $dias_restantes = calcular_dias_restantes($vehiculo['caducidad_itv']);
                 if ($vehiculo['estado'] == 'ITV RECHAZADA') {
                     $estado_mostrar = 'ITV RECHAZADA';
-                } elseif ($dias_restantes <= 0) {
+                } elseif ($dias_restantes < 0) {
                     $estado_mostrar = 'ITV CADUCADA';
+                } elseif ($dias_restantes == 0) {
+                    $estado_mostrar = 'CADUCA HOY';
+                } elseif ($dias_restantes == 1) {
+                    $estado_mostrar = 'CADUCA MAÑANA';
                 }
             ?>
                 <tr class="<?= $info_color['color'] ?>">
@@ -201,7 +219,7 @@ usort($vehiculos_filtrados, function ($a, $b) {
         </tbody>
     </table>
 
-    <h4 class="small" style="margin-top:12px;">ITVControl v.1.3</h4>
+    <h4 class="small" style="margin-top:12px;">ITVControl v.1.4</h4>
     <p class="small">B174M3 // XaeK</p>
 </body>
 </html>
