@@ -2,7 +2,7 @@
     {
         "usuario": "admin",
         "contrase\u00f1a": "$2y$10$QbBi8YvGkZ35pI8CjxaY1eSXUWbiKPW.7LyFs5Ee\/CD2DWJYtHiFW",
-        "tipo": "Administrador"
+        "tipo": "SuperAdministrador"
     },
     {
         "usuario": "usuario",
