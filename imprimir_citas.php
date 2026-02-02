@@ -10,7 +10,6 @@ if (!isset($_SESSION['usuario'])) {
 $is_admin = isset($_SESSION['tipo']) && in_array($_SESSION['tipo'], ['Administrador', 'SuperAdministrador']);
 $is_superadmin = isset($_SESSION['tipo']) && $_SESSION['tipo'] === 'SuperAdministrador';
 
-
 // =====================
 // CARGA DE VEHÍCULOS
 // =====================
@@ -93,9 +92,6 @@ $fecha_impresion = date('d/m/Y H:i');
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <link rel="shortcut icon" href="images/logo.webp">
-    <link rel="icon" sizes="64x64" href="images/logo.webp">
-    <link rel="apple-touch-icon" sices="180x180" href="images/logo.webp">
 <meta charset="UTF-8">
 <title>Impresión de Citas ITV</title>
 
@@ -121,7 +117,7 @@ th {
 .fila-azul { border-left: 5px solid #004aad; }
 .fila-amarilla { border-left: 5px solid #c9a600; }
 
-/* 👇 ÚNICO CAMBIO: texto en gris SOLO para segundas inspecciones */
+/* SEGUNDAS: texto gris (pantalla + impresión) */
 .fila-azul td,
 .fila-azul td * {
     color: #666;
@@ -180,6 +176,17 @@ th {
         line-height: 1.2;
     }
 
+    /* TODAS las citas en negrita */
+    tbody tr td {
+        font-weight: bold;
+    }
+
+    /* EXCEPTO segundas */
+    .fila-azul td,
+    .fila-azul td * {
+        font-weight: normal;
+    }
+
     table,
     tr,
     td,
@@ -198,20 +205,17 @@ th {
 </h1>
 
 <div class="menu">
-    <a title="index" href="index.php"><img src="images/index.webp" alt="index" width="80" style="vertical-align: middle;"></a>
-    <a title="citas" href="citas.php"><img src="images/citas.webp" alt="citas" width="80" style="vertical-align: middle;"></a>
-    <a title="vehiculos" href="vehiculos.php"><img src="images/vehiculos.webp" alt="vehiculos" width="80" style="vertical-align: middle;"></a>
-
+    <a href="index.php"><img src="images/index.webp" width="80"></a>
+    <a href="citas.php"><img src="images/citas.webp" width="80"></a>
+    <a href="vehiculos.php"><img src="images/vehiculos.webp" width="80"></a>
     <?php if ($is_admin): ?>
-        <a title="estaciones" href="estaciones.php"><img src="images/estaciones.webp" alt="estaciones" width="80" style="vertical-align: middle;"></a>
+        <a href="estaciones.php"><img src="images/estaciones.webp" width="80"></a>
     <?php endif; ?>
-
     <?php if ($is_superadmin): ?>
-        <a title="usuarios" href="usuarios.php"><img src="images/usuarios.webp" alt="usuarios" width="80" style="vertical-align: middle;"></a>
+        <a href="usuarios.php"><img src="images/usuarios.webp" width="80"></a>
     <?php endif; ?>
-
-    <a title="imprimir" href="imprimir.php"><img src="images/imprimir.webp" alt="imprimir" width="80" style="vertical-align: middle;"></a>
-    <a title="logout" href="logout.php"><img src="images/logout.webp" alt="logout" width="80" style="vertical-align: middle;"></a>
+    <a href="imprimir.php"><img src="images/imprimir.webp" width="80"></a>
+    <a href="logout.php"><img src="images/logout.webp" width="80"></a>
 </div>
 
 <div class="print-header">
@@ -308,11 +312,12 @@ if ($tipo === 'primera' && $fecha_cita && $caducidad && $fecha_cita > $caducidad
 <div class="print-footer">
     <p>
         <strong>Aviso importante:</strong><br>
-        Le informamos que, en caso de retraso por parte del usuario, superados los <strong>15 minutos de margen</strong> sobre la hora concertada, esta será anulada a favor de otros usuarios del servicio. Por motivos organizativos, el servicio de inspección empezará en el intervalo de los quince minutos siguientes a la hora concertada.
+        Le informamos que, en caso de retraso por parte del usuario, superados los <strong>15 minutos de margen</strong> sobre la hora concertada, esta será anulada a favor de otros usuarios del servicio.
     </p>
 </div>
 
 <h4 class="small no-imprimir" style="margin-top:12px;">ITVControl v.1.4</h4>
 <p class="small no-imprimir">B174M3 // XaeK</p>
+
 </body>
 </html>
