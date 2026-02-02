@@ -113,7 +113,6 @@ usort($vehiculos_filtrados, function ($a, $b) {
     if ($b['estado'] === 'ITV RECHAZADA' && $a['estado'] !== 'ITV RECHAZADA') return 1;
     return calcular_dias_restantes($a['caducidad_itv']) - calcular_dias_restantes($b['caducidad_itv']);
 });
-
 ?>
 
 <!DOCTYPE html>
@@ -138,88 +137,130 @@ usort($vehiculos_filtrados, function ($a, $b) {
         th, td { border: 1px solid #ccc; padding: 8px; text-align: left; vertical-align: top; }
         th { background-color: #eee; }
         ul { margin: 0; padding-left: 18px; }
+
+        /* === INFO USUARIO (MEJORA AÑADIDA) === */
+        .user-info {
+            position: fixed;
+            top: 10px;
+            right: 15px;
+            text-align: right;
+            font-size: 14px;
+            color: #333;
+        }
+        .user-info .user-line {
+            font-weight: bold;
+        }
+        #fecha-hora {
+            font-size: 12px;
+            color: #666;
+        }
     </style>
 </head>
 <body>
-    <h1><img src="images/logo.webp" alt="Logo" width="30" style="vertical-align: middle;"> Página Principal - Gestión de ITV</h1>
+
+<!-- INFO USUARIO -->
+<div class="user-info">
+    <div class="user-line">
+        <?= htmlspecialchars($_SESSION['usuario']) ?> | <?= htmlspecialchars($_SESSION['tipo']) ?>
+    </div>
+    <div id="fecha-hora"></div>
+</div>
+
+<h1>
+    <img src="images/logo.webp" alt="Logo" width="30" style="vertical-align: middle;">
+    Página Principal - Gestión de ITV
+</h1>
 
 <div class="menu">
-    <a title="index" href="index.php"><img src="images/index.webp" alt="index" width="80" style="vertical-align: middle;"></a>
-    <a title="citas" href="citas.php"><img src="images/citas.webp" alt="citas" width="80" style="vertical-align: middle;"></a>
-    <a title="vehiculos" href="vehiculos.php"><img src="images/vehiculos.webp" alt="vehiculos" width="80" style="vertical-align: middle;"></a>
+    <a title="index" href="index.php"><img src="images/index.webp" alt="index" width="80"></a>
+    <a title="citas" href="citas.php"><img src="images/citas.webp" alt="citas" width="80"></a>
+    <a title="vehiculos" href="vehiculos.php"><img src="images/vehiculos.webp" alt="vehiculos" width="80"></a>
 
     <?php if ($is_admin): ?>
-        <a title="estaciones" href="estaciones.php"><img src="images/estaciones.webp" alt="estaciones" width="80" style="vertical-align: middle;"></a>
+        <a title="estaciones" href="estaciones.php"><img src="images/estaciones.webp" alt="estaciones" width="80"></a>
     <?php endif; ?>
 
     <?php if ($is_superadmin): ?>
-        <a title="usuarios" href="usuarios.php"><img src="images/usuarios.webp" alt="usuarios" width="80" style="vertical-align: middle;"></a>
+        <a title="usuarios" href="usuarios.php"><img src="images/usuarios.webp" alt="usuarios" width="80"></a>
     <?php endif; ?>
 
-    <a title="imprimir" href="imprimir.php"><img src="images/imprimir.webp" alt="imprimir" width="80" style="vertical-align: middle;"></a>
-    <a title="logout" href="logout.php"><img src="images/logout.webp" alt="logout" width="80" style="vertical-align: middle;"></a>
+    <a title="imprimir" href="imprimir.php"><img src="images/imprimir.webp" alt="imprimir" width="80"></a>
+    <a title="logout" href="logout.php"><img src="images/logout.webp" alt="logout" width="80"></a>
 </div>
+
 <p></br></p>
 
-    <h2>Vehículos</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Vehículo</th>
-                <th>Matrícula</th>
-                <th>Tipo</th>
-                <th>Estado</th>
-                <th>Caducidad ITV</th>
-                <th>Días para Caducar ITV</th>
-                <th>Cita Asignada</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php foreach ($vehiculos_filtrados as $vehiculo):
-                $info_color = obtener_color_y_texto($vehiculo);
-                $citas_vehiculo = obtener_citas_vehiculo($vehiculo['matricula'], $citas);
+<h2>Vehículos</h2>
+<table>
+    <thead>
+        <tr>
+            <th>Vehículo</th>
+            <th>Matrícula</th>
+            <th>Tipo</th>
+            <th>Estado</th>
+            <th>Caducidad ITV</th>
+            <th>Días para Caducar ITV</th>
+            <th>Cita Asignada</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php foreach ($vehiculos_filtrados as $vehiculo):
+            $info_color = obtener_color_y_texto($vehiculo);
+            $citas_vehiculo = obtener_citas_vehiculo($vehiculo['matricula'], $citas);
 
-                // Ajustar estado mostrado
-                $estado_mostrar = $vehiculo['estado'];
-                $dias_restantes = calcular_dias_restantes($vehiculo['caducidad_itv']);
-                if ($vehiculo['estado'] == 'ITV RECHAZADA') {
-                    $estado_mostrar = 'ITV RECHAZADA';
-                } elseif ($dias_restantes < 0) {
-                    $estado_mostrar = 'ITV CADUCADA';
-                } elseif ($dias_restantes == 0) {
-                    $estado_mostrar = 'CADUCA HOY';
-                } elseif ($dias_restantes == 1) {
-                    $estado_mostrar = 'CADUCA MAÑANA';
-                }
-            ?>
-                <tr class="<?= $info_color['color'] ?>">
-                    <td><?= htmlspecialchars($vehiculo['vehiculo']) ?></td>
-                    <td><?= htmlspecialchars($vehiculo['matricula']) ?></td>
-                    <td><?= isset($vehiculo['tipo']) ? htmlspecialchars($vehiculo['tipo']) : '-' ?></td>
-                    <td><?= $estado_mostrar ?></td>
-                    <td><?= formatear_fecha($vehiculo['caducidad_itv']) ?></td>
-                    <td><?= $info_color['texto_dias'] ?></td>
-                    <td>
-                        <?php if (!empty($citas_vehiculo)): ?>
-                            <ul>
-                            <?php foreach ($citas_vehiculo as $cita): ?>
-                                <li>
-                                    <strong>Fecha:</strong> <?= formatear_fecha($cita['fecha_cita']) ?>, 
-                                    <strong>Hora:</strong> <?= htmlspecialchars($cita['hora_cita']) ?>, 
-                                    <strong>Estación:</strong> <?= htmlspecialchars($cita['estacion_cita']) . ' ' . ($cita['tipo_cita']==='Primera'?'1ª':'2ª') ?>
-                                </li>
-                            <?php endforeach; ?>
-                            </ul>
-                        <?php else: ?>
-                            Sin cita asignada
-                        <?php endif; ?>
-                    </td>
-                </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
+            $estado_mostrar = $vehiculo['estado'];
+            $dias_restantes = calcular_dias_restantes($vehiculo['caducidad_itv']);
+            if ($vehiculo['estado'] == 'ITV RECHAZADA') {
+                $estado_mostrar = 'ITV RECHAZADA';
+            } elseif ($dias_restantes < 0) {
+                $estado_mostrar = 'ITV CADUCADA';
+            } elseif ($dias_restantes == 0) {
+                $estado_mostrar = 'CADUCA HOY';
+            } elseif ($dias_restantes == 1) {
+                $estado_mostrar = 'CADUCA MAÑANA';
+            }
+        ?>
+        <tr class="<?= $info_color['color'] ?>">
+            <td><?= htmlspecialchars($vehiculo['vehiculo']) ?></td>
+            <td><?= htmlspecialchars($vehiculo['matricula']) ?></td>
+            <td><?= isset($vehiculo['tipo']) ? htmlspecialchars($vehiculo['tipo']) : '-' ?></td>
+            <td><?= $estado_mostrar ?></td>
+            <td><?= formatear_fecha($vehiculo['caducidad_itv']) ?></td>
+            <td><?= $info_color['texto_dias'] ?></td>
+            <td>
+                <?php if (!empty($citas_vehiculo)): ?>
+                    <ul>
+                        <?php foreach ($citas_vehiculo as $cita): ?>
+                            <li>
+                                <strong>Fecha:</strong> <?= formatear_fecha($cita['fecha_cita']) ?>,
+                                <strong>Hora:</strong> <?= htmlspecialchars($cita['hora_cita']) ?>,
+                                <strong>Estación:</strong>
+                                <?= htmlspecialchars($cita['estacion_cita']) . ' ' . ($cita['tipo_cita']==='Primera'?'1ª':'2ª') ?>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                <?php else: ?>
+                    Sin cita asignada
+                <?php endif; ?>
+            </td>
+        </tr>
+        <?php endforeach; ?>
+    </tbody>
+</table>
 
-    <h4 class="small" style="margin-top:12px;">ITVControl v.1.4</h4>
-    <p class="small">B174M3 // XaeK</p>
+<h4 class="small" style="margin-top:12px;">ITVControl v.1.4</h4>
+<p class="small">B174M3 // XaeK</p>
+
+<script>
+function actualizarFechaHora() {
+    const ahora = new Date();
+    const fecha = ahora.toLocaleDateString('es-ES');
+    const hora = ahora.toLocaleTimeString('es-ES');
+    document.getElementById('fecha-hora').textContent = fecha + ' ' + hora;
+}
+actualizarFechaHora();
+setInterval(actualizarFechaHora, 1000);
+</script>
+
 </body>
 </html>
