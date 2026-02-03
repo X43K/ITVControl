@@ -36,11 +36,37 @@ $mes  = $_GET['mes']  ?? $mes_actual;
 $anio = $_GET['anio'] ?? $anio_actual;
 
 // =====================
+// FECHA LÍMITE (ahora - 1 hora)
+// =====================
+// ★★★
+$ahora_menos_una_hora = new DateTime();
+$ahora_menos_una_hora->modify('-1 hour');
+
+// =====================
 // FILTRAR CITAS
 // =====================
-$citas_filtradas = array_filter($citas, function ($cita) use ($mes, $anio) {
-    $fecha = DateTime::createFromFormat('Y-m-d', $cita['fecha_cita']);
-    return $fecha && $fecha->format('m') == $mes && $fecha->format('Y') == $anio;
+$citas_filtradas = array_filter($citas, function ($cita) use ($mes, $anio, $ahora_menos_una_hora) {
+
+    if (empty($cita['fecha_cita']) || empty($cita['hora_cita'])) {
+        return false;
+    }
+
+    $fecha_hora_cita = DateTime::createFromFormat(
+        'Y-m-d H:i',
+        $cita['fecha_cita'] . ' ' . $cita['hora_cita']
+    );
+
+    if (!$fecha_hora_cita) {
+        return false;
+    }
+
+    // ★★★ Excluir citas anteriores a ahora - 1 hora
+    if ($fecha_hora_cita < $ahora_menos_una_hora) {
+        return false;
+    }
+
+    return $fecha_hora_cita->format('m') == $mes
+        && $fecha_hora_cita->format('Y') == $anio;
 });
 
 // =====================
@@ -117,7 +143,6 @@ th {
 .fila-azul { border-left: 5px solid #004aad; }
 .fila-amarilla { border-left: 5px solid #c9a600; }
 
-/* SEGUNDAS: texto gris (pantalla + impresión) */
 .fila-azul td,
 .fila-azul td * {
     color: #666;
@@ -139,7 +164,6 @@ th {
 }
 
 @media print {
-
     @page {
         size: A4 portrait;
         margin: 12mm;
@@ -176,12 +200,10 @@ th {
         line-height: 1.2;
     }
 
-    /* TODAS las citas en negrita */
     tbody tr td {
         font-weight: bold;
     }
 
-    /* EXCEPTO segundas */
     .fila-azul td,
     .fila-azul td * {
         font-weight: normal;
@@ -284,21 +306,11 @@ if ($tipo === 'primera' && $fecha_cita && $caducidad && $fecha_cita > $caducidad
 ?>
 
 <tr class="<?= $clase_fila ?>">
-    <td>
-        <?php
-        $veh = mostrar_vehiculo_completo($vehiculo, $vehiculos);
-        if (strpos($veh, ' - ') !== false) {
-            [$nombre, $mat] = explode(' - ', $veh, 2);
-            echo htmlspecialchars($nombre) . ' - <span class="matricula">' . htmlspecialchars($mat) . '</span>';
-        } else {
-            echo htmlspecialchars($veh);
-        }
-        ?>
-    </td>
+    <td><?= htmlspecialchars(mostrar_vehiculo_completo($vehiculo, $vehiculos)) ?></td>
     <td><?= htmlspecialchars($cita['tipo_cita'] ?? '-') ?></td>
     <td><?= formatear_fecha($cita['fecha_cita']) ?></td>
     <td><?= htmlspecialchars($cita['hora_cita']) ?></td>
-    <td><?= htmlspecialchars($cita['estacion'] ?? $cita['estacion_cita'] ?? '-') ?></td>
+    <td><?= htmlspecialchars($cita['estacion'] ?? '-') ?></td>
     <td><?= obtener_caducidad_itv($vehiculo, $vehiculos) ?></td>
     <td class="estado"><?= $estado ?></td>
 </tr>
@@ -312,12 +324,10 @@ if ($tipo === 'primera' && $fecha_cita && $caducidad && $fecha_cita > $caducidad
 <div class="print-footer">
     <p>
         <strong>Aviso importante:</strong><br>
-        Le informamos que, en caso de retraso por parte del usuario, superados los <strong>15 minutos de margen</strong> sobre la hora concertada, esta será anulada a favor de otros usuarios del servicio.
+        Superados los <strong>15 minutos de margen</strong> sobre la hora concertada,
+        la cita podrá ser anulada.
     </p>
 </div>
-
-<h4 class="small no-imprimir" style="margin-top:12px;">ITVControl v.1.4</h4>
-<p class="small no-imprimir">B174M3 // XaeK</p>
 
 </body>
 </html>
