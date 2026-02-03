@@ -1,11 +1,15 @@
 <?php
 session_start();
 
-// Solo administradores
-if (!isset($_SESSION['usuario']) || $_SESSION['tipo'] != 'Administrador') {
+// Administrador y SuperAdministrador
+if (
+    !isset($_SESSION['usuario']) ||
+    !in_array($_SESSION['tipo'], ['Administrador', 'SuperAdministrador'])
+) {
     header('Location: login.php');
     exit();
 }
+
 
 $is_admin = isset($_SESSION['tipo']) && in_array($_SESSION['tipo'], ['Administrador', 'SuperAdministrador']);
 $is_superadmin = isset($_SESSION['tipo']) && $_SESSION['tipo'] === 'SuperAdministrador';
