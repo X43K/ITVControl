@@ -25,6 +25,11 @@ $vehiculos_file = 'vehiculos.json';
 if (!file_exists($vehiculos_file)) die("El archivo de vehículos no existe.");
 $vehiculos = json_decode(file_get_contents($vehiculos_file), true);
 
+// ✅ MEJORA: ordenar vehículos alfabéticamente (orden natural con números)
+usort($vehiculos, function ($a, $b) {
+    return strnatcasecmp($a['vehiculo'], $b['vehiculo']);
+});
+
 // =====================
 // CARGAR ESTACIONES
 // =====================
