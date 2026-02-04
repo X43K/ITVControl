@@ -42,6 +42,11 @@ if ($cita_editar === null) die("No se encontró la cita para la fecha y hora pro
 $vehiculos_file = 'vehiculos.json';
 $vehiculos = json_decode(file_get_contents($vehiculos_file), true);
 
+// ✅ MEJORA: ordenar vehículos alfabéticamente (orden natural con números)
+usort($vehiculos, function ($a, $b) {
+    return strnatcasecmp($a['vehiculo'], $b['vehiculo']);
+});
+
 // Cargar estaciones desde JSON
 $estaciones_file = 'estaciones.json';
 if (!file_exists($estaciones_file)) {
@@ -86,7 +91,6 @@ function formatear_fecha($fecha) {
     <title>Editar Cita</title>
     <link rel="stylesheet" href="style.css">
 
-
 <script>
 function validarCita(form) {
     var fechaCita = new Date(form.fecha_cita.value);
@@ -124,27 +128,30 @@ function validarCita(form) {
     return true;
 }
 </script>
-
 </head>
+
 <body>
-    <h1><img src="images/logo.webp" alt="Logo" width="30" style="vertical-align: middle;">Editar Cita</h1>
+<h1><img src="images/logo.webp" alt="Logo" width="30" style="vertical-align: middle;">Editar Cita</h1>
+
 <div class="menu">
-    <a title="index" href="index.php"><img src="images/index.webp" alt="index" width="80" style="vertical-align: middle;"></a>
-    <a title="citas" href="citas.php"><img src="images/citas.webp" alt="citas" width="80" style="vertical-align: middle;"></a>
-    <a title="vehiculos" href="vehiculos.php"><img src="images/vehiculos.webp" alt="vehiculos" width="80" style="vertical-align: middle;"></a>
+    <a title="index" href="index.php"><img src="images/index.webp" alt="index" width="80"></a>
+    <a title="citas" href="citas.php"><img src="images/citas.webp" alt="citas" width="80"></a>
+    <a title="vehiculos" href="vehiculos.php"><img src="images/vehiculos.webp" alt="vehiculos" width="80"></a>
 
     <?php if ($is_admin): ?>
-        <a title="estaciones" href="estaciones.php"><img src="images/estaciones.webp" alt="estaciones" width="80" style="vertical-align: middle;"></a>
+        <a title="estaciones" href="estaciones.php"><img src="images/estaciones.webp" alt="estaciones" width="80"></a>
     <?php endif; ?>
 
     <?php if ($is_superadmin): ?>
-        <a title="usuarios" href="usuarios.php"><img src="images/usuarios.webp" alt="usuarios" width="80" style="vertical-align: middle;"></a>
+        <a title="usuarios" href="usuarios.php"><img src="images/usuarios.webp" alt="usuarios" width="80"></a>
     <?php endif; ?>
 
-    <a title="imprimir" href="imprimir.php"><img src="images/imprimir.webp" alt="imprimir" width="80" style="vertical-align: middle;"></a>
-    <a title="logout" href="logout.php"><img src="images/logout.webp" alt="logout" width="80" style="vertical-align: middle;"></a>
+    <a title="imprimir" href="imprimir.php"><img src="images/imprimir.webp" alt="imprimir" width="80"></a>
+    <a title="logout" href="logout.php"><img src="images/logout.webp" alt="logout" width="80"></a>
 </div>
-<p></br></p>
+
+<br>
+
 <form method="POST" onsubmit="return validarCita(this);">
     <label>Fecha de Cita:</label>
     <input type="date" name="fecha_cita" value="<?= htmlspecialchars($cita_editar['fecha_cita']) ?>" required><br><br>
@@ -172,7 +179,7 @@ function validarCita(form) {
         <option value="">Sin asignar</option>
         <?php foreach ($vehiculos as $vehiculo): ?>
             <option value="<?= htmlspecialchars($vehiculo['matricula']) ?>" <?= $cita_editar['vehiculo']===$vehiculo['matricula']?'selected':'' ?>>
-                <?= htmlspecialchars($vehiculo['matricula']) ?> - <?= htmlspecialchars($vehiculo['vehiculo']) ?>
+                <?= htmlspecialchars($vehiculo['vehiculo']) ?> - <?= htmlspecialchars($vehiculo['matricula']) ?>
             </option>
         <?php endforeach; ?>
     </select><br><br>
