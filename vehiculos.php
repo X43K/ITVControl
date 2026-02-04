@@ -45,16 +45,16 @@ if ($is_colab && $_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// ✅ Calcular días restantes con comparación a medianoche
+// Calcular días restantes
 function calcular_dias_restantes($caducidad_itv) {
     $fecha_actual = new DateTime('today');
     $fecha_caducidad = new DateTime($caducidad_itv);
     $fecha_caducidad->setTime(0, 0, 0);
     $intervalo = $fecha_actual->diff($fecha_caducidad);
-    return (int)$intervalo->format('%r%a'); // Negativo si ya caducó
+    return (int)$intervalo->format('%r%a');
 }
 
-// ✅ Obtener color y texto de la columna de días
+// Obtener color y texto
 function obtener_color_y_texto($vehiculo) {
     $estado = $vehiculo['estado'];
     $dias_restantes = calcular_dias_restantes($vehiculo['caducidad_itv']);
@@ -87,10 +87,15 @@ function obtener_color_y_texto($vehiculo) {
         $texto_dias = $dias_restantes . " día" . ($dias_restantes != 1 ? "s" : "");
     }
 
+    // 🔴 FORZAR ROJO SI ITV RECHAZADA
+    if ($estado === 'ITV RECHAZADA') {
+        $color = 'rojo_intenso';
+    }
+
     return ['color' => $color, 'texto_dias' => $texto_dias];
 }
 
-// ✅ Ordenar vehículos: ITV RECHAZADA primero, BAJA al final, resto por días restantes
+// Ordenar vehículos
 usort($vehiculos, function($a, $b) {
     if ($a['estado'] === 'ITV RECHAZADA' && $b['estado'] !== 'ITV RECHAZADA') return -1;
     if ($b['estado'] === 'ITV RECHAZADA' && $a['estado'] !== 'ITV RECHAZADA') return 1;
@@ -144,89 +149,89 @@ function formatear_fecha($fecha) {
     <a title="logout" href="logout.php"><img src="images/logout.webp" alt="logout" width="80"></a>
 </div>
 
-    <?php if (isset($error)): ?>
-        <p style="color: red;"><?= $error ?></p>
-    <?php endif; ?>
+<?php if (isset($error)): ?>
+    <p style="color: red;"><?= $error ?></p>
+<?php endif; ?>
 
+<?php if ($is_colab): ?>
+<h2>Añadir Vehículo</h2>
+<form method="POST">
+    <label>Vehículo:</label><input type="text" name="vehiculo" required><br><br>
+    <label>Matrícula:</label><input type="text" name="matricula" required><br><br>
+    <label>Tipo:</label>
+    <select name="tipo" required>
+        <option value="Turismo">Turismo</option>
+        <option value="Transporte mercancías hasta 3500 kg">Transporte mercancías hasta 3500 kg</option>
+        <option value="Transporte mercancías más de 3500 kg">Transporte mercancías más de 3500 kg</option>
+        <option value="Autobuses y microbuses">Autobuses y microbuses</option>
+        <option value="Agrícolas">Agrícolas</option>
+        <option value="Motocicletas y quads">Motocicletas y quads</option>
+    </select><br><br>
+    <label>Estado:</label>
+    <select name="estado">
+        <option value="ACTIVO">ACTIVO</option>
+        <option value="ITV RECHAZADA">ITV RECHAZADA</option>
+        <option value="BAJA">BAJA</option>
+    </select><br><br>
+    <label>Caducidad ITV:</label><input type="date" name="caducidad_itv" required><br><br>
+    <input type="submit" value="Añadir Vehículo">
+</form>
+<?php endif; ?>
+
+<h2>Lista de Vehículos</h2>
+<table>
+<thead>
+<tr>
+    <th>Vehículo</th>
+    <th>Matrícula</th>
+    <th>Tipo</th>
+    <th>Estado</th>
+    <th>Caducidad ITV</th>
+    <th>Días para Caducar</th>
+    <?php if ($is_colab): ?><th>Editar</th><?php endif; ?>
+    <?php if ($is_admin): ?><th>Eliminar</th><?php endif; ?>
+</tr>
+</thead>
+<tbody>
+<?php foreach ($vehiculos as $vehiculo):
+    $info = obtener_color_y_texto($vehiculo);
+    $dias_restantes = calcular_dias_restantes($vehiculo['caducidad_itv']);
+?>
+<tr class="<?= $info['color'] ?>">
+    <td><?= htmlspecialchars($vehiculo['vehiculo']) ?></td>
+    <td><?= htmlspecialchars($vehiculo['matricula']) ?></td>
+    <td><?= htmlspecialchars($vehiculo['tipo']) ?></td>
+    <td>
+        <?php
+        if ($vehiculo['estado'] === 'BAJA') {
+            echo 'BAJA';
+        } elseif ($vehiculo['estado'] === 'ITV RECHAZADA') {
+            echo 'ITV RECHAZADA';
+        } elseif ($dias_restantes < 0) {
+            echo 'ITV CADUCADA';
+        } elseif ($dias_restantes == 0) {
+            echo 'CADUCA HOY';
+        } elseif ($dias_restantes == 1) {
+            echo 'CADUCA MAÑANA';
+        } else {
+            echo htmlspecialchars($vehiculo['estado']);
+        }
+        ?>
+    </td>
+    <td><?= formatear_fecha($vehiculo['caducidad_itv']) ?></td>
+    <td><?= $info['texto_dias'] ?></td>
     <?php if ($is_colab): ?>
-        <h2>Añadir Vehículo</h2>
-        <form method="POST">
-            <label>Vehículo:</label><input type="text" name="vehiculo" required><br><br>
-            <label>Matrícula:</label><input type="text" name="matricula" required><br><br>
-            <label>Tipo:</label>
-            <select name="tipo" required>
-                <option value="Turismo">Turismo</option>
-                <option value="Transporte mercancías hasta 3500 kg">Transporte mercancías hasta 3500 kg</option>
-                <option value="Transporte mercancías más de 3500 kg">Transporte mercancías más de 3500 kg</option>
-                <option value="Autobuses y microbuses">Autobuses y microbuses</option>
-                <option value="Agrícolas">Agrícolas</option>
-                <option value="Motocicletas y quads">Motocicletas y quads</option>
-            </select><br><br>
-            <label>Estado:</label>
-            <select name="estado">
-                <option value="ACTIVO">ACTIVO</option>
-                <option value="ITV RECHAZADA">ITV RECHAZADA</option>
-                <option value="BAJA">BAJA</option>
-            </select><br><br>
-            <label>Caducidad ITV:</label><input type="date" name="caducidad_itv" required><br><br>
-            <input type="submit" value="Añadir Vehículo">
-        </form>
+        <td><a href="editar_vehiculo.php?id=<?= urlencode($vehiculo['matricula']) ?>">Editar</a></td>
     <?php endif; ?>
+    <?php if ($is_admin): ?>
+        <td><a href="eliminar_vehiculo.php?id=<?= urlencode($vehiculo['matricula']) ?>">Eliminar</a></td>
+    <?php endif; ?>
+</tr>
+<?php endforeach; ?>
+</tbody>
+</table>
 
-    <h2>Lista de Vehículos</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Vehículo</th>
-                <th>Matrícula</th>
-                <th>Tipo</th>
-                <th>Estado</th>
-                <th>Caducidad ITV</th>
-                <th>Días para Caducar</th>
-                <?php if ($is_colab): ?><th>Editar</th><?php endif; ?>
-                <?php if ($is_admin): ?><th>Eliminar</th><?php endif; ?>
-            </tr>
-        </thead>
-        <tbody>
-            <?php foreach ($vehiculos as $vehiculo):
-                $info = obtener_color_y_texto($vehiculo);
-                $dias_restantes = calcular_dias_restantes($vehiculo['caducidad_itv']);
-            ?>
-                <tr class="<?= $info['color'] ?>">
-                    <td><?= htmlspecialchars($vehiculo['vehiculo']) ?></td>
-                    <td><?= htmlspecialchars($vehiculo['matricula']) ?></td>
-                    <td><?= htmlspecialchars($vehiculo['tipo']) ?></td>
-                    <td>
-                        <?php
-                            if ($vehiculo['estado'] === 'BAJA') {
-                                echo 'BAJA';
-                            } elseif ($vehiculo['estado'] === 'ITV RECHAZADA') {
-                                echo 'ITV RECHAZADA';
-                            } elseif ($dias_restantes < 0) {
-                                echo 'ITV CADUCADA';
-                            } elseif ($dias_restantes == 0) {
-                                echo 'CADUCA HOY';
-                            } elseif ($dias_restantes == 1) {
-                                echo 'CADUCA MAÑANA';
-                            } else {
-                                echo htmlspecialchars($vehiculo['estado']);
-                            }
-                        ?>
-                    </td>
-                    <td><?= formatear_fecha($vehiculo['caducidad_itv']) ?></td>
-                    <td><?= $info['texto_dias'] ?></td>
-                    <?php if ($is_colab): ?>
-                        <td><a href="editar_vehiculo.php?id=<?= urlencode($vehiculo['matricula']) ?>">Editar</a></td>
-                    <?php endif; ?>
-                    <?php if ($is_admin): ?>
-                        <td><a href="eliminar_vehiculo.php?id=<?= urlencode($vehiculo['matricula']) ?>">Eliminar</a></td>
-                    <?php endif; ?>
-                </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
-
-    <h4 class="small" style="margin-top:12px;">ITVControl v.1.4</h4>
-    <p class="small">B174M3 // XaeK</p>
+<h4 class="small" style="margin-top:12px;">ITVControl v.1.4</h4>
+<p class="small">B174M3 // XaeK</p>
 </body>
 </html>
