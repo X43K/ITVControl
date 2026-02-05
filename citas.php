@@ -203,7 +203,18 @@ usort($citas, function($a, $b) {
 <?php if (!empty($citas)): ?>
     <?php foreach ($citas as $cita): ?>
     <tr>
-        <td><?= formatear_fecha($cita['fecha_cita']) ?></td>
+        <?php
+// Obtener día de la semana en español
+$fecha_dt = DateTime::createFromFormat('Y-m-d', $cita['fecha_cita']);
+$dias_semana = ['do','lu','ma','mi','ju','vi','sa'];
+$dia_abrev = $fecha_dt ? $dias_semana[$fecha_dt->format('w')] : '';
+
+// Colorear en rojo viernes, sábado y domingo
+$es_rojo = in_array($dia_abrev, ['vi','sa','do']);
+$color_dia = $es_rojo ? 'red' : 'black';
+?>
+<td><span style="color:<?= $color_dia ?>; font-weight:bold;"><?= $dia_abrev ?></span> - <?= formatear_fecha($cita['fecha_cita']) ?></td>
+
         <td><?= htmlspecialchars($cita['hora_cita']) ?></td>
         <td><?= htmlspecialchars($cita['estacion_cita']) ?></td>
         <td><?= htmlspecialchars($cita['tipo_cita']) ?></td>
