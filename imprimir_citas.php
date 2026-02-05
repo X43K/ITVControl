@@ -38,7 +38,6 @@ $anio = $_GET['anio'] ?? $anio_actual;
 // =====================
 // FECHA LÍMITE (ahora - 1 hora)
 // =====================
-// ★★★
 $ahora_menos_una_hora = new DateTime();
 $ahora_menos_una_hora->modify('-1 hour');
 
@@ -60,7 +59,6 @@ $citas_filtradas = array_filter($citas, function ($cita) use ($mes, $anio, $ahor
         return false;
     }
 
-    // ★★★ Excluir citas anteriores a ahora - 1 hora
     if ($fecha_hora_cita < $ahora_menos_una_hora) {
         return false;
     }
@@ -102,6 +100,13 @@ function obtener_caducidad_itv($matricula, $vehiculos) {
         }
     }
     return '-';
+}
+
+// NUEVA FUNCION: abreviatura del día
+function obtener_dia_semana_abrev($fecha) {
+    $dias = [1=>'lu',2=>'ma',3=>'mi',4=>'ju',5=>'vi',6=>'sa',7=>'do'];
+    $f = DateTime::createFromFormat('Y-m-d', $fecha);
+    return $f ? $dias[(int)$f->format('N')] : '';
 }
 
 // =====================
@@ -162,6 +167,11 @@ th {
 .print-footer {
     display: none;
 }
+
+/* estilos día semana */
+.dia-semana { font-weight: bold; }
+.dia-rojo { color: #c00000 !important; }
+.dia-negro { color: #000 !important; }
 
 @media print {
     @page {
@@ -226,6 +236,7 @@ th {
     Hoja de citas ITV
 </h1>
 
+<!-- MENU ORIGINAL -->
 <div class="menu">
     <a href="index.php"><img src="images/index.webp" width="80"></a>
     <a href="citas.php"><img src="images/citas.webp" width="80"></a>
@@ -240,10 +251,7 @@ th {
     <a href="logout.php"><img src="images/logout.webp" width="80"></a>
 </div>
 
-<div class="print-header">
-    <?= $meses_txt[$mes] ?> <?= $anio ?> — Impreso el <?= $fecha_impresion ?>
-</div>
-
+<!-- FORMULARIO ORIGINAL -->
 <form method="GET" style="margin:15px 0;">
     <select name="mes">
         <?php foreach ($meses_txt as $num => $nombre): ?>
@@ -257,12 +265,19 @@ th {
     <button type="button" onclick="window.print()">Imprimir</button>
 </form>
 
+<!-- CABECERA DE IMPRESION ORIGINAL -->
+<div class="print-header">
+    <?= $meses_txt[$mes] ?> <?= $anio ?> — Impreso el <?= $fecha_impresion ?>
+</div>
+
+<!-- TABLA -->
 <table>
 <thead>
 <tr>
+    <th>Día</th>
     <th>Vehículo</th>
     <th>Tipo</th>
-    <th>Día</th>
+    <th>Fecha</th>
     <th>Hora</th>
     <th>Estación</th>
     <th>Caducidad</th>
@@ -272,7 +287,7 @@ th {
 <tbody>
 
 <?php if (empty($citas_filtradas)): ?>
-<tr><td colspan="7">No hay citas para este periodo</td></tr>
+<tr><td colspan="8">No hay citas para este periodo</td></tr>
 <?php else: ?>
 <?php foreach ($citas_filtradas as $cita): ?>
 
@@ -284,8 +299,8 @@ $tipo = strtolower($cita['tipo_cita'] ?? '');
 $vehiculo = $cita['vehiculo'] ?? '';
 
 $fecha_cita = DateTime::createFromFormat('Y-m-d', $cita['fecha_cita']);
-$caducidad = null;
 
+$caducidad = null;
 foreach ($vehiculos as $v) {
     if ($v['matricula'] === $vehiculo) {
         $caducidad = DateTime::createFromFormat('Y-m-d', $v['caducidad_itv']);
@@ -303,14 +318,33 @@ if ($tipo === 'primera' && $fecha_cita && $caducidad && $fecha_cita > $caducidad
     $clase_fila = 'fila-amarilla';
     $estado = 'PRIMERA INSPECCIÓN SIN VEHÍCULO';
 }
+
+$dia_abrev = obtener_dia_semana_abrev($cita['fecha_cita']);
+$es_rojo = $fecha_cita && in_array($fecha_cita->format('N'), [5,6,7]);
 ?>
 
 <tr class="<?= $clase_fila ?>">
-    <td><?= htmlspecialchars(mostrar_vehiculo_completo($vehiculo, $vehiculos)) ?></td>
+    <td class="dia-semana <?= $es_rojo ? 'dia-rojo' : 'dia-negro' ?>"><?= $dia_abrev ?></td>
+<td>
+    <?php 
+        $vehiculo_completo = mostrar_vehiculo_completo($vehiculo, $vehiculos);
+        if ($vehiculo_completo !== '-') {
+            // separar vehículo y matrícula
+            $partes = explode(' - ', $vehiculo_completo, 2);
+            echo htmlspecialchars($partes[0]); // vehículo grande
+            if (isset($partes[1])) {
+                echo ' - <span class="matricula">' . htmlspecialchars($partes[1]) . '</span>';
+            }
+        } else {
+            echo '-';
+        }
+    ?>
+</td>
+
     <td><?= htmlspecialchars($cita['tipo_cita'] ?? '-') ?></td>
     <td><?= formatear_fecha($cita['fecha_cita']) ?></td>
     <td><?= htmlspecialchars($cita['hora_cita']) ?></td>
-    <td><?= htmlspecialchars($cita['estacion'] ?? '-') ?></td>
+    <td><?= htmlspecialchars($cita['estacion_cita'] ?? '-') ?></td>
     <td><?= obtener_caducidad_itv($vehiculo, $vehiculos) ?></td>
     <td class="estado"><?= $estado ?></td>
 </tr>
@@ -321,11 +355,11 @@ if ($tipo === 'primera' && $fecha_cita && $caducidad && $fecha_cita > $caducidad
 </tbody>
 </table>
 
+<!-- PIE DE PAGINA ORIGINAL -->
 <div class="print-footer">
     <p>
         <strong>Aviso importante:</strong><br>
-        Superados los <strong>15 minutos de margen</strong> sobre la hora concertada,
-        la cita podrá ser anulada.
+        Le informamos que, en caso de retraso por parte del usuario, superados los <strong>15 minutos de margen</strong> sobre la hora concertada, esta será anulada a favor de otros usuarios del servicio. Por motivos organizativos, el servicio de inspección empezará en el intervalo de los quince minutos siguientes a la hora concertada.
     </p>
 </div>
 
