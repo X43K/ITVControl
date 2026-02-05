@@ -363,5 +363,8 @@ $es_rojo = $fecha_cita && in_array($fecha_cita->format('N'), [5,6,7]);
     </p>
 </div>
 
+<!-- Esto ya no se imprimirá -->
+<h4 class="small no-imprimir" style="margin-top:12px;">ITVControl v.1.3</h4>
+<p class="small no-imprimir">B174M3 // XaeK</p>
 </body>
 </html>
