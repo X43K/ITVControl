@@ -24,7 +24,11 @@ if (!file_exists($citas_file)) {
 }
 $citas = json_decode(file_get_contents($citas_file), true);
 
-// ✅ Función para calcular días restantes (comparación a medianoche)
+// =====================
+// FUNCIONES
+// =====================
+
+// Calcular días restantes
 function calcular_dias_restantes($caducidad_itv) {
     $fecha_actual = new DateTime('today');
     $fecha_caducidad = new DateTime($caducidad_itv);
@@ -33,233 +37,230 @@ function calcular_dias_restantes($caducidad_itv) {
     return (int)$intervalo->format('%r%a');
 }
 
-// ✅ Función para obtener citas asignadas a un vehículo (solo futuras y ordenadas)
+// Obtener citas futuras de un vehículo
 function obtener_citas_vehiculo($matricula_vehiculo, $citas) {
     $fecha_actual = new DateTime();
-    $citas_vehiculo = [];
+    $resultado = [];
 
     foreach ($citas as $cita) {
         if ($cita['vehiculo'] === $matricula_vehiculo) {
-            $fecha_hora_cita = DateTime::createFromFormat('Y-m-d H:i', $cita['fecha_cita'] . ' ' . $cita['hora_cita']);
-            if ($fecha_hora_cita && $fecha_hora_cita >= $fecha_actual) {
-                $cita['timestamp'] = $fecha_hora_cita->getTimestamp();
-                $citas_vehiculo[] = $cita;
+            $dt = DateTime::createFromFormat('Y-m-d H:i', $cita['fecha_cita'].' '.$cita['hora_cita']);
+            if ($dt && $dt >= $fecha_actual) {
+                $cita['timestamp'] = $dt->getTimestamp();
+                $resultado[] = $cita;
             }
         }
     }
 
-    // Ordenar por fecha y hora ascendente
-    usort($citas_vehiculo, function ($a, $b) {
-        return $a['timestamp'] <=> $b['timestamp'];
-    });
-
-    return $citas_vehiculo;
+    usort($resultado, fn($a, $b) => $a['timestamp'] <=> $b['timestamp']);
+    return $resultado;
 }
 
-// Formatear fecha DD/MM/YYYY
+// Formatear fecha
 function formatear_fecha($fecha) {
-    $fecha_obj = DateTime::createFromFormat('Y-m-d', $fecha);
-    return $fecha_obj ? $fecha_obj->format('d/m/Y') : $fecha;
+    $d = DateTime::createFromFormat('Y-m-d', $fecha);
+    return $d ? $d->format('d/m/Y') : $fecha;
 }
 
-// ✅ Determinar color y texto de días restantes (solo color y casos especiales)
+// Color y texto días
 function obtener_color_y_texto($vehiculo) {
     $estado = $vehiculo['estado'];
-    $dias_restantes = calcular_dias_restantes($vehiculo['caducidad_itv']);
+    $dias = calcular_dias_restantes($vehiculo['caducidad_itv']);
+
     $color = 'verde';
-    $texto_dias = $dias_restantes . ' días';
+    $texto = $dias.' días';
 
-    if ($estado == 'BAJA') {
-        $color = 'negro';
-        $texto_dias = '-';
-    } elseif ($estado == 'ITV RECHAZADA') {
-        $color = 'rojo_intenso';
-        $texto_dias = 'ITV RECHAZADA';
-    } elseif ($dias_restantes < 0) {
-        $color = 'rojo_intenso';
-        $texto_dias = 'ITV CADUCADA';
-    } elseif ($dias_restantes == 0) {
-        $color = 'rojo_intenso';
-    } elseif ($dias_restantes == 1) {
-        $color = 'rojo_intenso';
-    } elseif ($dias_restantes < 10) {
-        $color = 'naranja_intenso';
-    } elseif ($dias_restantes <= 20) {
-        $color = 'naranja_suave';
-    } elseif ($dias_restantes <= 35) {
-        $color = 'azul';
+    if ($estado === 'ITV RECHAZADA') {
+        return ['color'=>'rojo_intenso','texto_dias'=>'ITV RECHAZADA'];
     }
+    if ($dias < 0) return ['color'=>'rojo_intenso','texto_dias'=>'ITV CADUCADA'];
+    if ($dias <= 1) return ['color'=>'rojo_intenso','texto_dias'=>$dias.' día'.($dias==1?'':'s')];
+    if ($dias < 10) return ['color'=>'naranja_intenso','texto_dias'=>$dias.' días'];
+    if ($dias <= 20) return ['color'=>'naranja_suave','texto_dias'=>$dias.' días'];
+    if ($dias <= 35) return ['color'=>'azul','texto_dias'=>$dias.' días'];
 
-    // Ajustar el texto de días según el caso
-    if (!in_array($texto_dias, ['ITV CADUCADA', 'ITV RECHAZADA', '-'])) {
-        if ($dias_restantes == 1) {
-            $texto_dias = '1 día';
-        } elseif ($dias_restantes >= 0) {
-            $texto_dias = $dias_restantes . ' días';
-        }
-    }
-
-    return ['color' => $color, 'texto_dias' => $texto_dias];
+    return ['color'=>$color,'texto_dias'=>$texto];
 }
 
-// Filtrar solo vehículos activos o con ITV rechazada (BAJA se oculta)
-$vehiculos_filtrados = array_filter($vehiculos, function ($vehiculo) {
-    return in_array($vehiculo['estado'], ['ACTIVO', 'ITV RECHAZADA']);
-});
+// =====================
+// PRÓXIMA ITV GLOBAL
+// =====================
+$proxima_itv = null;
+$ts_min = null;
+$ahora = new DateTime();
 
-// Ordenar: primero los "ITV RECHAZADA", luego por días restantes
-usort($vehiculos_filtrados, function ($a, $b) {
-    if ($a['estado'] === 'ITV RECHAZADA' && $b['estado'] !== 'ITV RECHAZADA') return -1;
-    if ($b['estado'] === 'ITV RECHAZADA' && $a['estado'] !== 'ITV RECHAZADA') return 1;
-    return calcular_dias_restantes($a['caducidad_itv']) - calcular_dias_restantes($b['caducidad_itv']);
-});
+foreach ($citas as $cita) {
+    $dt = DateTime::createFromFormat('Y-m-d H:i', $cita['fecha_cita'].' '.$cita['hora_cita']);
+    if ($dt && $dt >= $ahora) {
+        $ts = $dt->getTimestamp();
+        if ($ts_min === null || $ts < $ts_min) {
+            $ts_min = $ts;
+            $proxima_itv = $cita;
+        }
+    }
+}
+
+// Filtrar vehículos visibles
+$vehiculos_filtrados = array_filter($vehiculos, fn($v) =>
+    in_array($v['estado'], ['ACTIVO','ITV RECHAZADA'])
+);
+
+usort($vehiculos_filtrados, fn($a,$b) =>
+    calcular_dias_restantes($a['caducidad_itv']) <=> calcular_dias_restantes($b['caducidad_itv'])
+);
 ?>
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta http-equiv="refresh" content="60">
-    <link rel="shortcut icon" href="images/logo.webp">
-    <link rel="icon" sizes="64x64" href="images/logo.webp">
-    <link rel="apple-touch-icon" sizes="180x180" href="images/logo.webp">
-    <meta charset="UTF-8">
-    <title>Página Principal - Gestión de ITV</title>
-    <link rel="stylesheet" href="style.css">
-    <style>
-        .negro { background-color: black; color: grey; }
-        .rojo_intenso { background-color: #cc0000; color: white; }
-        .naranja_intenso { background-color: #ff6600; color: white; }
-        .naranja_suave { background-color: #ffae0d; color: white; }
-        .azul { background-color: #3399ff; color: white; }
-        .verde { background-color: #4CAF50; color: white; }
+<meta charset="UTF-8">
+<meta http-equiv="refresh" content="60">
+<title>Página Principal - Gestión de ITV</title>
+<link rel="icon" href="images/logo.webp">
+<link rel="stylesheet" href="style.css">
 
-        table { border-collapse: collapse; width: 100%; }
-        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; vertical-align: top; }
-        th { background-color: #eee; }
-        ul { margin: 0; padding-left: 18px; }
+<style>
+.negro{background:black;color:grey}
+.rojo_intenso{background:#cc0000;color:white}
+.naranja_intenso{background:#ff6600;color:white}
+.naranja_suave{background:#ffae0d;color:white}
+.azul{background:#3399ff;color:white}
+.verde{background:#4CAF50;color:white}
 
-        /* === INFO USUARIO (MEJORA AÑADIDA) === */
-        .user-info {
-            position: fixed;
-            top: 10px;
-            right: 15px;
-            text-align: right;
-            font-size: 14px;
-            color: #333;
-        }
-        .user-info .user-line {
-            font-weight: bold;
-        }
-        #fecha-hora {
-            font-size: 12px;
-            color: #666;
-        }
-    </style>
+table{border-collapse:collapse;width:100%}
+th,td{border:1px solid #ccc;padding:8px;vertical-align:top}
+th{background:#eee}
+ul{margin:0;padding-left:18px}
+
+.user-info{
+    position:fixed;
+    top:10px;
+    right:15px;
+    text-align:right;
+    font-size:14px;
+}
+
+/* PRÓXIMA ITV */
+.proxima-itv{
+    position:fixed;
+    top:90px;
+    right:20px;
+    width:260px;
+    border:2px solid #000;
+    background:#f8f8f8;
+}
+.proxima-itv .titulo{
+    background:#d9968c;
+    text-align:center;
+    font-weight:bold;
+    font-size:20px;
+    padding:8px;
+}
+.proxima-itv .fila{
+    display:flex;
+    border-top:1px solid #000;
+}
+.proxima-itv .label{
+    width:40%;
+    padding:6px;
+    font-weight:bold;
+    border-right:1px solid #000;
+}
+.proxima-itv .valor{
+    width:60%;
+    padding:6px;
+}
+</style>
 </head>
+
 <body>
 
-<!-- INFO USUARIO -->
 <div class="user-info">
-    <div class="user-line">
-        <?= htmlspecialchars($_SESSION['usuario']) ?> | <?= htmlspecialchars($_SESSION['tipo']) ?>
-    </div>
+    <strong><?= $_SESSION['usuario'] ?> | <?= $_SESSION['tipo'] ?></strong>
     <div id="fecha-hora"></div>
 </div>
 
 <h1>
-    <img src="images/logo.webp" alt="Logo" width="30" style="vertical-align: middle;">
-    Página Principal - Gestión de ITV
+<img src="images/logo.webp" width="30">
+Página Principal - Gestión de ITV
 </h1>
 
 <div class="menu">
-    <a title="index" href="index.php"><img src="images/index.webp" alt="index" width="80"></a>
-    <a title="citas" href="citas.php"><img src="images/citas.webp" alt="citas" width="80"></a>
-    <a title="vehiculos" href="vehiculos.php"><img src="images/vehiculos.webp" alt="vehiculos" width="80"></a>
-
-    <?php if ($is_admin): ?>
-        <a title="estaciones" href="estaciones.php"><img src="images/estaciones.webp" alt="estaciones" width="80"></a>
-    <?php endif; ?>
-
-    <?php if ($is_superadmin): ?>
-        <a title="usuarios" href="usuarios.php"><img src="images/usuarios.webp" alt="usuarios" width="80"></a>
-    <?php endif; ?>
-
-    <a title="imprimir" href="imprimir.php"><img src="images/imprimir.webp" alt="imprimir" width="80"></a>
-    <a title="logout" href="logout.php"><img src="images/logout.webp" alt="logout" width="80"></a>
+    <a href="index.php"><img src="images/index.webp" width="80"></a>
+    <a href="citas.php"><img src="images/citas.webp" width="80"></a>
+    <a href="vehiculos.php"><img src="images/vehiculos.webp" width="80"></a>
+    <?php if($is_admin): ?><a href="estaciones.php"><img src="images/estaciones.webp" width="80"></a><?php endif; ?>
+    <?php if($is_superadmin): ?><a href="usuarios.php"><img src="images/usuarios.webp" width="80"></a><?php endif; ?>
+    <a href="imprimir.php"><img src="images/imprimir.webp" width="80"></a>
+    <a href="logout.php"><img src="images/logout.webp" width="80"></a>
 </div>
 
-<p></br></p>
+<?php if($proxima_itv): ?>
+<div class="proxima-itv">
+    <div class="titulo">PRÓXIMA ITV</div>
+    <div class="fila"><div class="label">FECHA</div><div class="valor"><?= formatear_fecha($proxima_itv['fecha_cita']) ?></div></div>
+    <div class="fila"><div class="label">HORA</div><div class="valor"><?= $proxima_itv['hora_cita'] ?></div></div>
+    <div class="fila"><div class="label">ESTACIÓN</div>
+        <div class="valor">
+            <?= $proxima_itv['estacion_cita'] ?>
+            <?= $proxima_itv['tipo_cita']==='Primera'?'1ª':'2ª' ?>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
 
 <h2>Vehículos</h2>
-<table>
-    <thead>
-        <tr>
-            <th>Vehículo</th>
-            <th>Matrícula</th>
-            <th>Tipo</th>
-            <th>Estado</th>
-            <th>Caducidad ITV</th>
-            <th>Días para Caducar ITV</th>
-            <th>Cita Asignada</th>
-        </tr>
-    </thead>
-    <tbody>
-        <?php foreach ($vehiculos_filtrados as $vehiculo):
-            $info_color = obtener_color_y_texto($vehiculo);
-            $citas_vehiculo = obtener_citas_vehiculo($vehiculo['matricula'], $citas);
 
-            $estado_mostrar = $vehiculo['estado'];
-            $dias_restantes = calcular_dias_restantes($vehiculo['caducidad_itv']);
-            if ($vehiculo['estado'] == 'ITV RECHAZADA') {
-                $estado_mostrar = 'ITV RECHAZADA';
-            } elseif ($dias_restantes < 0) {
-                $estado_mostrar = 'ITV CADUCADA';
-            } elseif ($dias_restantes == 0) {
-                $estado_mostrar = 'CADUCA HOY';
-            } elseif ($dias_restantes == 1) {
-                $estado_mostrar = 'CADUCA MAÑANA';
-            }
-        ?>
-        <tr class="<?= $info_color['color'] ?>">
-            <td><?= htmlspecialchars($vehiculo['vehiculo']) ?></td>
-            <td><?= htmlspecialchars($vehiculo['matricula']) ?></td>
-            <td><?= isset($vehiculo['tipo']) ? htmlspecialchars($vehiculo['tipo']) : '-' ?></td>
-            <td><?= $estado_mostrar ?></td>
-            <td><?= formatear_fecha($vehiculo['caducidad_itv']) ?></td>
-            <td><?= $info_color['texto_dias'] ?></td>
-            <td>
-                <?php if (!empty($citas_vehiculo)): ?>
-                    <ul>
-                        <?php foreach ($citas_vehiculo as $cita): ?>
-                            <li>
-                                <strong>Fecha:</strong> <?= formatear_fecha($cita['fecha_cita']) ?>,
-                                <strong>Hora:</strong> <?= htmlspecialchars($cita['hora_cita']) ?>,
-                                <strong>Estación:</strong>
-                                <?= htmlspecialchars($cita['estacion_cita']) . ' ' . ($cita['tipo_cita']==='Primera'?'1ª':'2ª') ?>
-                            </li>
-                        <?php endforeach; ?>
-                    </ul>
-                <?php else: ?>
-                    Sin cita asignada
-                <?php endif; ?>
-            </td>
-        </tr>
-        <?php endforeach; ?>
-    </tbody>
+<table>
+<thead>
+<tr>
+<th>Vehículo</th><th>Matrícula</th><th>Tipo</th>
+<th>Estado</th><th>Caducidad ITV</th>
+<th>Días</th><th>Cita Asignada</th>
+</tr>
+</thead>
+<tbody>
+
+<?php foreach($vehiculos_filtrados as $v):
+$info = obtener_color_y_texto($v);
+$citas_v = obtener_citas_vehiculo($v['matricula'],$citas);
+?>
+<tr class="<?= $info['color'] ?>">
+<td><?= $v['vehiculo'] ?></td>
+<td><?= $v['matricula'] ?></td>
+<td><?= $v['tipo'] ?? '-' ?></td>
+<td><?= $v['estado'] ?></td>
+<td><?= formatear_fecha($v['caducidad_itv']) ?></td>
+<td><?= $info['texto_dias'] ?></td>
+<td>
+<?php if($citas_v): ?>
+<ul>
+<?php foreach($citas_v as $c): ?>
+<li>
+<strong><?= formatear_fecha($c['fecha_cita']) ?></strong>
+<?= $c['hora_cita'] ?> –
+<?= $c['estacion_cita'] ?> <?= $c['tipo_cita']==='Primera'?'1ª':'2ª' ?>
+</li>
+<?php endforeach; ?>
+</ul>
+<?php else: ?>Sin cita<?php endif; ?>
+</td>
+</tr>
+<?php endforeach; ?>
+
+</tbody>
 </table>
 
 <h4 class="small" style="margin-top:12px;">ITVControl v.1.4</h4>
 <p class="small">B174M3 // XaeK</p>
 
 <script>
-function actualizarFechaHora() {
-    const ahora = new Date();
-    const fecha = ahora.toLocaleDateString('es-ES');
-    const hora = ahora.toLocaleTimeString('es-ES');
-    document.getElementById('fecha-hora').textContent = fecha + ' ' + hora;
+function actualizarFechaHora(){
+    const d=new Date();
+    document.getElementById('fecha-hora').innerText =
+        d.toLocaleDateString('es-ES')+' '+d.toLocaleTimeString('es-ES');
 }
 actualizarFechaHora();
-setInterval(actualizarFechaHora, 1000);
+setInterval(actualizarFechaHora,1000);
 </script>
 
 </body>
