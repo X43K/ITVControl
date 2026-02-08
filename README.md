@@ -30,9 +30,9 @@ Este proyecto permite gestionar una flota de vehículos, sus citas de ITV, las E
 ## SE RECOMIENDA EDITAR O ELIMINAR EL USUARIO `admin`. ANTES DE ELIMINARLO CREE OTRO `SuperAdministrador` PARA PODER SEGUIR GESTIONANDO LOS USUARIOS DEL SISTEMA, YA QUE ES EL UNICO QUE TIENE ESTE PERMISO.
 
 ## CÓMO CONTRIBUIR
-• Reporta errores en la sección Issues.
-• Sugiere mejoras.
-• Prueba la aplicación y envía feedback.
+- Reporta errores en la sección Issues.
+- Sugiere mejoras.
+- Prueba la aplicación y envía feedback.
 
 
 
