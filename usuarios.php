@@ -78,6 +78,19 @@ a { text-decoration:underline; }
 /* Mensajes de error */
 .rojo_intenso { color:#cc0000; }
 
+/* ===== BLOQUE USUARIO (igual que página principal) ===== */
+.user-info {
+    position: fixed;
+    top: 10px;
+    right: 15px;
+    text-align: right;
+    font-size: 14px;
+    color: inherit;
+}
+
+/* PRÓXIMA ITV placeholder para consistencia */
+.proxima-itv { display:none; }
+
 /* ===== MODO OSCURO AUTOMÁTICO ===== */
 @media (prefers-color-scheme: dark) {
     body { background:#000; color:#ddd; }
@@ -92,16 +105,20 @@ a { text-decoration:underline; }
 </style>
 </head>
 <body>
-	
-</br>
-	
+
+<!-- BLOQUE USUARIO -->
+<div class="user-info">
+    <strong><?= $_SESSION['usuario'] ?> | <?= $_SESSION['tipo'] ?></strong>
+    <div id="fecha-hora"></div>
+</div>
+<br>
+
 <h1>
     <img src="images/logo.webp" alt="Logo" width="30">
     Gestionar Usuarios
 </h1>
-	
-</br>
-	
+<br>
+
 <div class="menu">
     <a href="index.php"><img src="images/index.webp" alt="index"></a>
     <a href="citas.php"><img src="images/citas.webp" alt="citas"></a>
@@ -115,18 +132,14 @@ a { text-decoration:underline; }
     <a href="imprimir.php"><img src="images/imprimir.webp" alt="imprimir"></a>
     <a href="logout.php"><img src="images/logout.webp" alt="logout"></a>
 </div>
-	
-</br>
-	
+<br>
 
 <?php if (isset($error)): ?>
     <p class="rojo_intenso"><?= htmlspecialchars($error) ?></p>
 <?php endif; ?>
 
 <h2>Añadir Usuario</h2>
-	
-</br>
-	
+<br>
 <form method="POST">
     <label>Usuario:</label><input type="text" name="usuario" required><br><br>
     <label>Contraseña:</label><input type="password" name="contraseña" required><br><br>
@@ -139,11 +152,8 @@ a { text-decoration:underline; }
     </select><br><br>
     <input type="submit" value="Añadir Usuario">
 </form>
-	
-</br>
-		
-</br>
-	
+<br><br>
+
 <h2>Lista de Usuarios</h2>
 <table>
     <thead>
@@ -169,6 +179,16 @@ a { text-decoration:underline; }
 
 <h4 class="small" style="margin-top:12px; text-align:left;"><?= htmlspecialchars($version_text) ?></h4>
 <p class="small" style="text-align:left;"><?= htmlspecialchars($autor_text) ?></p>
+
+<script>
+function actualizarFechaHora(){
+    const d=new Date();
+    document.getElementById('fecha-hora').innerText =
+        d.toLocaleDateString('es-ES')+' '+d.toLocaleTimeString('es-ES');
+}
+actualizarFechaHora();
+setInterval(actualizarFechaHora,1000);
+</script>
 
 </body>
 </html>

@@ -133,7 +133,10 @@ usort($citas, fn($a,$b) => strtotime($a['fecha_cita'].' '.$a['hora_cita']) <=> s
 </style>
 </head>
 <body>
-
+<div class="user-info" style="position:fixed;top:10px;right:15px;text-align:right;font-size:14px;">
+    <strong><?= $_SESSION['usuario'] ?> | <?= $_SESSION['tipo'] ?></strong>
+        <div id="fecha-hora"></div>
+</div>
 </br>
 
 <h1><img src="images/logo.webp" alt="Logo" width="30" style="vertical-align: middle;"> Gestionar Citas de ITV</h1>
@@ -246,6 +249,14 @@ usort($citas, fn($a,$b) => strtotime($a['fecha_cita'].' '.$a['hora_cita']) <=> s
 
 <h4 class="small version-title" style="text-align:left; margin:4px 0;"><?= htmlspecialchars($version_info['version']) ?></h4>
 <p class="small version-author" style="text-align:left; margin:0;"><?= htmlspecialchars($version_info['author']) ?></p>
-
+<script>
+function actualizarFechaHora(){
+    const d=new Date();
+    document.getElementById('fecha-hora').innerText =
+        d.toLocaleDateString('es-ES')+' '+d.toLocaleTimeString('es-ES');
+}
+actualizarFechaHora();
+setInterval(actualizarFechaHora,1000);
+</script>
 </body>
 </html>

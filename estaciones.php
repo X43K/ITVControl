@@ -87,10 +87,15 @@ if (file_exists($version_file)) {
 <link rel="apple-touch-icon" sizes="180x180" href="images/logo.webp">
 <link rel="stylesheet" href="style.css">
 <style>
+body { margin:15px; font-family:Arial,sans-serif; }
+
+/* Menú */
 .menu { margin-bottom:15px; }
 .menu a { margin-right:5px; }
 .menu img { width:80px; height:auto; vertical-align:middle; transition:filter 0.3s ease; }
 h1 img { vertical-align:middle; }
+
+/* Formulario */
 input, select, textarea { padding:5px; margin:2px 0; border-radius:4px; }
 input[type="submit"] { cursor:pointer; }
 
@@ -103,6 +108,19 @@ table { border-collapse:collapse; width:100%; }
 th, td { border:1px solid #ccc; padding:8px; vertical-align:top; }
 th { background:#eee; }
 ul { margin:0; padding-left:18px; }
+
+/* ===== BLOQUE USUARIO (igual que página principal) ===== */
+.user-info {
+    position: fixed;
+    top: 10px;
+    right: 15px;
+    text-align: right;
+    font-size: 14px;
+    color: inherit;
+}
+
+/* PRÓXIMA ITV placeholder para consistencia */
+.proxima-itv { display:none; }
 
 /* ===== MODO OSCURO AUTOMÁTICO ===== */
 @media (prefers-color-scheme: dark) {
@@ -119,16 +137,20 @@ ul { margin:0; padding-left:18px; }
 </style>
 </head>
 <body>
-	
-</br>
-	
+
+<!-- BLOQUE USUARIO -->
+<div class="user-info">
+    <strong><?= $_SESSION['usuario'] ?> | <?= $_SESSION['tipo'] ?></strong>
+    <div id="fecha-hora"></div>
+</div>
+<br>
+
 <h1>
     <img src="images/logo.webp" alt="Logo" width="30">
     Gestionar Estaciones
 </h1>
-	
-</br>
-	
+<br>
+
 <div class="menu">
     <a href="index.php"><img src="images/index.webp" alt="index"></a>
     <a href="citas.php"><img src="images/citas.webp" alt="citas"></a>
@@ -142,9 +164,8 @@ ul { margin:0; padding-left:18px; }
     <a href="imprimir.php"><img src="images/imprimir.webp" alt="imprimir"></a>
     <a href="logout.php"><img src="images/logout.webp" alt="logout"></a>
 </div>
-	
-</br>
-	
+<br>
+
 <?php if (isset($mensaje)): ?>
     <p class="verde"><?= htmlspecialchars($mensaje) ?></p>
 <?php endif; ?>
@@ -153,22 +174,17 @@ ul { margin:0; padding-left:18px; }
 <?php endif; ?>
 
 <h2>Agregar Nueva Estación</h2>
-	
-</br>
-	
+<br>
+
 <form method="POST">
     <input type="text" name="nueva_estacion" placeholder="Nombre de la estación" required>
     <input type="submit" value="Agregar">
 </form>
-	
-</br>
-		
-</br>
-	
+<br><br>
+
 <h2>Editar Estaciones Existentes</h2>
-	
-</br>
-	
+<br>
+
 <form method="POST">
     <?php foreach ($estaciones as $i => $estacion): ?>
         <input type="text" name="estaciones[<?= $i ?>]" value="<?= htmlspecialchars($estacion) ?>" required>
@@ -180,5 +196,15 @@ ul { margin:0; padding-left:18px; }
 
 <h4 class="small" style="margin-top:12px; text-align:left;"><?= htmlspecialchars($version_text) ?></h4>
 <p class="small" style="text-align:left;"><?= htmlspecialchars($autor_text) ?></p>
+
+<script>
+function actualizarFechaHora(){
+    const d=new Date();
+    document.getElementById('fecha-hora').innerText =
+        d.toLocaleDateString('es-ES')+' '+d.toLocaleTimeString('es-ES');
+}
+actualizarFechaHora();
+setInterval(actualizarFechaHora,1000);
+</script>
 </body>
 </html>
