@@ -1,9 +1,457 @@
 [
     {
-        "fecha_cita": "2026-02-01",
-        "hora_cita": "10:30",
-        "estacion": "Tambre",
+        "fecha_cita": "2026-01-26",
+        "hora_cita": "12:15",
+        "estacion_cita": "Tambre",
         "tipo_cita": "Primera",
-        "vehiculo": "123ABC"
+        "vehiculo": "4976FNB"
+    },
+    {
+        "fecha_cita": "2026-01-26",
+        "hora_cita": "11:15",
+        "estacion_cita": "Sionlla",
+        "tipo_cita": "Primera",
+        "vehiculo": "8531LML"
+    },
+    {
+        "fecha_cita": "2026-01-28",
+        "hora_cita": "11:00",
+        "estacion_cita": "Cacheiras",
+        "tipo_cita": "Primera",
+        "vehiculo": "8530LML"
+    },
+    {
+        "fecha_cita": "2026-01-29",
+        "hora_cita": "11:00",
+        "estacion_cita": "Tambre",
+        "tipo_cita": "Primera",
+        "vehiculo": "5670FXT"
+    },
+    {
+        "fecha_cita": "2026-02-02",
+        "hora_cita": "11:15",
+        "estacion_cita": "Tambre",
+        "tipo_cita": "Primera",
+        "vehiculo": "8529LML"
+    },
+    {
+        "fecha_cita": "2026-02-03",
+        "hora_cita": "17:00",
+        "estacion_cita": "Sionlla",
+        "tipo_cita": "Primera",
+        "vehiculo": ""
+    },
+    {
+        "fecha_cita": "2026-02-09",
+        "hora_cita": "11:00",
+        "estacion_cita": "Cacheiras",
+        "tipo_cita": "Primera",
+        "vehiculo": "2296HFC"
+    },
+    {
+        "fecha_cita": "2026-02-10",
+        "hora_cita": "11:15",
+        "estacion_cita": "Tambre",
+        "tipo_cita": "Primera",
+        "vehiculo": "8584HBR"
+    },
+    {
+        "fecha_cita": "2026-02-11",
+        "hora_cita": "11:15",
+        "estacion_cita": "Tambre",
+        "tipo_cita": "Primera",
+        "vehiculo": "3833GDN"
+    },
+    {
+        "fecha_cita": "2026-02-12",
+        "hora_cita": "11:15",
+        "estacion_cita": "Tambre",
+        "tipo_cita": "Primera",
+        "vehiculo": "5374LJS"
+    },
+    {
+        "fecha_cita": "2026-02-16",
+        "hora_cita": "11:30",
+        "estacion_cita": "Sionlla",
+        "tipo_cita": "Primera",
+        "vehiculo": "5388LJS"
+    },
+    {
+        "fecha_cita": "2026-02-18",
+        "hora_cita": "11:00",
+        "estacion_cita": "Cacheiras",
+        "tipo_cita": "Primera",
+        "vehiculo": "5378LJS"
+    },
+    {
+        "fecha_cita": "2026-02-23",
+        "hora_cita": "11:15",
+        "estacion_cita": "Tambre",
+        "tipo_cita": "Primera",
+        "vehiculo": "5375LJS"
+    },
+    {
+        "fecha_cita": "2026-02-25",
+        "hora_cita": "11:00",
+        "estacion_cita": "Sionlla",
+        "tipo_cita": "Primera",
+        "vehiculo": "5405LJS"
+    },
+    {
+        "fecha_cita": "2026-01-26",
+        "hora_cita": "15:45",
+        "estacion_cita": "Tambre",
+        "tipo_cita": "Segunda",
+        "vehiculo": "8489HBR"
+    },
+    {
+        "fecha_cita": "2026-01-27",
+        "hora_cita": "11:30",
+        "estacion_cita": "Tambre",
+        "tipo_cita": "Segunda",
+        "vehiculo": "4976FNB"
+    },
+    {
+        "fecha_cita": "2026-01-28",
+        "hora_cita": "11:30",
+        "estacion_cita": "Tambre",
+        "tipo_cita": "Segunda",
+        "vehiculo": "8489HBR"
+    },
+    {
+        "fecha_cita": "2026-01-27",
+        "hora_cita": "11:30",
+        "estacion_cita": "Sionlla",
+        "tipo_cita": "Segunda",
+        "vehiculo": "8489HBR"
+    },
+    {
+        "fecha_cita": "2026-01-27",
+        "hora_cita": "17:15",
+        "estacion_cita": "Tambre",
+        "tipo_cita": "Segunda",
+        "vehiculo": "4976FNB"
+    },
+    {
+        "fecha_cita": "2026-01-29",
+        "hora_cita": "10:30",
+        "estacion_cita": "Cacheiras",
+        "tipo_cita": "Segunda",
+        "vehiculo": "8530LML"
+    },
+    {
+        "fecha_cita": "2026-01-30",
+        "hora_cita": "11:30",
+        "estacion_cita": "Tambre",
+        "tipo_cita": "Segunda",
+        "vehiculo": "5670FXT"
+    },
+    {
+        "fecha_cita": "2026-02-04",
+        "hora_cita": "11:45",
+        "estacion_cita": "Sionlla",
+        "tipo_cita": "Primera",
+        "vehiculo": "3873GDN"
+    },
+    {
+        "fecha_cita": "2026-02-03",
+        "hora_cita": "11:30",
+        "estacion_cita": "Tambre",
+        "tipo_cita": "Segunda",
+        "vehiculo": "4976FNB"
+    },
+    {
+        "fecha_cita": "2026-02-04",
+        "hora_cita": "11:30",
+        "estacion_cita": "Sionlla",
+        "tipo_cita": "Segunda",
+        "vehiculo": ""
+    },
+    {
+        "fecha_cita": "2026-02-05",
+        "hora_cita": "11:30",
+        "estacion_cita": "Sionlla",
+        "tipo_cita": "Segunda",
+        "vehiculo": "3873GDN"
+    },
+    {
+        "fecha_cita": "2026-02-10",
+        "hora_cita": "10:30",
+        "estacion_cita": "Cacheiras",
+        "tipo_cita": "Segunda",
+        "vehiculo": "2296HFC"
+    },
+    {
+        "fecha_cita": "2026-02-11",
+        "hora_cita": "10:30",
+        "estacion_cita": "Tambre",
+        "tipo_cita": "Segunda",
+        "vehiculo": "8584HBR"
+    },
+    {
+        "fecha_cita": "2026-02-12",
+        "hora_cita": "11:30",
+        "estacion_cita": "Tambre",
+        "tipo_cita": "Segunda",
+        "vehiculo": "3833GDN"
+    },
+    {
+        "fecha_cita": "2026-02-13",
+        "hora_cita": "11:30",
+        "estacion_cita": "Tambre",
+        "tipo_cita": "Segunda",
+        "vehiculo": "5374LJS"
+    },
+    {
+        "fecha_cita": "2026-02-18",
+        "hora_cita": "11:30",
+        "estacion_cita": "Sionlla",
+        "tipo_cita": "Segunda",
+        "vehiculo": "5388LJS"
+    },
+    {
+        "fecha_cita": "2026-02-19",
+        "hora_cita": "10:30",
+        "estacion_cita": "Cacheiras",
+        "tipo_cita": "Segunda",
+        "vehiculo": "5378LJS"
+    },
+    {
+        "fecha_cita": "2026-02-24",
+        "hora_cita": "11:30",
+        "estacion_cita": "Tambre",
+        "tipo_cita": "Segunda",
+        "vehiculo": "5375LJS"
+    },
+    {
+        "fecha_cita": "2026-02-26",
+        "hora_cita": "11:30",
+        "estacion_cita": "Sionlla",
+        "tipo_cita": "Segunda",
+        "vehiculo": "5405LJS"
+    },
+    {
+        "fecha_cita": "2026-03-02",
+        "hora_cita": "11:00",
+        "estacion_cita": "Sionlla",
+        "tipo_cita": "Primera",
+        "vehiculo": "5384LJS"
+    },
+    {
+        "fecha_cita": "2026-03-04",
+        "hora_cita": "11:15",
+        "estacion_cita": "Tambre",
+        "tipo_cita": "Primera",
+        "vehiculo": "5387LJS"
+    },
+    {
+        "fecha_cita": "2026-03-05",
+        "hora_cita": "11:00",
+        "estacion_cita": "Sionlla",
+        "tipo_cita": "Primera",
+        "vehiculo": "0435KCX"
+    },
+    {
+        "fecha_cita": "2026-03-09",
+        "hora_cita": "11:00",
+        "estacion_cita": "Sionlla",
+        "tipo_cita": "Primera",
+        "vehiculo": "8633HYY"
+    },
+    {
+        "fecha_cita": "2026-03-11",
+        "hora_cita": "11:00",
+        "estacion_cita": "Cacheiras",
+        "tipo_cita": "Primera",
+        "vehiculo": "5389LJS"
+    },
+    {
+        "fecha_cita": "2026-03-16",
+        "hora_cita": "11:15",
+        "estacion_cita": "Tambre",
+        "tipo_cita": "Primera",
+        "vehiculo": "5542HFB"
+    },
+    {
+        "fecha_cita": "2026-03-23",
+        "hora_cita": "11:00",
+        "estacion_cita": "Sionlla",
+        "tipo_cita": "Primera",
+        "vehiculo": ""
+    },
+    {
+        "fecha_cita": "2026-03-25",
+        "hora_cita": "11:00",
+        "estacion_cita": "Cacheiras",
+        "tipo_cita": "Primera",
+        "vehiculo": "3902GDN"
+    },
+    {
+        "fecha_cita": "2026-03-30",
+        "hora_cita": "11:15",
+        "estacion_cita": "Tambre",
+        "tipo_cita": "Primera",
+        "vehiculo": "4461LBV"
+    },
+    {
+        "fecha_cita": "2026-04-06",
+        "hora_cita": "11:15",
+        "estacion_cita": "Sionlla",
+        "tipo_cita": "Primera",
+        "vehiculo": "7074JFB"
+    },
+    {
+        "fecha_cita": "2026-04-13",
+        "hora_cita": "11:15",
+        "estacion_cita": "Tambre",
+        "tipo_cita": "Primera",
+        "vehiculo": "3811HDF"
+    },
+    {
+        "fecha_cita": "2026-04-15",
+        "hora_cita": "11:15",
+        "estacion_cita": "Sionlla",
+        "tipo_cita": "Primera",
+        "vehiculo": ""
+    },
+    {
+        "fecha_cita": "2026-04-27",
+        "hora_cita": "11:15",
+        "estacion_cita": "Sionlla",
+        "tipo_cita": "Primera",
+        "vehiculo": "5385LJS"
+    },
+    {
+        "fecha_cita": "2026-03-03",
+        "hora_cita": "11:30",
+        "estacion_cita": "Sionlla",
+        "tipo_cita": "Segunda",
+        "vehiculo": "5384LJS"
+    },
+    {
+        "fecha_cita": "2026-02-02",
+        "hora_cita": "11:00",
+        "estacion_cita": "Tambre",
+        "tipo_cita": "Segunda",
+        "vehiculo": "4976FNB"
+    },
+    {
+        "fecha_cita": "2026-04-08",
+        "hora_cita": "11:00",
+        "estacion_cita": "Cacheiras",
+        "tipo_cita": "Primera",
+        "vehiculo": ""
+    },
+    {
+        "fecha_cita": "2026-01-30",
+        "hora_cita": "18:00",
+        "estacion_cita": "Cacheiras",
+        "tipo_cita": "Segunda",
+        "vehiculo": "8489HBR"
+    },
+    {
+        "fecha_cita": "2026-02-05",
+        "hora_cita": "17:30",
+        "estacion_cita": "Sionlla",
+        "tipo_cita": "Segunda",
+        "vehiculo": "3873GDN"
+    },
+    {
+        "fecha_cita": "2026-02-04",
+        "hora_cita": "14:45",
+        "estacion_cita": "Tambre",
+        "tipo_cita": "Segunda",
+        "vehiculo": "4976FNB"
+    },
+    {
+        "fecha_cita": "2026-03-05",
+        "hora_cita": "11:30",
+        "estacion_cita": "Tambre",
+        "tipo_cita": "Segunda",
+        "vehiculo": "5387LJS"
+    },
+    {
+        "fecha_cita": "2026-03-06",
+        "hora_cita": "11:30",
+        "estacion_cita": "Sionlla",
+        "tipo_cita": "Segunda",
+        "vehiculo": "0435KCX"
+    },
+    {
+        "fecha_cita": "2026-04-22",
+        "hora_cita": "11:15",
+        "estacion_cita": "Tambre",
+        "tipo_cita": "Primera",
+        "vehiculo": ""
+    },
+    {
+        "fecha_cita": "2026-03-10",
+        "hora_cita": "11:30",
+        "estacion_cita": "Sionlla",
+        "tipo_cita": "Segunda",
+        "vehiculo": "8633HYY"
+    },
+    {
+        "fecha_cita": "2026-03-12",
+        "hora_cita": "10:30",
+        "estacion_cita": "Cacheiras",
+        "tipo_cita": "Segunda",
+        "vehiculo": "5389LJS"
+    },
+    {
+        "fecha_cita": "2026-03-17",
+        "hora_cita": "11:30",
+        "estacion_cita": "Tambre",
+        "tipo_cita": "Segunda",
+        "vehiculo": "5542HFB"
+    },
+    {
+        "fecha_cita": "2026-03-24",
+        "hora_cita": "11:30",
+        "estacion_cita": "Sionlla",
+        "tipo_cita": "Segunda",
+        "vehiculo": ""
+    },
+    {
+        "fecha_cita": "2026-03-26",
+        "hora_cita": "10:30",
+        "estacion_cita": "Cacheiras",
+        "tipo_cita": "Segunda",
+        "vehiculo": "3902GDN"
+    },
+    {
+        "fecha_cita": "2026-03-31",
+        "hora_cita": "11:30",
+        "estacion_cita": "Tambre",
+        "tipo_cita": "Segunda",
+        "vehiculo": "4461LBV"
+    },
+    {
+        "fecha_cita": "2026-04-07",
+        "hora_cita": "11:30",
+        "estacion_cita": "Sionlla",
+        "tipo_cita": "Segunda",
+        "vehiculo": "7074JFB"
+    },
+    {
+        "fecha_cita": "2026-04-09",
+        "hora_cita": "10:30",
+        "estacion_cita": "Cacheiras",
+        "tipo_cita": "Segunda",
+        "vehiculo": ""
+    },
+    {
+        "fecha_cita": "2026-01-31",
+        "hora_cita": "11:11",
+        "estacion_cita": "Tambre",
+        "tipo_cita": "Primera",
+        "vehiculo": ""
+    },
+    {
+        "fecha_cita": "2026-02-21",
+        "hora_cita": "11:11",
+        "estacion_cita": "Tambre",
+        "tipo_cita": "Primera",
+        "vehiculo": ""
     }
 ]

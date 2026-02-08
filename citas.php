@@ -10,6 +10,21 @@ $is_colab = isset($_SESSION['tipo']) && in_array($_SESSION['tipo'], ['Colaborado
 $is_admin = isset($_SESSION['tipo']) && in_array($_SESSION['tipo'], ['Administrador', 'SuperAdministrador']);
 $is_superadmin = isset($_SESSION['tipo']) && $_SESSION['tipo'] === 'SuperAdministrador';
 
+// =====================
+// CARGAR VERSION
+// =====================
+$version_file = 'version.xk';
+if (file_exists($version_file)) {
+    $version_content = file_get_contents($version_file);
+    preg_match('/<h4.*?>(.*?)<\/h4>/', $version_content, $match_v);
+    preg_match('/<p.*?>(.*?)<\/p>/', $version_content, $match_a);
+    $version_info = [
+        'version' => $match_v[1] ?? 'ITVControl v.2.0',
+        'author' => $match_a[1] ?? 'B174M3 // XaeK'
+    ];
+} else {
+    $version_info = ['version'=>'ITVControl v.2.0','author'=>'B174M3 // XaeK'];
+}
 
 // =====================
 // CARGAR CITAS
@@ -24,8 +39,6 @@ $citas = json_decode(file_get_contents($citas_file), true);
 $vehiculos_file = 'vehiculos.json';
 if (!file_exists($vehiculos_file)) die("El archivo de vehículos no existe.");
 $vehiculos = json_decode(file_get_contents($vehiculos_file), true);
-
-// ✅ MEJORA: ordenar vehículos alfabéticamente (orden natural con números)
 usort($vehiculos, function ($a, $b) {
     return strnatcasecmp($a['vehiculo'], $b['vehiculo']);
 });
@@ -43,7 +56,6 @@ $estaciones = json_decode(file_get_contents($estaciones_file), true);
 // PROCESAR FORMULARIO (ADMIN)
 // =====================
 if ($is_colab && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['fecha_cita'])) {
-
     if (!empty($_POST['fecha_cita']) && !empty($_POST['hora_cita']) && !empty($_POST['estacion_cita'])) {
 
         $nueva_cita = [
@@ -54,7 +66,6 @@ if ($is_colab && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['fecha_ci
             'vehiculo' => $_POST['vehiculo'] ?? ''
         ];
 
-        // Validar vehículo
         if (!empty($nueva_cita['vehiculo'])) {
             $vehiculo_encontrado = false;
             foreach ($vehiculos as $vehiculo) {
@@ -63,9 +74,7 @@ if ($is_colab && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['fecha_ci
                     break;
                 }
             }
-            if (!$vehiculo_encontrado) {
-                $error = "Vehículo no encontrado.";
-            }
+            if (!$vehiculo_encontrado) $error = "Vehículo no encontrado.";
         }
 
         if (empty($error)) {
@@ -80,70 +89,72 @@ if ($is_colab && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['fecha_ci
 }
 
 // =====================
-// FORMATEAR FECHA
+// FUNCIONES
 // =====================
 function formatear_fecha($fecha) {
     $f = DateTime::createFromFormat('Y-m-d', $fecha);
     return $f ? $f->format('d/m/Y') : $fecha;
 }
 
-// 🔹 MOSTRAR VEHÍCULO
 function mostrarVehiculo($matricula, $vehiculos) {
     if ($matricula === '') return 'Sin asignar';
     foreach ($vehiculos as $v) {
-        if ($v['matricula'] === $matricula) {
-            return $v['vehiculo'] . ' - ' . $v['matricula'];
-        }
+        if ($v['matricula'] === $matricula) return $v['vehiculo'] . ' - ' . $v['matricula'];
     }
     return $matricula;
 }
 
 // =====================
-// FILTRAR CITAS FUTURAS
+// FILTRAR Y ORDENAR CITAS FUTURAS
 // =====================
 $ahora = new DateTime();
-$citas = array_filter($citas, function($cita) use ($ahora) {
-    $fechaHoraCita = DateTime::createFromFormat('Y-m-d H:i', $cita['fecha_cita'] . ' ' . $cita['hora_cita']);
-    return $fechaHoraCita && $fechaHoraCita >= $ahora;
-});
-
-// =====================
-// ORDENAR CITAS POR FECHA Y HORA
-// =====================
-usort($citas, function($a, $b) {
-    $fechaHoraA = strtotime($a['fecha_cita'] . ' ' . $a['hora_cita']);
-    $fechaHoraB = strtotime($b['fecha_cita'] . ' ' . $b['hora_cita']);
-    return $fechaHoraA <=> $fechaHoraB;
-});
+$citas = array_filter($citas, fn($cita) => 
+    ($dt = DateTime::createFromFormat('Y-m-d H:i', $cita['fecha_cita'].' '.$cita['hora_cita'])) && $dt >= $ahora
+);
+usort($citas, fn($a,$b) => strtotime($a['fecha_cita'].' '.$a['hora_cita']) <=> strtotime($b['fecha_cita'].' '.$b['hora_cita']));
 ?>
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <title>Gestionar Citas</title>
 <link rel="stylesheet" href="style.css">
-</head>
+<style>
+/* ===== COLORES DÍAS ===== */
+.dia-rojo { color: red; font-weight:bold; }
+.dia-normal { color: inherit; font-weight:bold; }
 
+/* ===== MODO OSCURO AUTOMÁTICO ===== */
+@media (prefers-color-scheme: dark) {
+    body { background:#000; color:#ddd; }
+    h1, h2, h3, h4, p, strong { color:#ddd; }
+    .menu a img:not([alt="Logo"]) { filter: invert(1); }
+}
+</style>
+</head>
 <body>
+
+</br>
 
 <h1><img src="images/logo.webp" alt="Logo" width="30" style="vertical-align: middle;"> Gestionar Citas de ITV</h1>
 
+</br>
+
 <div class="menu">
-    <a title="index" href="index.php"><img src="images/index.webp" alt="index" width="80" style="vertical-align: middle;"></a>
-    <a title="citas" href="citas.php"><img src="images/citas.webp" alt="citas" width="80" style="vertical-align: middle;"></a>
-    <a title="vehiculos" href="vehiculos.php"><img src="images/vehiculos.webp" alt="vehiculos" width="80" style="vertical-align: middle;"></a>
+    <a title="index" href="index.php"><img src="images/index.webp" alt="index" width="80"></a>
+    <a title="citas" href="citas.php"><img src="images/citas.webp" alt="citas" width="80"></a>
+    <a title="vehiculos" href="vehiculos.php"><img src="images/vehiculos.webp" alt="vehiculos" width="80"></a>
 
     <?php if ($is_admin): ?>
-        <a title="estaciones" href="estaciones.php"><img src="images/estaciones.webp" alt="estaciones" width="80" style="vertical-align: middle;"></a>
+        <a title="estaciones" href="estaciones.php"><img src="images/estaciones.webp" alt="estaciones" width="80"></a>
     <?php endif; ?>
 
     <?php if ($is_superadmin): ?>
-        <a title="usuarios" href="usuarios.php"><img src="images/usuarios.webp" alt="usuarios" width="80" style="vertical-align: middle;"></a>
+        <a title="usuarios" href="usuarios.php"><img src="images/usuarios.webp" alt="usuarios" width="80"></a>
     <?php endif; ?>
 
-    <a title="imprimir" href="imprimir.php"><img src="images/imprimir.webp" alt="imprimir" width="80" style="vertical-align: middle;"></a>
-    <a title="logout" href="logout.php"><img src="images/logout.webp" alt="logout" width="80" style="vertical-align: middle;"></a>
+    <a title="imprimir" href="imprimir.php"><img src="images/imprimir.webp" alt="imprimir" width="80"></a>
+    <a title="logout" href="logout.php"><img src="images/logout.webp" alt="logout" width="80"></a>
 </div>
 
 <?php if (isset($error)): ?>
@@ -151,7 +162,13 @@ usort($citas, function($a, $b) {
 <?php endif; ?>
 
 <?php if ($is_colab): ?>
+
+</br>
+
 <h2>Añadir Cita</h2>
+
+</br>
+
 <form method="POST">
     <label>Fecha:</label>
     <input type="date" name="fecha_cita" required><br><br>
@@ -187,7 +204,6 @@ usort($citas, function($a, $b) {
 <?php endif; ?>
 
 <h2>Lista de Citas Futuras</h2>
-
 <table>
 <thead>
 <tr>
@@ -202,19 +218,14 @@ usort($citas, function($a, $b) {
 <tbody>
 <?php if (!empty($citas)): ?>
     <?php foreach ($citas as $cita): ?>
+    <?php
+        $fecha_dt = DateTime::createFromFormat('Y-m-d', $cita['fecha_cita']);
+        $dias_semana = ['do','lu','ma','mi','ju','vi','sa'];
+        $dia_abrev = $fecha_dt ? $dias_semana[$fecha_dt->format('w')] : '';
+        $clase_dia = in_array($dia_abrev, ['vi','sa','do']) ? 'dia-rojo' : 'dia-normal';
+    ?>
     <tr>
-        <?php
-// Obtener día de la semana en español
-$fecha_dt = DateTime::createFromFormat('Y-m-d', $cita['fecha_cita']);
-$dias_semana = ['do','lu','ma','mi','ju','vi','sa'];
-$dia_abrev = $fecha_dt ? $dias_semana[$fecha_dt->format('w')] : '';
-
-// Colorear en rojo viernes, sábado y domingo
-$es_rojo = in_array($dia_abrev, ['vi','sa','do']);
-$color_dia = $es_rojo ? 'red' : 'black';
-?>
-<td><span style="color:<?= $color_dia ?>; font-weight:bold;"><?= $dia_abrev ?></span> - <?= formatear_fecha($cita['fecha_cita']) ?></td>
-
+        <td class="<?= $clase_dia ?>"><?= $dia_abrev ?> - <?= formatear_fecha($cita['fecha_cita']) ?></td>
         <td><?= htmlspecialchars($cita['hora_cita']) ?></td>
         <td><?= htmlspecialchars($cita['estacion_cita']) ?></td>
         <td><?= htmlspecialchars($cita['tipo_cita']) ?></td>
@@ -233,8 +244,8 @@ $color_dia = $es_rojo ? 'red' : 'black';
 </tbody>
 </table>
 
-<h4 class="small" style="margin-top:12px;">ITVControl v.1.4</h4>
-<p class="small">B174M3 // XaeK</p>
+<h4 class="small version-title" style="text-align:left; margin:4px 0;"><?= htmlspecialchars($version_info['version']) ?></h4>
+<p class="small version-author" style="text-align:left; margin:0;"><?= htmlspecialchars($version_info['author']) ?></p>
 
 </body>
 </html>

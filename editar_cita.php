@@ -42,7 +42,7 @@ if ($cita_editar === null) die("No se encontró la cita para la fecha y hora pro
 $vehiculos_file = 'vehiculos.json';
 $vehiculos = json_decode(file_get_contents($vehiculos_file), true);
 
-// ✅ MEJORA: ordenar vehículos alfabéticamente (orden natural con números)
+// Ordenar vehículos alfabéticamente (orden natural)
 usort($vehiculos, function ($a, $b) {
     return strnatcasecmp($a['vehiculo'], $b['vehiculo']);
 });
@@ -79,17 +79,52 @@ function formatear_fecha($fecha) {
     $fecha_obj = DateTime::createFromFormat('Y-m-d', $fecha);
     return $fecha_obj ? $fecha_obj->format('d/m/Y') : $fecha;
 }
-?>
 
+// Cargar versión y autor desde version.xk
+$version_text = 'v.1.4';
+$autor_text = 'B174M3 // XaeK';
+if (file_exists('version.xk')) {
+    $lines = file('version.xk', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    $version_text = $lines[0] ?? $version_text;
+    $autor_text = $lines[1] ?? $autor_text;
+}
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <link rel="shortcut icon" href="images/logo.webp">
-    <link rel="icon" sizes="64x64" href="images/logo.webp">
-    <link rel="apple-touch-icon" sices="180x180" href="images/logo.webp">
-    <meta charset="UTF-8">
-    <title>Editar Cita</title>
-    <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<title>Editar Cita</title>
+<link rel="shortcut icon" href="images/logo.webp">
+<link rel="icon" sizes="64x64" href="images/logo.webp">
+<link rel="apple-touch-icon" sizes="180x180" href="images/logo.webp">
+<link rel="stylesheet" href="style.css">
+<style>
+body { margin:15px; font-family:Arial,sans-serif; }
+
+/* Menú */
+.menu { margin-bottom:15px; }
+.menu a { margin-right:5px; }
+.menu img { width:80px; height:auto; vertical-align:middle; transition:filter 0.3s ease; }
+h1 img { vertical-align:middle; }
+
+/* Formulario */
+input, select { padding:5px; margin:2px 0; border-radius:4px; }
+input[type="submit"] { cursor:pointer; }
+
+/* Mensajes de error */
+.rojo_intenso { color:#cc0000; }
+
+/* ===== MODO OSCURO AUTOMÁTICO ===== */
+@media (prefers-color-scheme: dark) {
+    body { background:#000; color:#ddd; }
+    h1,h2,h3,h4,p,strong { color:#ddd; }
+    input, select { background:#111; color:#fff; border:1px solid #555; }
+    input[type="submit"] { background:#222; color:#fff; border:1px solid #666; }
+    .menu img:not([alt="Logo"]) { filter: invert(1) hue-rotate(180deg); }
+    h1 img { filter:none; }
+    .rojo_intenso { color:#f33; }
+}
+</style>
 
 <script>
 function validarCita(form) {
@@ -131,23 +166,21 @@ function validarCita(form) {
 </head>
 
 <body>
-<h1><img src="images/logo.webp" alt="Logo" width="30" style="vertical-align: middle;">Editar Cita</h1>
+
+</br>
+
+<h1><img src="images/logo.webp" alt="Logo" width="30"> Editar Cita</h1>
+
+</br>
 
 <div class="menu">
-    <a title="index" href="index.php"><img src="images/index.webp" alt="index" width="80"></a>
-    <a title="citas" href="citas.php"><img src="images/citas.webp" alt="citas" width="80"></a>
-    <a title="vehiculos" href="vehiculos.php"><img src="images/vehiculos.webp" alt="vehiculos" width="80"></a>
-
-    <?php if ($is_admin): ?>
-        <a title="estaciones" href="estaciones.php"><img src="images/estaciones.webp" alt="estaciones" width="80"></a>
-    <?php endif; ?>
-
-    <?php if ($is_superadmin): ?>
-        <a title="usuarios" href="usuarios.php"><img src="images/usuarios.webp" alt="usuarios" width="80"></a>
-    <?php endif; ?>
-
-    <a title="imprimir" href="imprimir.php"><img src="images/imprimir.webp" alt="imprimir" width="80"></a>
-    <a title="logout" href="logout.php"><img src="images/logout.webp" alt="logout" width="80"></a>
+    <a href="index.php"><img src="images/index.webp" alt="index"></a>
+    <a href="citas.php"><img src="images/citas.webp" alt="citas"></a>
+    <a href="vehiculos.php"><img src="images/vehiculos.webp" alt="vehiculos"></a>
+    <?php if ($is_admin): ?><a href="estaciones.php"><img src="images/estaciones.webp" alt="estaciones"></a><?php endif; ?>
+    <?php if ($is_superadmin): ?><a href="usuarios.php"><img src="images/usuarios.webp" alt="usuarios"></a><?php endif; ?>
+    <a href="imprimir.php"><img src="images/imprimir.webp" alt="imprimir"></a>
+    <a href="logout.php"><img src="images/logout.webp" alt="logout"></a>
 </div>
 
 <br>
@@ -188,10 +221,11 @@ function validarCita(form) {
 </form>
 
 <?php if (isset($error)): ?>
-    <p style="color:red;"><?= $error ?></p>
+    <p class="rojo_intenso"><?= htmlspecialchars($error) ?></p>
 <?php endif; ?>
 
-<h4 class="small" style="margin-top:12px;">ITVControl v.1.4</h4>
-<p class="small">B174M3 // XaeK</p>
+<h4 class="small" style="margin-top:12px; text-align:left;"><?= htmlspecialchars($version_text) ?></h4>
+<p class="small" style="text-align:left;"><?= htmlspecialchars($autor_text) ?></p>
+
 </body>
 </html>
