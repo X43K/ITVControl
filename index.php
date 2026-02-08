@@ -235,7 +235,11 @@ $citas_v = obtener_citas_vehiculo($v['matricula'],$citas);
 <?php if($citas_v): ?>
 <ul>
 <?php foreach($citas_v as $c): ?>
-<li>
+<li style="<?= ($proxima_itv &&
+    $c['fecha_cita']===$proxima_itv['fecha_cita'] &&
+    $c['hora_cita']===$proxima_itv['hora_cita'] &&
+    $c['vehiculo']===$proxima_itv['vehiculo'])
+    ? 'color:red;font-weight:bold;' : '' ?>">
 <strong><?= formatear_fecha($c['fecha_cita']) ?></strong>
 <?= $c['hora_cita'] ?> –
 <?= $c['estacion_cita'] ?> <?= $c['tipo_cita']==='Primera'?'1ª':'2ª' ?>
