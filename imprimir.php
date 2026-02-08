@@ -11,131 +11,80 @@ if (!isset($_SESSION['usuario'])) {
 $is_admin = isset($_SESSION['tipo']) && in_array($_SESSION['tipo'], ['Administrador', 'SuperAdministrador']);
 $is_superadmin = isset($_SESSION['tipo']) && $_SESSION['tipo'] === 'SuperAdministrador';
 
-// Verificar si el archivo vehiculos.json existe y es accesible
-$vehiculos_file = 'vehiculos.json';
-if (!file_exists($vehiculos_file)) {
-    file_put_contents($vehiculos_file, json_encode([]));
-}
-
-// Cargar vehículos desde el archivo JSON
-$vehiculos = json_decode(file_get_contents($vehiculos_file), true);
-
-// Procesar formulario de añadir vehículo si es administrador
-if ($is_admin && $_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!empty($_POST['vehiculo']) && !empty($_POST['matricula']) && !empty($_POST['estado']) && !empty($_POST['caducidad_itv']) && !empty($_POST['tipo'])) {
-        $nuevo_vehiculo = [
-            'vehiculo' => $_POST['vehiculo'],
-            'matricula' => $_POST['matricula'],
-            'tipo' => $_POST['tipo'],
-            'estado' => $_POST['estado'],
-            'caducidad_itv' => $_POST['caducidad_itv']
-        ];
-
-        $vehiculos[] = $nuevo_vehiculo;
-
-        if (file_put_contents($vehiculos_file, json_encode($vehiculos, JSON_PRETTY_PRINT))) {
-            header('Location: vehiculos.php');
-            exit();
-        } else {
-            $error = "No se pudo guardar el vehículo. Verifique los permisos del archivo.";
-        }
-    } else {
-        $error = "Todos los campos son obligatorios.";
-    }
-}
-
-// Función para calcular los días restantes para la caducidad
-function calcular_dias_restantes($caducidad_itv) {
-    $fecha_actual = new DateTime();
-    $fecha_caducidad = new DateTime($caducidad_itv);
-    $intervalo = $fecha_actual->diff($fecha_caducidad);
-    return (int)$intervalo->format('%r%a'); // puede ser negativo si ya caducó
-}
-
-// Función para obtener color y texto según estado y días restantes
-function obtener_color_y_texto($vehiculo) {
-    $estado = $vehiculo['estado'];
-    $dias_restantes = calcular_dias_restantes($vehiculo['caducidad_itv']);
-    $texto_dias = $dias_restantes . ' días';
-    $color = 'verde'; // default
-
-    if ($estado == 'BAJA') {
-        $color = 'negro';
-    } elseif ($estado == 'ITV RECHAZADA' || $dias_restantes <= 0) {
-        $color = 'rojo_intenso';
-        if ($dias_restantes <= 0) $texto_dias = "ITV CADUCADA";
-    } elseif ($dias_restantes < 10) {
-        $color = 'naranja_intenso';
-    } elseif ($dias_restantes >= 10 && $dias_restantes <= 20) {
-        $color = 'naranja_suave';
-    } elseif ($dias_restantes > 20 && $dias_restantes <= 35) {
-        $color = 'azul';
-    } else {
-        $color = 'verde';
-    }
-
-    return ['color' => $color, 'texto_dias' => $texto_dias];
-}
-
-// Ordenar vehículos: por días restantes, BAJA al final
-usort($vehiculos, function($a, $b) {
-    if ($a['estado'] == 'BAJA' && $b['estado'] != 'BAJA') return 1;
-    if ($b['estado'] == 'BAJA' && $a['estado'] != 'BAJA') return -1;
-    return calcular_dias_restantes($a['caducidad_itv']) - calcular_dias_restantes($b['caducidad_itv']);
-});
-
-// Función para formatear fecha en DD/MM/YYYY
-function formatear_fecha($fecha) {
-    $fecha_obj = DateTime::createFromFormat('Y-m-d', $fecha);
-    return $fecha_obj ? $fecha_obj->format('d/m/Y') : $fecha;
+// =====================
+// CARGAR VERSIÓN Y AUTOR
+// =====================
+$version_file = 'version.xk';
+$version = 'v.1.0';
+$autor = '';
+if(file_exists($version_file)){
+    $lines = file($version_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    if(isset($lines[0])) $version = $lines[0];
+    if(isset($lines[1])) $autor = $lines[1];
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <link rel="shortcut icon" href="images/logo.webp">
-    <link rel="icon" sizes="64x64" href="images/logo.webp">
-    <link rel="apple-touch-icon" sices="180x180" href="images/logo.webp">
-    <meta charset="UTF-8">
-    <title>Gestionar Vehículos</title>
-    <link rel="stylesheet" href="style.css">
-    <style>
-        .negro { background-color: black; color: white; }
-        .rojo_intenso { background-color: #cc0000; color: white; }
-        .naranja_intenso { background-color: #ff6600; color: white; }
-        .naranja_suave { background-color: #ffcc66; color: black; }
-        .azul { background-color: #3399ff; color: white; }
-        .verde { background-color: #4CAF50; color: white; }
-        table { border-collapse: collapse; width: 100%; }
-        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-        th { background-color: #eee; }
-    </style>
+<meta charset="UTF-8">
+<title>Impresora</title>
+<link rel="icon" href="images/logo.webp">
+<link rel="stylesheet" href="style.css">
+
+<style>
+/* Colores consistentes */
+.negro { background-color: black; color: white; }
+.rojo_intenso { background-color: #cc0000; color: white; }
+.naranja_intenso { background-color: #ff6600; color: white; }
+.naranja_suave { background-color: #ffcc66; color: black; }
+.azul { background-color: #3399ff; color: white; }
+.verde { background-color: #4CAF50; color: white; }
+
+table { border-collapse: collapse; width: 100%; }
+th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+th { background-color: #eee; }
+
+/* ===== MODO OSCURO AUTOMÁTICO ===== */
+@media (prefers-color-scheme: dark) {
+    body { background:#000; color:#ddd; }
+    h1,h2,h3,h4,p,strong { color:#ddd; }
+    th { background:#222; color:#fff; }
+    .menu img { filter: invert(1) hue-rotate(180deg); }
+    h1 img { filter:none; } /* logo.webp NO se invierte */
+}
+</style>
 </head>
 <body>
-    <h1><img src="images/logo.webp" alt="Logo" width="30" style="vertical-align: middle;">Impresora</h1>
 
-<div class="menu">
-    <a title="index" href="index.php"><img src="images/index.webp" alt="index" width="80" style="vertical-align: middle;"></a>
-    <a title="citas" href="citas.php"><img src="images/citas.webp" alt="citas" width="80" style="vertical-align: middle;"></a>
-    <a title="vehiculos" href="vehiculos.php"><img src="images/vehiculos.webp" alt="vehiculos" width="80" style="vertical-align: middle;"></a>
-
-    <?php if ($is_admin): ?>
-        <a title="estaciones" href="estaciones.php"><img src="images/estaciones.webp" alt="estaciones" width="80" style="vertical-align: middle;"></a>
-    <?php endif; ?>
-
-    <?php if ($is_superadmin): ?>
-        <a title="usuarios" href="usuarios.php"><img src="images/usuarios.webp" alt="usuarios" width="80" style="vertical-align: middle;"></a>
-    <?php endif; ?>
-
-    <a title="imprimir" href="imprimir.php"><img src="images/imprimir.webp" alt="imprimir" width="80" style="vertical-align: middle;"></a>
-    <a title="logout" href="logout.php"><img src="images/logout.webp" alt="logout" width="80" style="vertical-align: middle;"></a>
+<div class="user-info" style="position:fixed;top:10px;right:15px;text-align:right;font-size:14px;">
+    <strong><?= $_SESSION['usuario'] ?> | <?= $_SESSION['tipo'] ?></strong>
 </div>
 
-<p><a title="imprimir_caducidades" href="imprimir_caducidades.php">IMPRIMIR CADUCIDADES</a></p>
-<p><a title="imprimir_citas" href="imprimir_citas.php">IMPRIMIR CITAS</a></p>
+</br>
 
-        <h4 class="small" style="margin-top:12px;">ITVControl v.1.4</h4>
-        <p class="small">B174M3 // XaeK</p>
+<h1>
+<img src="images/logo.webp" width="30" style="vertical-align: middle;"> Impresora
+</h1>
+
+</br>
+
+<div class="menu">
+    <a href="index.php"><img src="images/index.webp" width="80"></a>
+    <a href="citas.php"><img src="images/citas.webp" width="80"></a>
+    <a href="vehiculos.php"><img src="images/vehiculos.webp" width="80"></a>
+    <?php if($is_admin): ?><a href="estaciones.php"><img src="images/estaciones.webp" width="80"></a><?php endif; ?>
+    <?php if($is_superadmin): ?><a href="usuarios.php"><img src="images/usuarios.webp" width="80"></a><?php endif; ?>
+    <a href="imprimir.php"><img src="images/imprimir.webp" width="80"></a>
+    <a href="logout.php"><img src="images/logout.webp" width="80"></a>
+</div>
+
+</br>
+
+<p><a href="imprimir_caducidades.php">IMPRIMIR CADUCIDADES</a></p>
+<p><a href="imprimir_citas.php">IMPRIMIR CITAS</a></p>
+
+<h4 class="small" style="margin-top:12px;text-align:left;"><?= htmlspecialchars($version) ?></h4>
+<p class="small" style="text-align:left;"><?= htmlspecialchars($autor) ?></p>
+
 </body>
 </html>

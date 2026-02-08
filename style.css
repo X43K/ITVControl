@@ -1,21 +1,131 @@
+/* ===========================
+   ITVControl - Estilos globales
+   =========================== */
+
+/* Fuente base y diseño general */
 body {
-    font-family: Arial, sans-serif;
+    font-family: "Segoe UI", Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f8f9fa;
+    color: #212529;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+/* Contenedores y títulos */
+h1, h2, h3, h4, p {
+    margin: 0;
+    padding: 0;
+}
+
+h1, h2 {
+    color: #0d6efd;
+}
+
+h4.small {
+    font-size: 0.9em;
+    font-weight: 600;
+}
+
+p.small {
+    font-size: 0.8em;
+    opacity: 0.8;
+}
+
+/* Tablas generales */
 table {
     width: 100%;
     border-collapse: collapse;
-}
-
-table, th, td {
-    border: 1px solid #ddd;
+    margin-top: 10px;
+    font-size: 0.95em;
 }
 
 th, td {
-    padding: 8px;
+    padding: 8px 10px;
+    border: 1px solid #dee2e6;
     text-align: left;
 }
 
-h1 {
-    color: #333;
+/* Colores según estado */
+tr.estado-verde    { background-color: #d1e7dd; color: #0f5132; }
+tr.estado-rojo     { background-color: #f8d7da; color: #842029; }
+tr.estado-naranja  { background-color: #fff3cd; color: #664d03; }
+tr.estado-azul     { background-color: #cff4fc; color: #055160; }
+
+/* Filas hover */
+tr:hover {
+    background-color: rgba(0,0,0,0.05);
+}
+
+/* Menú superior e iconos */
+nav {
+    display: flex;
+    align-items: center;
+    background-color: #ffffff;
+    border-bottom: 1px solid #ddd;
+    padding: 8px 12px;
+}
+
+nav img {
+    height: 28px;
+    margin-right: 8px;
+    transition: filter 0.3s ease;
+}
+
+nav img:not([src*="logo.webp"]) {
+    filter: none;
+}
+
+/* Bloque de versión */
+.version-title {
+    margin-top: 12px;
+    text-align: center;
+    color: #6c757d;
+}
+
+.version-author {
+    text-align: center;
+    color: #adb5bd;
+    margin-bottom: 12px;
+}
+
+/* ================
+   MODO OSCURO
+   ================ */
+@media (prefers-color-scheme: dark) {
+    body {
+        background-color: #121212;
+        color: #e4e6eb;
+    }
+
+    nav {
+        background-color: #1e1e1e;
+        border-bottom: 1px solid #333;
+    }
+
+    table, th, td {
+        border-color: #333;
+    }
+
+    tr.estado-verde    { background-color: #204530; color: #b3ffcc; }
+    tr.estado-rojo     { background-color: #4d1a1d; color: #ffb3b3; }
+    tr.estado-naranja  { background-color: #5a3f00; color: #ffd580; }
+    tr.estado-azul     { background-color: #003a4d; color: #b3e5ff; }
+
+    tr:hover {
+        background-color: rgba(255,255,255,0.05);
+    }
+
+    /* Invertir iconos del menú (excepto logo) */
+    nav img:not([src*="logo.webp"]) {
+        filter: invert(100%) brightness(150%);
+    }
+
+    .version-title {
+        color: #bbb;
+    }
+
+    .version-author {
+        color: #777;
+    }
 }

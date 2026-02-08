@@ -38,7 +38,6 @@ if (!$cita_encontrada) {
 // Procesar confirmación
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['confirmar']) && $_POST['confirmar'] === 'sí') {
-        // Eliminar cita
         unset($citas[$cita_encontrada['index']]);
         $citas = array_values($citas); // Reindexar
 
@@ -49,7 +48,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = "No se pudo eliminar la cita. Verifique los permisos del archivo.";
         }
     } else {
-        // Cancelar eliminación
         header('Location: citas.php');
         exit();
     }
@@ -60,28 +58,69 @@ function formatear_fecha($fecha) {
     $fecha_obj = DateTime::createFromFormat('Y-m-d', $fecha);
     return $fecha_obj ? $fecha_obj->format('d/m/Y') : $fecha;
 }
-?>
 
+// Cargar versión y autor desde version.xk
+$version_text = 'v.1.4';
+$autor_text = 'B174M3 // XaeK';
+if (file_exists('version.xk')) {
+    $lines = file('version.xk', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    $version_text = $lines[0] ?? $version_text;
+    $autor_text = $lines[1] ?? $autor_text;
+}
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Eliminar Cita</title>
-    <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<title>Eliminar Cita</title>
+<link rel="shortcut icon" href="images/logo.webp">
+<link rel="icon" sizes="64x64" href="images/logo.webp">
+<link rel="apple-touch-icon" sizes="180x180" href="images/logo.webp">
+<link rel="stylesheet" href="style.css">
+<style>
+body { margin:15px; font-family:Arial,sans-serif; }
+
+/* Botones */
+button { padding:8px 15px; margin-right:10px; border-radius:4px; cursor:pointer; }
+button[type="submit"] { border:1px solid #555; background:#ccc; color:#000; }
+button[type="submit"]:hover { background:#bbb; }
+
+/* Mensajes de error */
+.rojo_intenso { color:#cc0000; }
+
+/* ===== MODO OSCURO AUTOMÁTICO ===== */
+@media (prefers-color-scheme: dark) {
+    body { background:#000; color:#ddd; }
+    h1,h2,h3,h4,p,strong { color:#ddd; }
+    button { background:#222; color:#fff; border:1px solid #666; }
+    button:hover { background:#333; }
+    .rojo_intenso { color:#f33; }
+}
+</style>
 </head>
 <body>
-    <h1>Eliminar Cita</h1>
 
-    <?php if (isset($error)): ?>
-        <p style="color: red;"><?= $error ?></p>
-    <?php endif; ?>
+</br>
 
-    <p>¿Estás seguro de que deseas eliminar la cita del <strong><?= formatear_fecha($cita_encontrada['cita']['fecha_cita']) ?></strong> a las <strong><?= htmlspecialchars($cita_encontrada['cita']['hora_cita']) ?></strong> en la estación <strong><?= htmlspecialchars($cita_encontrada['cita']['estacion_cita']) ?></strong>?</p>
+<h1>Eliminar Cita</h1>
 
-    <form method="POST">
-        <button type="submit" name="confirmar" value="sí">Sí, eliminar</button>
-        <button type="submit" name="confirmar" value="no">Cancelar</button>
-    </form>
+</br>
+
+<?php if (isset($error)): ?>
+    <p class="rojo_intenso"><?= htmlspecialchars($error) ?></p>
+<?php endif; ?>
+
+<p>¿Estás seguro de que deseas eliminar la cita del <strong><?= formatear_fecha($cita_encontrada['cita']['fecha_cita']) ?></strong> a las <strong><?= htmlspecialchars($cita_encontrada['cita']['hora_cita']) ?></strong> en la estación <strong><?= htmlspecialchars($cita_encontrada['cita']['estacion_cita']) ?></strong>?</p>
+
+</br>
+
+<form method="POST">
+    <button type="submit" name="confirmar" value="sí">Sí, eliminar</button>
+    <button type="submit" name="confirmar" value="no">Cancelar</button>
+</form>
+
+<h4 class="small" style="margin-top:12px; text-align:left;"><?= htmlspecialchars($version_text) ?></h4>
+<p class="small" style="text-align:left;"><?= htmlspecialchars($autor_text) ?></p>
 
 </body>
 </html>

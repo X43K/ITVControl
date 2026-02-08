@@ -12,23 +12,18 @@ $is_superadmin = isset($_SESSION['tipo']) && $_SESSION['tipo'] === 'SuperAdminis
 
 // Cargar vehículos
 $vehiculos_file = 'vehiculos.json';
-if (!file_exists($vehiculos_file)) {
-    die("El archivo de vehículos no existe.");
-}
+if (!file_exists($vehiculos_file)) die("El archivo de vehículos no existe.");
 $vehiculos = json_decode(file_get_contents($vehiculos_file), true);
 
 // Cargar citas
 $citas_file = 'citas.json';
-if (!file_exists($citas_file)) {
-    die("El archivo de citas no existe.");
-}
+if (!file_exists($citas_file)) die("El archivo de citas no existe.");
 $citas = json_decode(file_get_contents($citas_file), true);
 
 // =====================
 // FUNCIONES
 // =====================
 
-// Calcular días restantes
 function calcular_dias_restantes($caducidad_itv) {
     $fecha_actual = new DateTime('today');
     $fecha_caducidad = new DateTime($caducidad_itv);
@@ -37,11 +32,9 @@ function calcular_dias_restantes($caducidad_itv) {
     return (int)$intervalo->format('%r%a');
 }
 
-// Obtener citas futuras de un vehículo
 function obtener_citas_vehiculo($matricula_vehiculo, $citas) {
     $fecha_actual = new DateTime();
     $resultado = [];
-
     foreach ($citas as $cita) {
         if ($cita['vehiculo'] === $matricula_vehiculo) {
             $dt = DateTime::createFromFormat('Y-m-d H:i', $cita['fecha_cita'].' '.$cita['hora_cita']);
@@ -51,35 +44,25 @@ function obtener_citas_vehiculo($matricula_vehiculo, $citas) {
             }
         }
     }
-
     usort($resultado, fn($a, $b) => $a['timestamp'] <=> $b['timestamp']);
     return $resultado;
 }
 
-// Formatear fecha
 function formatear_fecha($fecha) {
     $d = DateTime::createFromFormat('Y-m-d', $fecha);
     return $d ? $d->format('d/m/Y') : $fecha;
 }
 
-// Color y texto días
 function obtener_color_y_texto($vehiculo) {
     $estado = $vehiculo['estado'];
     $dias = calcular_dias_restantes($vehiculo['caducidad_itv']);
-
-    $color = 'verde';
-    $texto = $dias.' días';
-
-    if ($estado === 'ITV RECHAZADA') {
-        return ['color'=>'rojo_intenso','texto_dias'=>'ITV RECHAZADA'];
-    }
+    if ($estado === 'ITV RECHAZADA') return ['color'=>'rojo_intenso','texto_dias'=>'ITV RECHAZADA'];
     if ($dias < 0) return ['color'=>'rojo_intenso','texto_dias'=>'ITV CADUCADA'];
     if ($dias <= 1) return ['color'=>'rojo_intenso','texto_dias'=>$dias.' día'.($dias==1?'':'s')];
     if ($dias < 10) return ['color'=>'naranja_intenso','texto_dias'=>$dias.' días'];
     if ($dias <= 20) return ['color'=>'naranja_suave','texto_dias'=>$dias.' días'];
     if ($dias <= 35) return ['color'=>'azul','texto_dias'=>$dias.' días'];
-
-    return ['color'=>$color,'texto_dias'=>$texto];
+    return ['color'=>'verde','texto_dias'=>$dias.' días'];
 }
 
 // =====================
@@ -88,7 +71,6 @@ function obtener_color_y_texto($vehiculo) {
 $proxima_itv = null;
 $ts_min = null;
 $ahora = new DateTime();
-
 foreach ($citas as $cita) {
     $dt = DateTime::createFromFormat('Y-m-d H:i', $cita['fecha_cita'].' '.$cita['hora_cita']);
     if ($dt && $dt >= $ahora) {
@@ -100,14 +82,20 @@ foreach ($citas as $cita) {
     }
 }
 
-// Filtrar vehículos visibles
-$vehiculos_filtrados = array_filter($vehiculos, fn($v) =>
-    in_array($v['estado'], ['ACTIVO','ITV RECHAZADA'])
-);
+// Filtrar vehículos visibles y ordenar
+$vehiculos_filtrados = array_filter($vehiculos, fn($v) => in_array($v['estado'], ['ACTIVO','ITV RECHAZADA']));
+usort($vehiculos_filtrados, fn($a,$b) => calcular_dias_restantes($a['caducidad_itv']) <=> calcular_dias_restantes($b['caducidad_itv']));
 
-usort($vehiculos_filtrados, fn($a,$b) =>
-    calcular_dias_restantes($a['caducidad_itv']) <=> calcular_dias_restantes($b['caducidad_itv'])
-);
+// =====================
+// VERSION Y AUTOR
+// =====================
+$version = 'v.1.0';
+$autor = 'Desconocido';
+if (file_exists('version.xk')) {
+    $lineas = file('version.xk', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    if (isset($lineas[0])) $version = trim($lineas[0]);
+    if (isset($lineas[1])) $autor = trim($lineas[1]);
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -117,7 +105,6 @@ usort($vehiculos_filtrados, fn($a,$b) =>
 <title>Página Principal - Gestión de ITV</title>
 <link rel="icon" href="images/logo.webp">
 <link rel="stylesheet" href="style.css">
-
 <style>
 .negro{background:black;color:grey}
 .rojo_intenso{background:#cc0000;color:white}
@@ -169,9 +156,19 @@ ul{margin:0;padding-left:18px}
     width:60%;
     padding:6px;
 }
+
+/* ===== MODO OSCURO AUTOMÁTICO ===== */
+@media (prefers-color-scheme: dark) {
+    body{background:#000;color:#ddd;}
+    h1,h2,h3,h4,p,strong{color:#ddd;}
+    th{background:#222;color:#fff;}
+    .proxima-itv{background:#111;border-color:#555;color:#ddd;}
+    .proxima-itv .titulo{background:#660000;color:#fff;}
+    .menu img{filter: invert(1) hue-rotate(180deg);}
+    h1 img{filter:none;}
+}
 </style>
 </head>
-
 <body>
 
 <div class="user-info">
@@ -179,10 +176,14 @@ ul{margin:0;padding-left:18px}
     <div id="fecha-hora"></div>
 </div>
 
+</br>
+
 <h1>
 <img src="images/logo.webp" width="30">
 Página Principal - Gestión de ITV
 </h1>
+
+</br>
 
 <div class="menu">
     <a href="index.php"><img src="images/index.webp" width="80"></a>
@@ -194,21 +195,22 @@ Página Principal - Gestión de ITV
     <a href="logout.php"><img src="images/logout.webp" width="80"></a>
 </div>
 
+</br>
+
 <?php if($proxima_itv): ?>
 <div class="proxima-itv">
     <div class="titulo">PRÓXIMA ITV</div>
     <div class="fila"><div class="label">FECHA</div><div class="valor"><?= formatear_fecha($proxima_itv['fecha_cita']) ?></div></div>
     <div class="fila"><div class="label">HORA</div><div class="valor"><?= $proxima_itv['hora_cita'] ?></div></div>
     <div class="fila"><div class="label">ESTACIÓN</div>
-        <div class="valor">
-            <?= $proxima_itv['estacion_cita'] ?>
-            <?= $proxima_itv['tipo_cita']==='Primera'?'1ª':'2ª' ?>
-        </div>
+        <div class="valor"><?= $proxima_itv['estacion_cita'] ?> <?= $proxima_itv['tipo_cita']==='Primera'?'1ª':'2ª' ?></div>
     </div>
 </div>
 <?php endif; ?>
 
 <h2>Vehículos</h2>
+
+</br>
 
 <table>
 <thead>
@@ -219,7 +221,6 @@ Página Principal - Gestión de ITV
 </tr>
 </thead>
 <tbody>
-
 <?php foreach($vehiculos_filtrados as $v):
 $info = obtener_color_y_texto($v);
 $citas_v = obtener_citas_vehiculo($v['matricula'],$citas);
@@ -232,30 +233,25 @@ $citas_v = obtener_citas_vehiculo($v['matricula'],$citas);
 <td><?= formatear_fecha($v['caducidad_itv']) ?></td>
 <td><?= $info['texto_dias'] ?></td>
 <td>
-<?php if($citas_v): ?>
-<ul>
+<?php if($citas_v): ?><ul>
 <?php foreach($citas_v as $c): ?>
 <li style="<?= ($proxima_itv &&
     $c['fecha_cita']===$proxima_itv['fecha_cita'] &&
     $c['hora_cita']===$proxima_itv['hora_cita'] &&
-    $c['vehiculo']===$proxima_itv['vehiculo'])
-    ? 'color:red;font-weight:bold;' : '' ?>">
-<strong><?= formatear_fecha($c['fecha_cita']) ?></strong>
-<?= $c['hora_cita'] ?> –
-<?= $c['estacion_cita'] ?> <?= $c['tipo_cita']==='Primera'?'1ª':'2ª' ?>
+    $c['vehiculo']===$proxima_itv['vehiculo']) ? 'color:red;font-weight:bold;' : '' ?>">
+<strong style="color:inherit"><?= formatear_fecha($c['fecha_cita']) ?></strong>
+<?= $c['hora_cita'] ?> – <?= $c['estacion_cita'] ?> <?= $c['tipo_cita']==='Primera'?'1ª':'2ª' ?>
 </li>
-<?php endforeach; ?>
-</ul>
-<?php else: ?>Sin cita<?php endif; ?>
+<?php endforeach; ?></ul><?php else: ?>Sin cita<?php endif; ?>
 </td>
 </tr>
 <?php endforeach; ?>
-
 </tbody>
 </table>
 
-<h4 class="small" style="margin-top:12px;">ITVControl v.1.4</h4>
-<p class="small">B174M3 // XaeK</p>
+<!-- VERSIÓN Y AUTOR -->
+<h4 class="small version-title" style="margin-top:12px; text-align:left;"><?= htmlspecialchars($version) ?></h4>
+<p class="small version-author" style="text-align:left;"><?= htmlspecialchars($autor) ?></p>
 
 <script>
 function actualizarFechaHora(){

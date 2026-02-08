@@ -65,7 +65,7 @@ usort($vehiculos_filtrados, function($a, $b) {
 // =====================
 // CÁLCULO HORIZONTE SEGURO DE IMPRESIÓN
 // =====================
-$frecuencia_meses = 24; // por defecto bienal
+$frecuencia_meses = 24;
 $tipos_detectados = [];
 
 foreach ($vehiculos as $v) {
@@ -105,16 +105,26 @@ $mes_maximo = (int)$fecha_limite_obj->format('m');
 $anio_maximo = $fecha_limite_obj->format('Y');
 
 $fecha_impresion = date('d/m/Y H:i');
+
+// =====================
+// CARGA DE VERSIÓN Y AUTOR
+// =====================
+$version_file = 'version.xk';
+$version = 'v.1.0';
+$autor = '';
+if(file_exists($version_file)){
+    $lines = file($version_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    if(isset($lines[0])) $version = $lines[0];
+    if(isset($lines[1])) $autor = $lines[1];
+}
 ?>
 
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <link rel="shortcut icon" href="images/logo.webp">
-    <link rel="icon" sizes="64x64" href="images/logo.webp">
-    <link rel="apple-touch-icon" sices="180x180" href="images/logo.webp">
 <meta charset="UTF-8">
 <title>Hoja de Caducidad ITV</title>
+<link rel="shortcut icon" href="images/logo.webp">
 <link rel="stylesheet" href="style.css">
 <style>
 body { font-family: Arial, sans-serif; }
@@ -122,6 +132,7 @@ table { border-collapse: collapse; width: 100%; margin-top: 10px; }
 th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
 th { background-color: #eee; }
 h1 img { vertical-align: middle; }
+
 .aviso-horizonte { background: #fff3cd; border: 1px solid #ffeeba; padding: 10px; margin-bottom: 10px; font-size: 14px; }
 .formulario-filtro { margin-bottom: 15px; }
 
@@ -135,29 +146,62 @@ h1 img { vertical-align: middle; }
 
 .solo-impresion { display: none; }
 .no-imprimir { display: block; }
+
+/* ===== MODO OSCURO AUTOMÁTICO ===== */
+@media (prefers-color-scheme: dark) {
+    body { background:#000; color:#ddd; }
+    h1,h2,h3,h4,p,strong { color:#ddd; }
+    th { background:#222; color:#fff; }
+    .menu img { filter: invert(1) hue-rotate(180deg); }
+    h1 img { filter:none; } /* logo.webp no se invierte */
+
+    /* Aviso de impresión seguro en modo oscuro */
+    .aviso-horizonte {
+        background: #333; /* fondo oscuro */
+        border-color: #666; /* borde visible */
+        color: #ffd700;    /* texto amarillo brillante */
+    }
+
+    /* Botones en modo oscuro */
+    button {
+        background-color: #555;
+        color: #fff;
+        border: 1px solid #888;
+        padding: 4px 8px;
+        cursor: pointer;
+    }
+    button:hover {
+        background-color: #777;
+    }
+}
 </style>
 </head>
 <body>
 
+<div class="user-info" style="position:fixed;top:10px;right:15px;text-align:right;font-size:14px;">
+    <strong><?= $_SESSION['usuario'] ?> | <?= $_SESSION['tipo'] ?></strong>
+</div>
+
+</br></br>
+
 <h1>
     <img src="images/logo.webp" alt="Logo" width="30"> Hoja de Caducidad ITV - <?= $meses_es[(int)$mes_seleccionado] ?> <?= $anio_seleccionado ?>
 </h1>
+
+</br>
+
 <div class="menu">
-    <a title="index" href="index.php"><img src="images/index.webp" alt="index" width="80" style="vertical-align: middle;"></a>
-    <a title="citas" href="citas.php"><img src="images/citas.webp" alt="citas" width="80" style="vertical-align: middle;"></a>
-    <a title="vehiculos" href="vehiculos.php"><img src="images/vehiculos.webp" alt="vehiculos" width="80" style="vertical-align: middle;"></a>
-
-    <?php if ($is_admin): ?>
-        <a title="estaciones" href="estaciones.php"><img src="images/estaciones.webp" alt="estaciones" width="80" style="vertical-align: middle;"></a>
-    <?php endif; ?>
-
-    <?php if ($is_superadmin): ?>
-        <a title="usuarios" href="usuarios.php"><img src="images/usuarios.webp" alt="usuarios" width="80" style="vertical-align: middle;"></a>
-    <?php endif; ?>
-
-    <a title="imprimir" href="imprimir.php"><img src="images/imprimir.webp" alt="imprimir" width="80" style="vertical-align: middle;"></a>
-    <a title="logout" href="logout.php"><img src="images/logout.webp" alt="logout" width="80" style="vertical-align: middle;"></a>
+    <a href="index.php"><img src="images/index.webp" width="80"></a>
+    <a href="citas.php"><img src="images/citas.webp" width="80"></a>
+    <a href="vehiculos.php"><img src="images/vehiculos.webp" width="80"></a>
+    <?php if ($is_admin): ?><a href="estaciones.php"><img src="images/estaciones.webp" width="80"></a><?php endif; ?>
+    <?php if ($is_superadmin): ?><a href="usuarios.php"><img src="images/usuarios.webp" width="80"></a><?php endif; ?>
+    <a href="imprimir.php"><img src="images/imprimir.webp" width="80"></a>
+    <a href="logout.php"><img src="images/logout.webp" width="80"></a>
 </div>
+
+</br>
+
 <p>Fecha de impresión: <?= $fecha_impresion ?></p>
 
 <div class="formulario-filtro">
@@ -172,8 +216,8 @@ h1 img { vertical-align: middle; }
         <label>Año:
             <input type="number" name="anio" value="<?= $anio_seleccionado ?>" min="2000" max="2100">
         </label>
-    <button type="submit">Mostrar</button>
-    <button type="button" onclick="window.print()">Imprimir</button>
+        <button type="submit">Mostrar</button>
+        <button type="button" onclick="window.print()">Imprimir</button>
     </form>
 </div>
 
@@ -210,14 +254,10 @@ h1 img { vertical-align: middle; }
 </tbody>
 </table>
 
-<!-- Esto ya no se imprimirá -->
-<h4 class="small no-imprimir" style="margin-top:12px;">ITVControl v.1.4</h4>
-<p class="small no-imprimir">B174M3 // XaeK</p>
+<h4 class="small no-imprimir" style="margin-top:12px;"><?= htmlspecialchars($version) ?></h4>
+<p class="small no-imprimir"><?= htmlspecialchars($autor) ?></p>
 
-<!-- Solo visible en impresión -->
-<div class="solo-impresion" style="margin-top:10px;">
-
-</div>
+<div class="solo-impresion" style="margin-top:10px;"></div>
 
 </body>
 </html>
