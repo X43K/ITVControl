@@ -58,6 +58,7 @@ th { background-color: #eee; }
 
 <div class="user-info" style="position:fixed;top:10px;right:15px;text-align:right;font-size:14px;">
     <strong><?= $_SESSION['usuario'] ?> | <?= $_SESSION['tipo'] ?></strong>
+        <div id="fecha-hora"></div>
 </div>
 
 </br>
@@ -85,6 +86,14 @@ th { background-color: #eee; }
 
 <h4 class="small" style="margin-top:12px;text-align:left;"><?= htmlspecialchars($version) ?></h4>
 <p class="small" style="text-align:left;"><?= htmlspecialchars($autor) ?></p>
-
+<script>
+function actualizarFechaHora(){
+    const d=new Date();
+    document.getElementById('fecha-hora').innerText =
+        d.toLocaleDateString('es-ES')+' '+d.toLocaleTimeString('es-ES');
+}
+actualizarFechaHora();
+setInterval(actualizarFechaHora,1000);
+</script>
 </body>
 </html>
