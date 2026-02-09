@@ -81,11 +81,25 @@ th { background-color: #eee; }
 
 </br>
 
-<p><a href="imprimir_caducidades.php">IMPRIMIR CADUCIDADES</a></p>
-<p><a href="imprimir_citas.php">IMPRIMIR CITAS</a></p>
+<p>
+    <a href="imprimir_caducidades.php">
+        <button class="azul" style="padding:12px 20px;font-size:16px;cursor:pointer;">
+            IMPRIMIR CADUCIDADES
+        </button>
+    </a>
+</p>
+
+<p>
+    <a href="imprimir_citas.php">
+        <button class="verde" style="padding:12px 20px;font-size:16px;cursor:pointer;">
+            IMPRIMIR CITAS
+        </button>
+    </a>
+</p>
 
 <h4 class="small" style="margin-top:12px;text-align:left;"><?= htmlspecialchars($version) ?></h4>
 <p class="small" style="text-align:left;"><?= htmlspecialchars($autor) ?></p>
+
 <script>
 function actualizarFechaHora(){
     const d=new Date();
