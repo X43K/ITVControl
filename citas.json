@@ -1,9 +1,2 @@
 [
-    {
-        "fecha_cita": "2026-01-26",
-        "hora_cita": "12:15",
-        "estacion_cita": "Test",
-        "tipo_cita": "Primera",
-        "vehiculo": "1234AAA"
-    },
 ]
