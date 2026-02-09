@@ -448,10 +448,10 @@
         "vehiculo": ""
     },
     {
-        "fecha_cita": "2026-02-21",
-        "hora_cita": "11:11",
-        "estacion_cita": "Tambre",
+        "fecha_cita": "2026-04-20",
+        "hora_cita": "11:00",
+        "estacion_cita": "Cacheiras",
         "tipo_cita": "Primera",
-        "vehiculo": ""
+        "vehiculo": "7922JDP"
     }
 ]
