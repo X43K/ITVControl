@@ -178,9 +178,11 @@ h1 img { vertical-align: middle; }
 </head>
 <body>
 
-<div class="user-info" style="position:fixed;top:10px;right:15px;text-align:right;font-size:14px;">
+<div class="user-info no-imprimir" style="position:fixed;top:10px;right:15px;text-align:right;font-size:14px;">
     <strong><?= $_SESSION['usuario'] ?> | <?= $_SESSION['tipo'] ?></strong>
+    <div id="fecha-hora"></div>
 </div>
+
 
 </br></br>
 
@@ -258,6 +260,14 @@ h1 img { vertical-align: middle; }
 <p class="small no-imprimir"><?= htmlspecialchars($autor) ?></p>
 
 <div class="solo-impresion" style="margin-top:10px;"></div>
-
+<script>
+function actualizarFechaHora(){
+    const d=new Date();
+    document.getElementById('fecha-hora').innerText =
+        d.toLocaleDateString('es-ES')+' '+d.toLocaleTimeString('es-ES');
+}
+actualizarFechaHora();
+setInterval(actualizarFechaHora,1000);
+</script>
 </body>
 </html>

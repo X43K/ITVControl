@@ -152,7 +152,13 @@ th { background-color: #eee; }
 @media print {
     @page { size:A4 portrait; margin:12mm; }
     body { font-size:15px; }
-    .menu, form, button, .small { display:none !important; }
+    .menu,
+    form,
+    button,
+    .small,
+    .no-imprimir {
+        display:none !important;
+    }
     h1 { margin:0 0 6px 0; font-size:16px; }
     .print-header, .print-footer { display:block; font-size:12px; line-height:1.2; }
     tbody tr td { font-weight:bold; }
@@ -181,9 +187,11 @@ th { background-color: #eee; }
 </head>
 <body>
 
-<div class="user-info" style="position:fixed;top:10px;right:15px;text-align:right;font-size:14px;">
+<div class="user-info no-imprimir" style="position:fixed;top:10px;right:15px;text-align:right;font-size:14px;">
     <strong><?= $_SESSION['usuario'] ?> | <?= $_SESSION['tipo'] ?></strong>
+    <div id="fecha-hora"></div>
 </div>
+
 
 <h1>
     <img src="images/logo.webp" width="28" style="vertical-align: middle;">
@@ -288,6 +296,14 @@ th { background-color: #eee; }
 <!-- VERSION Y AUTOR -->
 <h4 class="small no-imprimir" style="margin-top:12px;"><?= htmlspecialchars($version) ?></h4>
 <p class="small no-imprimir"><?= htmlspecialchars($autor) ?></p>
-
+<script>
+function actualizarFechaHora(){
+    const d=new Date();
+    document.getElementById('fecha-hora').innerText =
+        d.toLocaleDateString('es-ES')+' '+d.toLocaleTimeString('es-ES');
+}
+actualizarFechaHora();
+setInterval(actualizarFechaHora,1000);
+</script>
 </body>
 </html>
