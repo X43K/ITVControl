@@ -71,8 +71,19 @@ function obtener_color_y_texto($vehiculo) {
 $proxima_itv = null;
 $ts_min = null;
 $ahora = new DateTime();
+
 foreach ($citas as $cita) {
-    $dt = DateTime::createFromFormat('Y-m-d H:i', $cita['fecha_cita'].' '.$cita['hora_cita']);
+
+    // 👉 AÑADIR ESTE FILTRO
+    if ($cita['tipo_cita'] !== 'Primera') {
+        continue;
+    }
+
+    $dt = DateTime::createFromFormat(
+        'Y-m-d H:i',
+        $cita['fecha_cita'].' '.$cita['hora_cita']
+    );
+
     if ($dt && $dt >= $ahora) {
         $ts = $dt->getTimestamp();
         if ($ts_min === null || $ts < $ts_min) {
@@ -81,6 +92,7 @@ foreach ($citas as $cita) {
         }
     }
 }
+
 
 // Filtrar vehículos visibles y ordenar
 $vehiculos_filtrados = array_filter($vehiculos, fn($v) => in_array($v['estado'], ['ACTIVO','ITV RECHAZADA']));
