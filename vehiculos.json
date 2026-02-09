@@ -1,3 +1,583 @@
 [
-{"vehiculo":"mi coche","matricula":"1234abc","tipo":"Turismo, Transporte mercancías hasta 3500 kg y cuadriciclos","estado":"ACTIVO","caducidad_itv":"2026-01-31"}
+    {
+        "vehiculo": "2332",
+        "matricula": "4976FNB",
+        "tipo": "Autobuses y microbuses",
+        "estado": "ACTIVO",
+        "caducidad_itv": "2026-08-04"
+    },
+    {
+        "vehiculo": "1978",
+        "matricula": "8489HBR",
+        "tipo": "Autobuses y microbuses",
+        "estado": "ACTIVO",
+        "caducidad_itv": "2026-07-31"
+    },
+    {
+        "vehiculo": "3277",
+        "matricula": "5670FXT",
+        "tipo": "Autobuses y microbuses",
+        "estado": "ACTIVO",
+        "caducidad_itv": "2026-08-02"
+    },
+    {
+        "vehiculo": "3308",
+        "matricula": "8529LML",
+        "tipo": "Autobuses y microbuses",
+        "estado": "ACTIVO",
+        "caducidad_itv": "2026-08-02"
+    },
+    {
+        "vehiculo": "3310",
+        "matricula": "8530LML",
+        "tipo": "Autobuses y microbuses",
+        "estado": "ACTIVO",
+        "caducidad_itv": "2026-08-02"
+    },
+    {
+        "vehiculo": "3312",
+        "matricula": "8531LML",
+        "tipo": "Autobuses y microbuses",
+        "estado": "ACTIVO",
+        "caducidad_itv": "2026-08-02"
+    },
+    {
+        "vehiculo": "3279",
+        "matricula": "3873GDN",
+        "tipo": "Autobuses y microbuses",
+        "estado": "ACTIVO",
+        "caducidad_itv": "2026-08-07"
+    },
+    {
+        "vehiculo": "1982",
+        "matricula": "8584HBR",
+        "tipo": "Autobuses y microbuses",
+        "estado": "ACTIVO",
+        "caducidad_itv": "2026-02-25"
+    },
+    {
+        "vehiculo": "2368",
+        "matricula": "2296HFC",
+        "tipo": "Autobuses y microbuses",
+        "estado": "ITV RECHAZADA",
+        "caducidad_itv": "2026-02-25"
+    },
+    {
+        "vehiculo": "3281",
+        "matricula": "3833GDN",
+        "tipo": "Autobuses y microbuses",
+        "estado": "ACTIVO",
+        "caducidad_itv": "2026-02-28"
+    },
+    {
+        "vehiculo": "3234",
+        "matricula": "5374LJS",
+        "tipo": "Autobuses y microbuses",
+        "estado": "ACTIVO",
+        "caducidad_itv": "2026-03-04"
+    },
+    {
+        "vehiculo": "3236",
+        "matricula": "5375LJS",
+        "tipo": "Autobuses y microbuses",
+        "estado": "ACTIVO",
+        "caducidad_itv": "2026-03-05"
+    },
+    {
+        "vehiculo": "3238",
+        "matricula": "5378LJS",
+        "tipo": "Autobuses y microbuses",
+        "estado": "ACTIVO",
+        "caducidad_itv": "2026-03-05"
+    },
+    {
+        "vehiculo": "3246",
+        "matricula": "5388LJS",
+        "tipo": "Autobuses y microbuses",
+        "estado": "ACTIVO",
+        "caducidad_itv": "2026-03-05"
+    },
+    {
+        "vehiculo": "3240",
+        "matricula": "5384LJS",
+        "tipo": "Autobuses y microbuses",
+        "estado": "ACTIVO",
+        "caducidad_itv": "2026-03-06"
+    },
+    {
+        "vehiculo": "3250",
+        "matricula": "5405LJS",
+        "tipo": "Autobuses y microbuses",
+        "estado": "ACTIVO",
+        "caducidad_itv": "2026-03-06"
+    },
+    {
+        "vehiculo": "2736",
+        "matricula": "0435KCX",
+        "tipo": "Autobuses y microbuses",
+        "estado": "ACTIVO",
+        "caducidad_itv": "2026-03-07"
+    },
+    {
+        "vehiculo": "3244",
+        "matricula": "5387LJS",
+        "tipo": "Autobuses y microbuses",
+        "estado": "ACTIVO",
+        "caducidad_itv": "2026-03-07"
+    },
+    {
+        "vehiculo": "1815",
+        "matricula": "8633HYY",
+        "tipo": "Autobuses y microbuses",
+        "estado": "ACTIVO",
+        "caducidad_itv": "2026-03-09"
+    },
+    {
+        "vehiculo": "2400",
+        "matricula": "5542HFB",
+        "tipo": "Autobuses y microbuses",
+        "estado": "ACTIVO",
+        "caducidad_itv": "2026-03-19"
+    },
+    {
+        "vehiculo": "3248",
+        "matricula": "5389LJS",
+        "tipo": "Autobuses y microbuses",
+        "estado": "ACTIVO",
+        "caducidad_itv": "2026-03-22"
+    },
+    {
+        "vehiculo": "3283",
+        "matricula": "3902GDN",
+        "tipo": "Autobuses y microbuses",
+        "estado": "ACTIVO",
+        "caducidad_itv": "2026-04-13"
+    },
+    {
+        "vehiculo": "3168",
+        "matricula": "4461LBV",
+        "tipo": "Autobuses y microbuses",
+        "estado": "ACTIVO",
+        "caducidad_itv": "2026-04-15"
+    },
+    {
+        "vehiculo": "2649",
+        "matricula": "7074JFB",
+        "tipo": "Autobuses y microbuses",
+        "estado": "ACTIVO",
+        "caducidad_itv": "2026-04-26"
+    },
+    {
+        "vehiculo": "1986",
+        "matricula": "3811HDF",
+        "tipo": "Autobuses y microbuses",
+        "estado": "ACTIVO",
+        "caducidad_itv": "2026-05-08"
+    },
+    {
+        "vehiculo": "2398",
+        "matricula": "7922JDP",
+        "tipo": "Autobuses y microbuses",
+        "estado": "ACTIVO",
+        "caducidad_itv": "2026-05-18"
+    },
+    {
+        "vehiculo": "3242",
+        "matricula": "5385LJS",
+        "tipo": "Autobuses y microbuses",
+        "estado": "ACTIVO",
+        "caducidad_itv": "2026-05-22"
+    },
+    {
+        "vehiculo": "1817",
+        "matricula": "8698HYY",
+        "tipo": "Autobuses y microbuses",
+        "estado": "ACTIVO",
+        "caducidad_itv": "2026-06-16"
+    },
+    {
+        "vehiculo": "1994",
+        "matricula": "2732HNF",
+        "tipo": "Autobuses y microbuses",
+        "estado": "ACTIVO",
+        "caducidad_itv": "2026-06-17"
+    },
+    {
+        "vehiculo": "LEON FR (ALVARO)",
+        "matricula": "7111LNM",
+        "tipo": "Turismo, Transporte mercanc\u00edas hasta 3500 kg y cuadriciclos",
+        "estado": "ACTIVO",
+        "caducidad_itv": "2026-06-20"
+    },
+    {
+        "vehiculo": "2424",
+        "matricula": "5969HFB",
+        "tipo": "Autobuses y microbuses",
+        "estado": "ACTIVO",
+        "caducidad_itv": "2026-06-22"
+    },
+    {
+        "vehiculo": "Keeway",
+        "matricula": "7012JMK",
+        "tipo": "Ciclomotores de 2 y 3 ruedas, motocicletas y quads\/veh\u00edculos similares y ATVs",
+        "estado": "ACTIVO",
+        "caducidad_itv": "2026-06-23"
+    },
+    {
+        "vehiculo": "886",
+        "matricula": "4632FKG",
+        "tipo": "Autobuses y microbuses",
+        "estado": "ACTIVO",
+        "caducidad_itv": "2026-06-24"
+    },
+    {
+        "vehiculo": "1990",
+        "matricula": "3854HDF",
+        "tipo": "Autobuses y microbuses",
+        "estado": "ACTIVO",
+        "caducidad_itv": "2026-06-26"
+    },
+    {
+        "vehiculo": "1996",
+        "matricula": "2733HNF",
+        "tipo": "Autobuses y microbuses",
+        "estado": "ACTIVO",
+        "caducidad_itv": "2026-06-26"
+    },
+    {
+        "vehiculo": "2374",
+        "matricula": "2324HFC",
+        "tipo": "Autobuses y microbuses",
+        "estado": "ACTIVO",
+        "caducidad_itv": "2026-06-29"
+    },
+    {
+        "vehiculo": "1992",
+        "matricula": "2713HNF",
+        "tipo": "Autobuses y microbuses",
+        "estado": "ACTIVO",
+        "caducidad_itv": "2026-07-07"
+    },
+    {
+        "vehiculo": "1502",
+        "matricula": "8930FVM",
+        "tipo": "Autobuses y microbuses",
+        "estado": "ACTIVO",
+        "caducidad_itv": "2026-07-09"
+    },
+    {
+        "vehiculo": "FOCUS",
+        "matricula": "0012FCT",
+        "tipo": "Turismo, Transporte mercanc\u00edas hasta 3500 kg y cuadriciclos",
+        "estado": "ACTIVO",
+        "caducidad_itv": "2026-07-12"
+    },
+    {
+        "vehiculo": "1984",
+        "matricula": "8659HBR",
+        "tipo": "Autobuses y microbuses",
+        "estado": "ACTIVO",
+        "caducidad_itv": "2026-07-24"
+    },
+    {
+        "vehiculo": "LEON (ALVARO)",
+        "matricula": "5333DWY",
+        "tipo": "Turismo, Transporte mercanc\u00edas hasta 3500 kg y cuadriciclos",
+        "estado": "ACTIVO",
+        "caducidad_itv": "2026-08-06"
+    },
+    {
+        "vehiculo": "LEON (MARIA)",
+        "matricula": "7537JHK",
+        "tipo": "Turismo, Transporte mercanc\u00edas hasta 3500 kg y cuadriciclos",
+        "estado": "ACTIVO",
+        "caducidad_itv": "2026-08-06"
+    },
+    {
+        "vehiculo": "3554",
+        "matricula": "1865MCH",
+        "tipo": "Autobuses y microbuses",
+        "estado": "ACTIVO",
+        "caducidad_itv": "2026-11-13"
+    },
+    {
+        "vehiculo": "3564",
+        "matricula": "3269MCT",
+        "tipo": "Autobuses y microbuses",
+        "estado": "ACTIVO",
+        "caducidad_itv": "2026-11-19"
+    },
+    {
+        "vehiculo": "3566",
+        "matricula": "6050MCT",
+        "tipo": "Autobuses y microbuses",
+        "estado": "ACTIVO",
+        "caducidad_itv": "2026-12-13"
+    },
+    {
+        "vehiculo": "BMW",
+        "matricula": "4123JKT",
+        "tipo": "Turismo, Transporte mercanc\u00edas hasta 3500 kg y cuadriciclos",
+        "estado": "ACTIVO",
+        "caducidad_itv": "2026-12-21"
+    },
+    {
+        "vehiculo": "3850",
+        "matricula": "5957MDF",
+        "tipo": "Autobuses y microbuses",
+        "estado": "ACTIVO",
+        "caducidad_itv": "2027-01-03"
+    },
+    {
+        "vehiculo": "3782",
+        "matricula": "7491LVW",
+        "tipo": "Autobuses y microbuses",
+        "estado": "ACTIVO",
+        "caducidad_itv": "2027-01-12"
+    },
+    {
+        "vehiculo": "3860",
+        "matricula": "8312MDH",
+        "tipo": "Autobuses y microbuses",
+        "estado": "ACTIVO",
+        "caducidad_itv": "2027-01-12"
+    },
+    {
+        "vehiculo": "3784",
+        "matricula": "7492LVW",
+        "tipo": "Autobuses y microbuses",
+        "estado": "ACTIVO",
+        "caducidad_itv": "2027-01-15"
+    },
+    {
+        "vehiculo": "3862",
+        "matricula": "7287MDK",
+        "tipo": "Autobuses y microbuses",
+        "estado": "ACTIVO",
+        "caducidad_itv": "2027-01-19"
+    },
+    {
+        "vehiculo": "MIATA",
+        "matricula": "2001KZJ",
+        "tipo": "Turismo, Transporte mercanc\u00edas hasta 3500 kg y cuadriciclos",
+        "estado": "ACTIVO",
+        "caducidad_itv": "2027-10-20"
+    },
+    {
+        "vehiculo": "314",
+        "matricula": "LU4343W",
+        "tipo": "Autobuses y microbuses",
+        "estado": "BAJA",
+        "caducidad_itv": ""
+    },
+    {
+        "vehiculo": "2372",
+        "matricula": "2314HFC",
+        "tipo": "Autobuses y microbuses",
+        "estado": "BAJA",
+        "caducidad_itv": ""
+    },
+    {
+        "vehiculo": "1976",
+        "matricula": "8475HBR",
+        "tipo": "Autobuses y microbuses",
+        "estado": "BAJA",
+        "caducidad_itv": ""
+    },
+    {
+        "vehiculo": "2370",
+        "matricula": "2306HFC",
+        "tipo": "Autobuses y microbuses",
+        "estado": "BAJA",
+        "caducidad_itv": ""
+    },
+    {
+        "vehiculo": "2353",
+        "matricula": "8299GRP",
+        "tipo": "Autobuses y microbuses",
+        "estado": "BAJA",
+        "caducidad_itv": ""
+    },
+    {
+        "vehiculo": "SUBARU",
+        "matricula": "6921LPV",
+        "tipo": "Turismo, Transporte mercanc\u00edas hasta 3500 kg y cuadriciclos",
+        "estado": "BAJA",
+        "caducidad_itv": ""
+    },
+    {
+        "vehiculo": "888",
+        "matricula": "4671FKG",
+        "tipo": "Autobuses y microbuses",
+        "estado": "BAJA",
+        "caducidad_itv": ""
+    },
+    {
+        "vehiculo": "1917",
+        "matricula": "9069FVM",
+        "tipo": "Autobuses y microbuses",
+        "estado": "BAJA",
+        "caducidad_itv": ""
+    },
+    {
+        "vehiculo": "1958",
+        "matricula": "1178CJH",
+        "tipo": "Autobuses y microbuses",
+        "estado": "BAJA",
+        "caducidad_itv": ""
+    },
+    {
+        "vehiculo": "1966",
+        "matricula": "0149FPJ",
+        "tipo": "Autobuses y microbuses",
+        "estado": "BAJA",
+        "caducidad_itv": ""
+    },
+    {
+        "vehiculo": "1967",
+        "matricula": "6031FPJ",
+        "tipo": "Autobuses y microbuses",
+        "estado": "BAJA",
+        "caducidad_itv": ""
+    },
+    {
+        "vehiculo": "1971",
+        "matricula": "8249FPJ",
+        "tipo": "Autobuses y microbuses",
+        "estado": "BAJA",
+        "caducidad_itv": ""
+    },
+    {
+        "vehiculo": "1972",
+        "matricula": "8468FPJ",
+        "tipo": "Autobuses y microbuses",
+        "estado": "BAJA",
+        "caducidad_itv": ""
+    },
+    {
+        "vehiculo": "1973",
+        "matricula": "8649FPJ",
+        "tipo": "Autobuses y microbuses",
+        "estado": "BAJA",
+        "caducidad_itv": ""
+    },
+    {
+        "vehiculo": "1974",
+        "matricula": "8768FPJ",
+        "tipo": "Autobuses y microbuses",
+        "estado": "BAJA",
+        "caducidad_itv": ""
+    },
+    {
+        "vehiculo": "1980",
+        "matricula": "8582HBR",
+        "tipo": "Autobuses y microbuses",
+        "estado": "BAJA",
+        "caducidad_itv": ""
+    },
+    {
+        "vehiculo": "1988",
+        "matricula": "3813HDF",
+        "tipo": "Autobuses y microbuses",
+        "estado": "BAJA",
+        "caducidad_itv": ""
+    },
+    {
+        "vehiculo": "2318",
+        "matricula": "8815DGN",
+        "tipo": "Autobuses y microbuses",
+        "estado": "BAJA",
+        "caducidad_itv": ""
+    },
+    {
+        "vehiculo": "2319",
+        "matricula": "8823DGN",
+        "tipo": "Autobuses y microbuses",
+        "estado": "BAJA",
+        "caducidad_itv": ""
+    },
+    {
+        "vehiculo": "2320",
+        "matricula": "8827DGN",
+        "tipo": "Autobuses y microbuses",
+        "estado": "BAJA",
+        "caducidad_itv": ""
+    },
+    {
+        "vehiculo": "2331",
+        "matricula": "2563FMY",
+        "tipo": "Autobuses y microbuses",
+        "estado": "BAJA",
+        "caducidad_itv": ""
+    },
+    {
+        "vehiculo": "2333",
+        "matricula": "5029FNB",
+        "tipo": "Autobuses y microbuses",
+        "estado": "BAJA",
+        "caducidad_itv": ""
+    },
+    {
+        "vehiculo": "2335",
+        "matricula": "9528FMY",
+        "tipo": "Autobuses y microbuses",
+        "estado": "BAJA",
+        "caducidad_itv": ""
+    },
+    {
+        "vehiculo": "2338",
+        "matricula": "9796FWM",
+        "tipo": "Autobuses y microbuses",
+        "estado": "BAJA",
+        "caducidad_itv": ""
+    },
+    {
+        "vehiculo": "2339",
+        "matricula": "9834FWM",
+        "tipo": "Autobuses y microbuses",
+        "estado": "BAJA",
+        "caducidad_itv": ""
+    },
+    {
+        "vehiculo": "2341",
+        "matricula": "9943FWM",
+        "tipo": "Autobuses y microbuses",
+        "estado": "BAJA",
+        "caducidad_itv": ""
+    },
+    {
+        "vehiculo": "2354",
+        "matricula": "8363GRP",
+        "tipo": "Autobuses y microbuses",
+        "estado": "BAJA",
+        "caducidad_itv": ""
+    },
+    {
+        "vehiculo": "2357",
+        "matricula": "8608GRP",
+        "tipo": "Autobuses y microbuses",
+        "estado": "BAJA",
+        "caducidad_itv": ""
+    },
+    {
+        "vehiculo": "2376",
+        "matricula": "2333HFC",
+        "tipo": "Autobuses y microbuses",
+        "estado": "BAJA",
+        "caducidad_itv": ""
+    },
+    {
+        "vehiculo": "5372",
+        "matricula": "5992CLV",
+        "tipo": "Turismo, Transporte mercanc\u00edas hasta 3500 kg y cuadriciclos",
+        "estado": "BAJA",
+        "caducidad_itv": ""
+    },
+    {
+        "vehiculo": "7079",
+        "matricula": "IB5417CJ",
+        "tipo": "Autobuses y microbuses",
+        "estado": "BAJA",
+        "caducidad_itv": ""
+    }
 ]

@@ -74,7 +74,6 @@ $ahora = new DateTime();
 
 foreach ($citas as $cita) {
 
-    // 👉 AÑADIR ESTE FILTRO
     if ($cita['tipo_cita'] !== 'Primera') {
         continue;
     }
@@ -93,7 +92,6 @@ foreach ($citas as $cita) {
     }
 }
 
-
 // Filtrar vehículos visibles y ordenar
 $vehiculos_filtrados = array_filter($vehiculos, fn($v) => in_array($v['estado'], ['ACTIVO','ITV RECHAZADA']));
 usort($vehiculos_filtrados, fn($a,$b) => calcular_dias_restantes($a['caducidad_itv']) <=> calcular_dias_restantes($b['caducidad_itv']));
@@ -107,6 +105,44 @@ if (file_exists('version.xk')) {
     $lineas = file('version.xk', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
     if (isset($lineas[0])) $version = trim($lineas[0]);
     if (isset($lineas[1])) $autor = trim($lineas[1]);
+}
+
+// =====================
+// COMPROBAR ACTUALIZACIÓN FUNCIONAL
+// =====================
+$hay_actualizacion = false;
+$github_version_url = 'https://raw.githubusercontent.com/X43K/ITVControl/main/version.xk';
+
+$opts = [
+    "http" => [
+        "method" => "GET",
+        "header" => "User-Agent: PHP/ITVControl-Updater\r\n"
+    ]
+];
+$context = stream_context_create($opts);
+$contenido_remoto = @file_get_contents($github_version_url, false, $context);
+
+$version_local_num = null;
+$version_remota_num = null;
+
+// Limpiar y extraer número de versión local
+if (preg_match('/v?(\d+\.\d+)/', $version, $m)) {
+    $version_local_num = $m[1]; // ej: "2.1"
+}
+
+// Limpiar y extraer número de versión remota
+if ($contenido_remoto !== false) {
+    $lineas_remotas = preg_split("/\r?\n/", trim($contenido_remoto));
+    if (!empty($lineas_remotas[0])) {
+        if (preg_match('/v?(\d+\.\d+)/', trim($lineas_remotas[0]), $mr)) {
+            $version_remota_num = $mr[1]; // ej: "2.2"
+        }
+    }
+}
+
+// Comparar versiones
+if ($version_local_num && $version_remota_num) {
+    $hay_actualizacion = version_compare($version_remota_num, $version_local_num, '>');
 }
 ?>
 <!DOCTYPE html>
@@ -136,6 +172,21 @@ ul{margin:0;padding-left:18px}
     right:15px;
     text-align:right;
     font-size:14px;
+}
+
+/* Botón de actualización flotante debajo del usuario */
+.update-button{
+    display:block;
+    margin-top:4px;
+    font-weight:bold;
+    text-align:right;
+}
+.update-button a{
+    color:red;
+    text-decoration:none;
+}
+.update-button a:hover{
+    text-decoration:underline;
 }
 
 /* PRÓXIMA ITV */
@@ -186,6 +237,13 @@ ul{margin:0;padding-left:18px}
 <div class="user-info">
     <strong><?= $_SESSION['usuario'] ?> | <?= $_SESSION['tipo'] ?></strong>
     <div id="fecha-hora"></div>
+    <?php if($hay_actualizacion): ?>
+        <div class="update-button">
+            <a href="https://github.com/X43K/ITVControl" target="_blank">
+                ¡Existe una actualización disponible!
+            </a>
+        </div>
+    <?php endif; ?>
 </div>
 
 </br>
