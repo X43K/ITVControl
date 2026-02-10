@@ -249,8 +249,7 @@ ul{margin:0;padding-left:18px}
 </br>
 
 <h1>
-<img src="images/logo.webp" width="30">
-Página Principal - Gestión de ITV
+<img src="images/logo.webp" width="30" style="vertical-align: middle;"> Página Principal - Gestión de ITV
 </h1>
 
 </br>
