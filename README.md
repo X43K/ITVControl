@@ -1,5 +1,5 @@
 # ITVControl
-
+<img src="https://github.com/X43K/ITVControl/blob/c343d1baa2b6a1ef822edc28d58ec07b376d64ba/images/logo.webp">
 Este proyecto permite gestionar una flota de vehículos, sus citas de ITV, las Estaciones de ITV y los usuarios que pueden acceder al sistema.
 
 ## Instrucciones de instalación
@@ -26,6 +26,9 @@ Este proyecto permite gestionar una flota de vehículos, sus citas de ITV, las E
 - SuperAdministrador - Puede hacer todo lo anterior + añadir/modificar/eliminar usuarios.
 
 ### SE RECOMIENDA EDITAR O ELIMINAR EL USUARIO `admin`. ANTES DE ELIMINARLO CREE OTRO `SuperAdministrador` PARA PODER SEGUIR GESTIONANDO LOS USUARIOS DEL SISTEMA, YA QUE ES EL UNICO QUE TIENE ESTE PERMISO.
+
+<img src="https://github.com/X43K/ITVControl/blob/1a1353d5830b926422414690ca60931f1bb142c8/images/ejemplo1.webp">
+<img src="https://github.com/X43K/ITVControl/blob/1a1353d5830b926422414690ca60931f1bb142c8/images/ejemplo2.webp">
 
 ## Cómo contribuir
 - Reporta errores en la sección Issues.
