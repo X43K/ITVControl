@@ -187,15 +187,15 @@ th { background-color: #eee; }
 </head>
 <body>
 
-<div class="user-info no-imprimir" style="position:fixed;top:10px;right:15px;text-align:right;font-size:14px;">
+<div class="user-info" style="position:fixed;top:10px;right:15px;text-align:right;font-size:14px;">
     <strong><?= $_SESSION['usuario'] ?> | <?= $_SESSION['tipo'] ?></strong>
-    <div id="fecha-hora"></div>
+        <div id="fecha-hora"></div>
 </div>
 
+</br>
 
 <h1>
-    <img src="images/logo.webp" width="28" style="vertical-align: middle;">
-    Hoja de citas ITV
+<img src="images/logo.webp" width="30" style="vertical-align: middle;"> Impresora Citas ITV
 </h1>
 
 </br>

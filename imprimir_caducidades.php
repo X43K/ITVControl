@@ -178,16 +178,15 @@ h1 img { vertical-align: middle; }
 </head>
 <body>
 
-<div class="user-info no-imprimir" style="position:fixed;top:10px;right:15px;text-align:right;font-size:14px;">
+<div class="user-info" style="position:fixed;top:10px;right:15px;text-align:right;font-size:14px;">
     <strong><?= $_SESSION['usuario'] ?> | <?= $_SESSION['tipo'] ?></strong>
-    <div id="fecha-hora"></div>
+        <div id="fecha-hora"></div>
 </div>
 
-
-</br></br>
+</br>
 
 <h1>
-    <img src="images/logo.webp" alt="Logo" width="30"> Hoja de Caducidad ITV - <?= $meses_es[(int)$mes_seleccionado] ?> <?= $anio_seleccionado ?>
+<img src="images/logo.webp" width="30" style="vertical-align: middle;"> Impresora Caducidades ITV
 </h1>
 
 </br>
@@ -251,7 +250,7 @@ h1 img { vertical-align: middle; }
 </tr>
 <?php endforeach; ?>
 <?php if(empty($vehiculos_filtrados)): ?>
-<tr><td colspan="5">No hay vehículos que cadquen en el mes seleccionado.</td></tr>
+<tr><td colspan="5">No hay vehículos que caduquen en el mes seleccionado.</td></tr>
 <?php endif; ?>
 </tbody>
 </table>
