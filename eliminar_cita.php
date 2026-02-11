@@ -7,13 +7,12 @@ if (!isset($_SESSION['usuario']) || !in_array($_SESSION['tipo'], ['Administrador
     exit();
 }
 
-// Verificar que se reciban fecha y hora de la cita
-if (!isset($_GET['fecha']) || !isset($_GET['hora'])) {
+// Verificar que se reciba el ID de la cita
+if (!isset($_GET['id']) || empty($_GET['id'])) {
     die("ID de cita no válido.");
 }
 
-$fecha = $_GET['fecha'];
-$hora = $_GET['hora'];
+$id_cita = $_GET['id'];
 
 // Cargar citas desde JSON
 $citas_file = 'citas.json';
@@ -25,7 +24,7 @@ $citas = json_decode(file_get_contents($citas_file), true);
 // Buscar la cita
 $cita_encontrada = null;
 foreach ($citas as $index => $cita) {
-    if ($cita['fecha_cita'] === $fecha && $cita['hora_cita'] === $hora) {
+    if (isset($cita['id_cita']) && $cita['id_cita'] === $id_cita) {
         $cita_encontrada = ['index' => $index, 'cita' => $cita];
         break;
     }
@@ -110,7 +109,10 @@ button[type="submit"]:hover { background:#bbb; }
     <p class="rojo_intenso"><?= htmlspecialchars($error) ?></p>
 <?php endif; ?>
 
-<p>¿Estás seguro de que deseas eliminar la cita del <strong><?= formatear_fecha($cita_encontrada['cita']['fecha_cita']) ?></strong> a las <strong><?= htmlspecialchars($cita_encontrada['cita']['hora_cita']) ?></strong> en la estación <strong><?= htmlspecialchars($cita_encontrada['cita']['estacion_cita']) ?></strong>?</p>
+<p>¿Estás seguro de que deseas eliminar la cita <strong><?= htmlspecialchars($cita_encontrada['cita']['id_cita']) ?></strong>  
+del <strong><?= formatear_fecha($cita_encontrada['cita']['fecha_cita']) ?></strong> a las  
+<strong><?= htmlspecialchars($cita_encontrada['cita']['hora_cita']) ?></strong> en la estación  
+<strong><?= htmlspecialchars($cita_encontrada['cita']['estacion_cita']) ?></strong>?</p>
 
 </br>
 

@@ -78,6 +78,21 @@ if ($is_colab && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['fecha_ci
         }
 
         if (empty($error)) {
+            // =====================
+            // GENERAR ID ÚNICO DE CITA
+            // =====================
+            $anio = substr(date('Y'), -3); // tres últimos dígitos del año (por ej. 026)
+            $prefijo = 'AA';
+            $ultimo_num = 0;
+            foreach ($citas as $c) {
+                if (isset($c['id_cita']) && preg_match('/^'.$anio.$prefijo.'(\d{3})$/', $c['id_cita'], $m)) {
+                    $num = intval($m[1]);
+                    if ($num > $ultimo_num) $ultimo_num = $num;
+                }
+            }
+            $nueva_cita['id_cita'] = $anio.$prefijo.str_pad($ultimo_num + 1, 3, '0', STR_PAD_LEFT);
+            // =====================
+
             $citas[] = $nueva_cita;
             file_put_contents($citas_file, json_encode($citas, JSON_PRETTY_PRINT));
             header('Location: citas.php');
@@ -210,6 +225,7 @@ usort($citas, fn($a,$b) => strtotime($a['fecha_cita'].' '.$a['hora_cita']) <=> s
 <table>
 <thead>
 <tr>
+    <th>ID</th>
     <th>Fecha</th>
     <th>Hora</th>
     <th>Estación</th>
@@ -228,6 +244,7 @@ usort($citas, fn($a,$b) => strtotime($a['fecha_cita'].' '.$a['hora_cita']) <=> s
         $clase_dia = in_array($dia_abrev, ['vi','sa','do']) ? 'dia-rojo' : 'dia-normal';
     ?>
     <tr>
+        <td><?= htmlspecialchars($cita['id_cita'] ?? '-') ?></td>
         <td class="<?= $clase_dia ?>"><?= $dia_abrev ?> - <?= formatear_fecha($cita['fecha_cita']) ?></td>
         <td><?= htmlspecialchars($cita['hora_cita']) ?></td>
         <td><?= htmlspecialchars($cita['estacion_cita']) ?></td>
@@ -235,14 +252,14 @@ usort($citas, fn($a,$b) => strtotime($a['fecha_cita'].' '.$a['hora_cita']) <=> s
         <td><?= htmlspecialchars(mostrarVehiculo($cita['vehiculo'], $vehiculos)) ?></td>
         <?php if ($is_admin): ?>
         <td>
-            <a href="editar_cita.php?fecha=<?= urlencode($cita['fecha_cita']) ?>&hora=<?= urlencode($cita['hora_cita']) ?>">Editar</a> |
-            <a href="eliminar_cita.php?fecha=<?= urlencode($cita['fecha_cita']) ?>&hora=<?= urlencode($cita['hora_cita']) ?>">Eliminar</a>
+            <a href="editar_cita.php?id=<?= urlencode($cita['id_cita']) ?>">Editar</a> |
+            <a href="eliminar_cita.php?id=<?= urlencode($cita['id_cita']) ?>">Eliminar</a>
         </td>
         <?php endif; ?>
     </tr>
     <?php endforeach; ?>
 <?php else: ?>
-    <tr><td colspan="<?= $is_admin ? 6 : 5 ?>">No hay citas futuras.</td></tr>
+    <tr><td colspan="<?= $is_admin ? 7 : 6 ?>">No hay citas futuras.</td></tr>
 <?php endif; ?>
 </tbody>
 </table>

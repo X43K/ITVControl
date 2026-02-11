@@ -14,14 +14,13 @@ if (
 $is_admin = in_array($_SESSION['tipo'], ['Administrador', 'SuperAdministrador']);
 $is_superadmin = $_SESSION['tipo'] === 'SuperAdministrador';
 
-// Obtener fecha y hora de la cita a editar
-if (!isset($_GET['fecha']) || !isset($_GET['hora']) || empty($_GET['fecha']) || empty($_GET['hora'])) {
+// Obtener ID de la cita a editar
+if (!isset($_GET['id']) || empty($_GET['id'])) {
     header('Location: citas.php');
     exit();
 }
 
-$fecha_cita = $_GET['fecha'];
-$hora_cita = $_GET['hora'];
+$id_cita = $_GET['id'];
 
 // Cargar citas desde JSON
 $citas_file = 'citas.json';
@@ -31,12 +30,12 @@ $citas = json_decode(file_get_contents($citas_file), true);
 // Buscar la cita a editar
 $cita_editar = null;
 foreach ($citas as &$cita) {
-    if ($cita['fecha_cita'] === $fecha_cita && $cita['hora_cita'] === $hora_cita) {
+    if (isset($cita['id_cita']) && $cita['id_cita'] === $id_cita) {
         $cita_editar = &$cita;
         break;
     }
 }
-if ($cita_editar === null) die("No se encontró la cita para la fecha y hora proporcionadas.");
+if ($cita_editar === null) die("No se encontró la cita con el ID proporcionado.");
 
 // Cargar vehículos desde JSON
 $vehiculos_file = 'vehiculos.json';
@@ -186,6 +185,8 @@ function validarCita(form) {
 <br>
 
 <form method="POST" onsubmit="return validarCita(this);">
+    <label><strong>ID de Cita:</strong> <?= htmlspecialchars($cita_editar['id_cita']) ?></label><br><br>
+
     <label>Fecha de Cita:</label>
     <input type="date" name="fecha_cita" value="<?= htmlspecialchars($cita_editar['fecha_cita']) ?>" required><br><br>
 
