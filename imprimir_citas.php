@@ -120,9 +120,10 @@ if(file_exists($version_file)){
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Impresión de Citas ITV</title>
+<title>Impresion de Citas ITV</title>
+<link rel="icon" href="images/logo.webp">
+<link rel="stylesheet" href="style.css">
 <style>
-body { font-family: Arial, sans-serif; }
 table { border-collapse: collapse; width: 100%; }
 th, td { border: 1px solid #ccc; padding: 2px 4px; font-size: 15px; text-align: left; line-height: 1.05; }
 th { background-color: #eee; }
@@ -156,7 +157,8 @@ th { background-color: #eee; }
     form,
     button,
     .small,
-    .no-imprimir {
+    .no-imprimir,
+    .user-info {
         display:none !important;
     }
     h1 { margin:0 0 6px 0; font-size:16px; }
@@ -192,26 +194,26 @@ th { background-color: #eee; }
         <div id="fecha-hora"></div>
 </div>
 
-</br>
+<br>
 
 <h1>
-<img src="images/logo.webp" width="30" style="vertical-align: middle;"> Impresora Citas ITV
+<img src="images/logo.webp" width="30" style="vertical-align: middle;"> Citas ITV
 </h1>
 
-</br>
+<br>
 
-<!-- MENU -->
+
 <div class="menu">
     <a href="index.php"><img src="images/index.webp" width="80"></a>
     <a href="citas.php"><img src="images/citas.webp" width="80"></a>
     <a href="vehiculos.php"><img src="images/vehiculos.webp" width="80"></a>
-    <?php if ($is_admin): ?><a href="estaciones.php"><img src="images/estaciones.webp" width="80"></a><?php endif; ?>
-    <?php if ($is_superadmin): ?><a href="usuarios.php"><img src="images/usuarios.webp" width="80"></a><?php endif; ?>
+    <?php if($is_admin): ?><a href="estaciones.php"><img src="images/estaciones.webp" width="80"></a><?php endif; ?>
+    <?php if($is_superadmin): ?><a href="usuarios.php"><img src="images/usuarios.webp" width="80"></a><?php endif; ?>
     <a href="imprimir.php"><img src="images/imprimir.webp" width="80"></a>
     <a href="logout.php"><img src="images/logout.webp" width="80"></a>
 </div>
 
-</br>
+<br>
 
 <!-- FORMULARIO -->
 <form method="GET" style="margin:15px 0;">
@@ -293,7 +295,6 @@ th { background-color: #eee; }
     </p>
 </div>
 
-<!-- VERSION Y AUTOR -->
 <h4 class="small no-imprimir" style="margin-top:12px;"><?= htmlspecialchars($version) ?></h4>
 <p class="small no-imprimir"><?= htmlspecialchars($autor) ?></p>
 <script>

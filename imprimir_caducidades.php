@@ -45,7 +45,7 @@ function formatear_fecha($fecha) {
 }
 
 // =====================
-// FILTRAR VEHÍCULOS QUE CADUCAN EN MES/AÑO SELECCIONADO
+// FILTRAR VEHÍCULOS
 // =====================
 $vehiculos_filtrados = array_filter($vehiculos, function($v) use ($mes_seleccionado, $anio_seleccionado) {
     $fecha = DateTime::createFromFormat('Y-m-d', $v['caducidad_itv']);
@@ -54,7 +54,7 @@ $vehiculos_filtrados = array_filter($vehiculos, function($v) use ($mes_seleccion
 });
 
 // =====================
-// ORDENAR POR FECHA DE CADUCIDAD DE MENOR A MAYOR
+// ORDENAR
 // =====================
 usort($vehiculos_filtrados, function($a, $b) {
     $fechaA = strtotime($a['caducidad_itv']);
@@ -63,7 +63,7 @@ usort($vehiculos_filtrados, function($a, $b) {
 });
 
 // =====================
-// CÁLCULO HORIZONTE SEGURO DE IMPRESIÓN
+// HORIZONTE SEGURO
 // =====================
 $frecuencia_meses = 24;
 $tipos_detectados = [];
@@ -71,28 +71,22 @@ $tipos_detectados = [];
 foreach ($vehiculos as $v) {
     $tipo = strtolower($v['tipo'] ?? '');
 
-    if (
-        str_contains($tipo, 'autobus') ||
+    if (str_contains($tipo, 'autobus') ||
         str_contains($tipo, 'microbus') ||
         str_contains($tipo, 'mercador') ||
         str_contains($tipo, 'tractora') ||
-        str_contains($tipo, 'remolque')
-    ) {
+        str_contains($tipo, 'remolque')) {
         $frecuencia_meses = min($frecuencia_meses, 6);
         $tipos_detectados[] = 'Semestral';
-    } elseif (
-        str_contains($tipo, 'turismo') ||
-        str_contains($tipo, 'taxi') ||
-        str_contains($tipo, 'agricola') ||
-        str_contains($tipo, 'obras')
-    ) {
+    } elseif (str_contains($tipo, 'turismo') ||
+              str_contains($tipo, 'taxi') ||
+              str_contains($tipo, 'agricola') ||
+              str_contains($tipo, 'obras')) {
         $frecuencia_meses = min($frecuencia_meses, 12);
         $tipos_detectados[] = 'Anual';
-    } elseif (
-        str_contains($tipo, 'moto') ||
-        str_contains($tipo, 'quad') ||
-        str_contains($tipo, 'ciclomotor')
-    ) {
+    } elseif (str_contains($tipo, 'moto') ||
+              str_contains($tipo, 'quad') ||
+              str_contains($tipo, 'ciclomotor')) {
         $frecuencia_meses = min($frecuencia_meses, 24);
         $tipos_detectados[] = 'Bienal';
     }
@@ -107,7 +101,7 @@ $anio_maximo = $fecha_limite_obj->format('Y');
 $fecha_impresion = date('d/m/Y H:i');
 
 // =====================
-// CARGA DE VERSIÓN Y AUTOR
+// VERSIÓN
 // =====================
 $version_file = 'version.xk';
 $version = 'v.1.0';
@@ -122,56 +116,74 @@ if(file_exists($version_file)){
 <!DOCTYPE html>
 <html lang="es">
 <head>
+<head>
 <meta charset="UTF-8">
 <title>Hoja de Caducidad ITV</title>
-<link rel="shortcut icon" href="images/logo.webp">
+<link rel="icon" href="images/logo.webp">
 <link rel="stylesheet" href="style.css">
 <style>
-body { font-family: Arial, sans-serif; }
+
 table { border-collapse: collapse; width: 100%; margin-top: 10px; }
-th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+
+th, td {
+    border: 1px solid #ccc;
+    padding: 2px 4px;
+    font-size: 15px;
+    text-align: left;
+    line-height: 1.05;
+}
+
 th { background-color: #eee; }
-h1 img { vertical-align: middle; }
+
+.print-header, .print-footer { display:none; }
 
 .aviso-horizonte { background: #fff3cd; border: 1px solid #ffeeba; padding: 10px; margin-bottom: 10px; font-size: 14px; }
 .formulario-filtro { margin-bottom: 15px; }
 
-/* Impresión */
+/* IMPRESIÓN IGUAL QUE EL PRIMERO */
 @media print {
-    .aviso-horizonte, .formulario-filtro, .menu, .no-imprimir { 
-        display: none !important; 
+    @page { size:A4 portrait; margin:12mm; }
+    body { font-size:15px; }
+
+    .menu,
+    .formulario-filtro,
+    .aviso-horizonte,
+    button,
+    .small,
+    .no-imprimir,
+    .user-info {
+        display:none !important;
     }
-    .solo-impresion { display: block !important; }
+
+    h1 { 
+    margin:0 0 6px 0; 
+    font-size:16px; 
+    color:#000 !important;
+    }
+
+    .print-header, .print-footer {
+        display:block;
+        font-size:12px;
+        line-height:1.2;
+    }
+
+    tbody tr td { font-weight:bold; }
+
+    table,tr,td,th { page-break-inside:avoid !important; }
 }
 
-.solo-impresion { display: none; }
-.no-imprimir { display: block; }
-
-/* ===== MODO OSCURO AUTOMÁTICO ===== */
+/* MODO OSCURO */
 @media (prefers-color-scheme: dark) {
     body { background:#000; color:#ddd; }
     h1,h2,h3,h4,p,strong { color:#ddd; }
     th { background:#222; color:#fff; }
     .menu img { filter: invert(1) hue-rotate(180deg); }
-    h1 img { filter:none; } /* logo.webp no se invierte */
+    h1 img { filter:none; }
 
-    /* Aviso de impresión seguro en modo oscuro */
     .aviso-horizonte {
-        background: #333; /* fondo oscuro */
-        border-color: #666; /* borde visible */
-        color: #ffd700;    /* texto amarillo brillante */
-    }
-
-    /* Botones en modo oscuro */
-    button {
-        background-color: #555;
-        color: #fff;
-        border: 1px solid #888;
-        padding: 4px 8px;
-        cursor: pointer;
-    }
-    button:hover {
-        background-color: #777;
+        background: #333;
+        border-color: #666;
+        color: #ffd700;
     }
 }
 </style>
@@ -183,51 +195,54 @@ h1 img { vertical-align: middle; }
         <div id="fecha-hora"></div>
 </div>
 
-</br>
+<br>
 
 <h1>
-<img src="images/logo.webp" width="30" style="vertical-align: middle;"> Impresora Caducidades ITV
+<img src="images/logo.webp" width="30" style="vertical-align: middle;"> Caducidades ITV
 </h1>
 
-</br>
+<br>
+
 
 <div class="menu">
     <a href="index.php"><img src="images/index.webp" width="80"></a>
     <a href="citas.php"><img src="images/citas.webp" width="80"></a>
     <a href="vehiculos.php"><img src="images/vehiculos.webp" width="80"></a>
-    <?php if ($is_admin): ?><a href="estaciones.php"><img src="images/estaciones.webp" width="80"></a><?php endif; ?>
-    <?php if ($is_superadmin): ?><a href="usuarios.php"><img src="images/usuarios.webp" width="80"></a><?php endif; ?>
+    <?php if($is_admin): ?><a href="estaciones.php"><img src="images/estaciones.webp" width="80"></a><?php endif; ?>
+    <?php if($is_superadmin): ?><a href="usuarios.php"><img src="images/usuarios.webp" width="80"></a><?php endif; ?>
     <a href="imprimir.php"><img src="images/imprimir.webp" width="80"></a>
     <a href="logout.php"><img src="images/logout.webp" width="80"></a>
 </div>
 
-</br>
-
-<p>Fecha de impresión: <?= $fecha_impresion ?></p>
+<br>
 
 <div class="formulario-filtro">
-    <form method="GET">
-        <label>Mes: 
-            <select name="mes">
-                <?php for($m=1;$m<=12;$m++): ?>
-                    <option value="<?= $m ?>" <?= $m==$mes_seleccionado?'selected':'' ?>><?= $meses_es[$m] ?></option>
-                <?php endfor; ?>
-            </select>
-        </label>
-        <label>Año:
-            <input type="number" name="anio" value="<?= $anio_seleccionado ?>" min="2000" max="2100">
-        </label>
-        <button type="submit">Mostrar</button>
-        <button type="button" onclick="window.print()">Imprimir</button>
-    </form>
+<form method="GET">
+    <label>Mes:
+        <select name="mes">
+            <?php for($m=1;$m<=12;$m++): ?>
+                <option value="<?= $m ?>" <?= $m==$mes_seleccionado?'selected':'' ?>><?= $meses_es[$m] ?></option>
+            <?php endfor; ?>
+        </select>
+    </label>
+    <label>Año:
+        <input type="number" name="anio" value="<?= $anio_seleccionado ?>" min="2000" max="2100">
+    </label>
+    <button type="submit">Mostrar</button>
+    <button type="button" onclick="window.print()">Imprimir</button>
+</form>
 </div>
 
 <?php if (!empty($tipos_detectados)): ?>
 <div class="aviso-horizonte">
-    ⚠️ Para que aparezcan <strong>todos los vehículos</strong>, es seguro imprimir
-    <strong><?= $meses_es[$mes_maximo] ?> <?= $anio_maximo ?></strong> (frecuencia más restrictiva detectada).
+⚠️ Para que aparezcan todos los vehículos es seguro imprimir
+<strong><?= $meses_es[$mes_maximo] ?> <?= $anio_maximo ?></strong>.
 </div>
 <?php endif; ?>
+
+<div class="print-header">
+<?= $meses_es[(int)$mes_seleccionado] ?> <?= $anio_seleccionado ?> — Impreso el <?= $fecha_impresion ?>
+</div>
 
 <table>
 <thead>
@@ -255,10 +270,14 @@ h1 img { vertical-align: middle; }
 </tbody>
 </table>
 
+<div class="print-footer">
+<p><strong>Aviso importante:</strong><br>
+Le informamos que la información mostrada corresponde al mes seleccionado y puede variar según modificaciones posteriores.
+</p>
+</div>
+
 <h4 class="small no-imprimir" style="margin-top:12px;"><?= htmlspecialchars($version) ?></h4>
 <p class="small no-imprimir"><?= htmlspecialchars($autor) ?></p>
-
-<div class="solo-impresion" style="margin-top:10px;"></div>
 <script>
 function actualizarFechaHora(){
     const d=new Date();
