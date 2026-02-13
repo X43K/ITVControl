@@ -61,13 +61,14 @@ th { background-color: #eee; }
         <div id="fecha-hora"></div>
 </div>
 
-</br>
+<br>
 
 <h1>
 <img src="images/logo.webp" width="30" style="vertical-align: middle;"> Impresora
 </h1>
 
-</br>
+<br>
+
 
 <div class="menu">
     <a href="index.php"><img src="images/index.webp" width="80"></a>
@@ -79,7 +80,7 @@ th { background-color: #eee; }
     <a href="logout.php"><img src="images/logout.webp" width="80"></a>
 </div>
 
-</br>
+<br>
 
 <p>
     <a href="imprimir_caducidades.php">
@@ -99,7 +100,6 @@ th { background-color: #eee; }
 
 <h4 class="small" style="margin-top:12px;text-align:left;"><?= htmlspecialchars($version) ?></h4>
 <p class="small" style="text-align:left;"><?= htmlspecialchars($autor) ?></p>
-
 <script>
 function actualizarFechaHora(){
     const d=new Date();
