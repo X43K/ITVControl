@@ -99,11 +99,11 @@ button[type="submit"]:hover { background:#bbb; }
 </head>
 <body>
 
-</br>
+<br>
 
 <h1>Eliminar Cita</h1>
 
-</br>
+<br>
 
 <?php if (isset($error)): ?>
     <p class="rojo_intenso"><?= htmlspecialchars($error) ?></p>
@@ -114,7 +114,7 @@ del <strong><?= formatear_fecha($cita_encontrada['cita']['fecha_cita']) ?></stro
 <strong><?= htmlspecialchars($cita_encontrada['cita']['hora_cita']) ?></strong> en la estación  
 <strong><?= htmlspecialchars($cita_encontrada['cita']['estacion_cita']) ?></strong>?</p>
 
-</br>
+<br>
 
 <form method="POST">
     <button type="submit" name="confirmar" value="sí">Sí, eliminar</button>

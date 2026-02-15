@@ -129,6 +129,11 @@ th{background:#eee}
     .menu img{filter: invert(1) hue-rotate(180deg)}
     h1 img{filter:none} /* logo.webp NO se invierte */
 }
+  body {
+    margin: 15px;       /* margen superior, inferior, izquierdo y derecho */
+    font-family: Arial, sans-serif; /* fuente consistente */
+}
+
 </style>
 </head>
 <body>
@@ -138,13 +143,13 @@ th{background:#eee}
         <div id="fecha-hora"></div>
 </div>
 
-</br>
+<br>
 
 <h1>
 <img src="images/logo.webp" width="30" style="vertical-align: middle;"> Gestionar Vehículos
 </h1>
 
-</br>
+<br>
 
 <div class="menu">
     <a href="index.php"><img src="images/index.webp" width="80"></a>
@@ -162,11 +167,11 @@ th{background:#eee}
 
 <?php if($is_colab): ?>
 
-</br>
+<br>
 
 <h2>Añadir Vehículo</h2>
 
-</br>
+<br>
 
 <form method="POST">
     <label>Vehículo:</label><input type="text" name="vehiculo" required><br><br>

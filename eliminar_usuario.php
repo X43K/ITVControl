@@ -93,11 +93,11 @@ button { padding:6px 12px; margin:2px; border-radius:4px; cursor:pointer; }
 </head>
 <body>
 
-</br>
+<br>
 
 <h1>Eliminar Usuario</h1>
 
-</br>
+<br>
 
 <?php if (isset($error)): ?>
     <p class="rojo_intenso"><?= htmlspecialchars($error) ?></p>
@@ -105,7 +105,7 @@ button { padding:6px 12px; margin:2px; border-radius:4px; cursor:pointer; }
 
 <p>¿Estás seguro de que deseas eliminar al usuario <strong><?= htmlspecialchars($usuario_encontrado['usuario']['usuario']) ?></strong>?</p>
 
-</br>
+<br>
 
 <form method="POST">
     <button type="submit" name="confirmar" value="sí">Sí, eliminar</button>

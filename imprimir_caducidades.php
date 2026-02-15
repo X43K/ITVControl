@@ -186,6 +186,11 @@ th { background-color: #eee; }
         color: #ffd700;
     }
 }
+  body {
+    margin: 15px;       /* margen superior, inferior, izquierdo y derecho */
+    font-family: Arial, sans-serif; /* fuente consistente */
+}
+
 </style>
 </head>
 <body>
