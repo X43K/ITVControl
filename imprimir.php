@@ -52,6 +52,11 @@ th { background-color: #eee; }
     .menu img { filter: invert(1) hue-rotate(180deg); }
     h1 img { filter:none; } /* logo.webp NO se invierte */
 }
+  body {
+    margin: 15px;       /* margen superior, inferior, izquierdo y derecho */
+    font-family: Arial, sans-serif; /* fuente consistente */
+}
+
 </style>
 </head>
 <body>

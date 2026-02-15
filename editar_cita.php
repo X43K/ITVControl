@@ -102,7 +102,7 @@ body { margin:15px; font-family:Arial,sans-serif; }
 
 /* Menú */
 .menu { margin-bottom:15px; }
-.menu a { margin-right:5px; }
+.menu a { margin-right:0px; }
 .menu img { width:80px; height:auto; vertical-align:middle; transition:filter 0.3s ease; }
 h1 img { vertical-align:middle; }
 
@@ -165,21 +165,27 @@ function validarCita(form) {
 </head>
 
 <body>
+<div class="user-info" style="position:fixed;top:10px;right:15px;text-align:right;font-size:14px;">
+    <strong><?= htmlspecialchars($_SESSION['usuario']) ?> | <?= htmlspecialchars($_SESSION['tipo']) ?></strong>
+    <div id="fecha-hora"></div>
+</div>
+<br>
 
-</br>
-
-<h1><img src="images/logo.webp" alt="Logo" width="30"> Editar Cita</h1>
-
-</br>
+<h1><img src="images/logo.webp" alt="Logo" width="30" style="vertical-align: middle;"> Editar Cita</h1>
+<br>
 
 <div class="menu">
-    <a href="index.php"><img src="images/index.webp" alt="index"></a>
-    <a href="citas.php"><img src="images/citas.webp" alt="citas"></a>
-    <a href="vehiculos.php"><img src="images/vehiculos.webp" alt="vehiculos"></a>
-    <?php if ($is_admin): ?><a href="estaciones.php"><img src="images/estaciones.webp" alt="estaciones"></a><?php endif; ?>
-    <?php if ($is_superadmin): ?><a href="usuarios.php"><img src="images/usuarios.webp" alt="usuarios"></a><?php endif; ?>
-    <a href="imprimir.php"><img src="images/imprimir.webp" alt="imprimir"></a>
-    <a href="logout.php"><img src="images/logout.webp" alt="logout"></a>
+    <a title="index" href="index.php"><img src="images/index.webp" alt="index" width="80"></a>
+    <a title="citas" href="citas.php"><img src="images/citas.webp" alt="citas" width="80"></a>
+    <a title="vehiculos" href="vehiculos.php"><img src="images/vehiculos.webp" alt="vehiculos" width="80"></a>
+    <?php if ($is_admin): ?>
+        <a title="estaciones" href="estaciones.php"><img src="images/estaciones.webp" alt="estaciones" width="80"></a>
+    <?php endif; ?>
+    <?php if ($is_superadmin): ?>
+        <a title="usuarios" href="usuarios.php"><img src="images/usuarios.webp" alt="usuarios" width="80"></a>
+    <?php endif; ?>
+    <a title="imprimir" href="imprimir.php"><img src="images/imprimir.webp" alt="imprimir" width="80"></a>
+    <a title="logout" href="logout.php"><img src="images/logout.webp" alt="logout" width="80"></a>
 </div>
 
 <br>

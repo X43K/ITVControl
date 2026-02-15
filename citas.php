@@ -78,10 +78,7 @@ if ($is_colab && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['fecha_ci
         }
 
         if (empty($error)) {
-            // =====================
-            // GENERAR ID ÚNICO DE CITA
-            // =====================
-            $anio = substr(date('Y'), -3); // tres últimos dígitos del año (por ej. 026)
+            $anio = substr(date('Y'), -3);
             $prefijo = 'AA';
             $ultimo_num = 0;
             foreach ($citas as $c) {
@@ -91,8 +88,6 @@ if ($is_colab && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['fecha_ci
                 }
             }
             $nueva_cita['id_cita'] = $anio.$prefijo.str_pad($ultimo_num + 1, 3, '0', STR_PAD_LEFT);
-            // =====================
-
             $citas[] = $nueva_cita;
             file_put_contents($citas_file, json_encode($citas, JSON_PRETTY_PRINT));
             header('Location: citas.php');
@@ -135,78 +130,84 @@ usort($citas, fn($a,$b) => strtotime($a['fecha_cita'].' '.$a['hora_cita']) <=> s
 <title>Gestionar Citas</title>
 <link rel="stylesheet" href="style.css">
 <style>
+/* ===== MARGEN Y TIPOGRAFÍA (igual que usuarios.php) ===== */
+body { 
+    margin: 15px; 
+    font-family: Arial, sans-serif; 
+}
+
 /* ===== COLORES DÍAS ===== */
 .dia-rojo { color: red; font-weight:bold; }
 .dia-normal { color: inherit; font-weight:bold; }
+
+/* ===== TABLAS ===== */
+table { border-collapse: collapse; width: 100%; }
+th, td { border: 1px solid #ccc; padding: 8px; vertical-align: top; }
+th { background: #eee; }
+
+/* ===== INPUTS Y SELECT ===== */
+input, select { padding:5px; margin:2px 0; border-radius:4px; }
+input[type="submit"] { cursor:pointer; }
 
 /* ===== MODO OSCURO AUTOMÁTICO ===== */
 @media (prefers-color-scheme: dark) {
     body { background:#000; color:#ddd; }
     h1, h2, h3, h4, p, strong { color:#ddd; }
-    .menu a img:not([alt="Logo"]) { filter: invert(1); }
+    th { background:#222; color:#fff; }
+    input, select { background:#111; color:#fff; border:1px solid #555; }
+    input[type="submit"] { background:#222; color:#fff; border:1px solid #666; }
+    .menu a img:not([alt="Logo"]) { filter: invert(1) hue-rotate(180deg); }
 }
 </style>
 </head>
 <body>
 <div class="user-info" style="position:fixed;top:10px;right:15px;text-align:right;font-size:14px;">
-    <strong><?= $_SESSION['usuario'] ?> | <?= $_SESSION['tipo'] ?></strong>
-        <div id="fecha-hora"></div>
+    <strong><?= htmlspecialchars($_SESSION['usuario']) ?> | <?= htmlspecialchars($_SESSION['tipo']) ?></strong>
+    <div id="fecha-hora"></div>
 </div>
-</br>
+<br>
 
 <h1><img src="images/logo.webp" alt="Logo" width="30" style="vertical-align: middle;"> Gestionar Citas de ITV</h1>
-
-</br>
+<br>
 
 <div class="menu">
     <a title="index" href="index.php"><img src="images/index.webp" alt="index" width="80"></a>
     <a title="citas" href="citas.php"><img src="images/citas.webp" alt="citas" width="80"></a>
     <a title="vehiculos" href="vehiculos.php"><img src="images/vehiculos.webp" alt="vehiculos" width="80"></a>
-
     <?php if ($is_admin): ?>
         <a title="estaciones" href="estaciones.php"><img src="images/estaciones.webp" alt="estaciones" width="80"></a>
     <?php endif; ?>
-
     <?php if ($is_superadmin): ?>
         <a title="usuarios" href="usuarios.php"><img src="images/usuarios.webp" alt="usuarios" width="80"></a>
     <?php endif; ?>
-
     <a title="imprimir" href="imprimir.php"><img src="images/imprimir.webp" alt="imprimir" width="80"></a>
     <a title="logout" href="logout.php"><img src="images/logout.webp" alt="logout" width="80"></a>
 </div>
 
 <?php if (isset($error)): ?>
-    <p style="color:red;"><?= $error ?></p>
+    <p class="rojo_intenso"><?= htmlspecialchars($error) ?></p>
 <?php endif; ?>
 
 <?php if ($is_colab): ?>
-
-</br>
-
+<br>
 <h2>Añadir Cita</h2>
-
-</br>
-
+<br>
 <form method="POST">
     <label>Fecha:</label>
     <input type="date" name="fecha_cita" required><br><br>
-
     <label>Hora:</label>
     <input type="time" name="hora_cita" required><br><br>
-
     <label>Estación:</label>
     <select name="estacion_cita" required>
         <?php foreach ($estaciones as $estacion): ?>
             <option value="<?= htmlspecialchars($estacion) ?>"><?= htmlspecialchars($estacion) ?></option>
         <?php endforeach; ?>
     </select><br><br>
-
     <label>Tipo:</label>
     <select name="tipo_cita">
         <option value="Primera">Primera</option>
         <option value="Segunda">Segunda</option>
     </select><br><br>
-
     <label>Vehículo:</label>
     <select name="vehiculo">
         <option value="">Sin asignar</option>
@@ -216,7 +217,6 @@ usort($citas, fn($a,$b) => strtotime($a['fecha_cita'].' '.$a['hora_cita']) <=> s
             </option>
         <?php endforeach; ?>
     </select><br><br>
-
     <input type="submit" value="Añadir Cita">
 </form>
 <?php endif; ?>
@@ -236,8 +236,7 @@ usort($citas, fn($a,$b) => strtotime($a['fecha_cita'].' '.$a['hora_cita']) <=> s
 </thead>
 <tbody>
 <?php if (!empty($citas)): ?>
-    <?php foreach ($citas as $cita): ?>
-    <?php
+    <?php foreach ($citas as $cita):
         $fecha_dt = DateTime::createFromFormat('Y-m-d', $cita['fecha_cita']);
         $dias_semana = ['do','lu','ma','mi','ju','vi','sa'];
         $dia_abrev = $fecha_dt ? $dias_semana[$fecha_dt->format('w')] : '';
@@ -264,9 +263,11 @@ usort($citas, fn($a,$b) => strtotime($a['fecha_cita'].' '.$a['hora_cita']) <=> s
 </tbody>
 </table>
 
-<h4 class="small version-title" style="text-align:left; margin:4px 0;"><?= htmlspecialchars($version_info['version']) ?></h4>
-<p class="small version-author" style="text-align:left; margin:0;"><?= htmlspecialchars($version_info['author']) ?></p>
+<h4 class="small" style="text-align:left; margin:4px 0;"><?= htmlspecialchars($version_info['version']) ?></h4>
+<p class="small" style="text-align:left; margin:0;"><?= htmlspecialchars($version_info['author']) ?></p>
+
 <script>
+// Actualizar fecha y hora
 function actualizarFechaHora(){
     const d=new Date();
     document.getElementById('fecha-hora').innerText =

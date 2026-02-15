@@ -65,7 +65,7 @@ body { margin:15px; font-family:Arial,sans-serif; }
 
 /* Menú */
 .menu { margin-bottom:15px; }
-.menu a { margin-right:5px; }
+.menu a { margin-right:0px; }
 .menu img { width:80px; height:auto; vertical-align:middle; transition:filter 0.3s ease; }
 h1 img { vertical-align:middle; }
 
@@ -110,7 +110,34 @@ a { text-decoration:underline; }
 /* PRÓXIMA ITV placeholder */
 .proxima-itv { display:none; }
 
-/* ===== MODO OSCURO ===== */
+/* ===== CASILLA PREMIUM INFO USUARIOS ===== */
+.info-usuarios {
+    flex:1;
+    padding:20px;
+    border:2px solid #4a90e2;
+    border-radius:12px;
+    background: linear-gradient(135deg, #f0f8ff, #dbe9ff);
+    box-shadow: 2px 2px 12px rgba(0,0,0,0.15);
+    font-size:14px;
+    line-height:1.5;
+    color: #000;
+    transition: all 0.3s ease;
+    position: relative;
+}
+.info-usuarios::before {
+    content: "\2139"; /* Ícono de información ℹ */
+    font-size: 22px;
+    color: #4a90e2;
+    position: absolute;
+    top:10px;
+    left:10px;
+}
+.info-usuarios:hover {
+    transform: translateY(-2px);
+    box-shadow: 4px 4px 14px rgba(0,0,0,0.25);
+}
+
+/* Modo oscuro */
 @media (prefers-color-scheme: dark) {
     body { background:#000; color:#ddd; }
     h1,h2,h3,h4,p,strong { color:#ddd; }
@@ -120,6 +147,17 @@ a { text-decoration:underline; }
     .menu img:not([alt="Logo"]) { filter: invert(1) hue-rotate(180deg); }
     h1 img { filter:none; }
     .rojo_intenso { color:#f33; }
+
+    /* Casilla modo oscuro */
+    .info-usuarios {
+        border:2px solid #3399ff;
+        background: linear-gradient(135deg, #111827, #1e293b);
+        box-shadow: 2px 2px 12px rgba(0,0,0,0.5);
+        color:#ddd;
+    }
+    .info-usuarios::before {
+        color:#3399ff;
+    }
 }
 </style>
 </head>
@@ -133,9 +171,7 @@ a { text-decoration:underline; }
 <br>
 
 <h1>
-    <img src="images/logo.webp" alt="Logo" width="30">
-    Gestionar Usuarios
-</h1>
+    <img src="images/logo.webp" alt="Logo" width="30"> Gestionar Usuarios</h1>
 <br>
 
 <div class="menu">
@@ -159,39 +195,54 @@ a { text-decoration:underline; }
 
 <h2>Añadir Usuario</h2>
 <br>
-<form method="POST">
-    <label>Usuario:</label><input type="text" name="usuario" required><br><br>
 
-    <label>Contraseña:</label>
-    <div style="position:relative; display:inline-block;">
-      <input type="password" id="contraseña" name="contraseña" required style="padding-right:35px;">
-      <svg id="togglePass1" class="eye-icon" onclick="togglePassword('contraseña', 'togglePass1')" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-          <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12zm11 4a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/>
-          <circle cx="12" cy="12" r="2"/>
-      </svg>
+<div style="display:flex; gap:20px; align-items:flex-start;">
+
+    <!-- Formulario -->
+    <form method="POST" style="flex:1;">
+        <label>Usuario:</label><input type="text" name="usuario" required><br><br>
+
+        <label>Contraseña:</label>
+        <div style="position:relative; display:inline-block;">
+          <input type="password" id="contraseña" name="contraseña" required style="padding-right:35px;">
+          <svg id="togglePass1" class="eye-icon" onclick="togglePassword('contraseña', 'togglePass1')" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+              <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12zm11 4a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/>
+              <circle cx="12" cy="12" r="2"/>
+          </svg>
+        </div>
+        <br><br>
+
+        <label>Confirmar Contraseña:</label>
+        <div style="position:relative; display:inline-block;">
+          <input type="password" id="confirmar_contraseña" name="confirmar_contraseña" required style="padding-right:35px;">
+          <svg id="togglePass2" class="eye-icon" onclick="togglePassword('confirmar_contraseña', 'togglePass2')" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+              <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12zm11 4a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/>
+              <circle cx="12" cy="12" r="2"/>
+          </svg>
+        </div>
+        <br><br>
+
+        <label>Tipo:</label>
+        <select name="tipo">
+            <option value="Usuario">Usuario</option>
+            <option value="Colaborador">Colaborador</option>
+            <option value="Administrador">Administrador</option>
+            <option value="SuperAdministrador">SuperAdministrador</option>
+        </select><br><br>
+
+        <input type="submit" value="Añadir Usuario">
+    </form>
+
+    <!-- Casilla informativa premium -->
+    <div class="info-usuarios">
+        <strong>Tipos de usuario:</strong><br><br>
+        <strong>Usuario</strong> - Puede consultar e imprimir.<br>
+        <strong>Colaborador</strong> - Puede hacer todo lo anterior + añadir citas, añadir vehículos y modificar estados y caducidades vehículos.<br>
+        <strong>Administrador</strong> - Puede hacer todo lo anterior + modificar/eliminar citas, eliminar vehículos y gestionar estaciones.<br>
+        <strong>SuperAdministrador</strong> - Puede hacer todo lo anterior + añadir/modificar/eliminar usuarios.
     </div>
-    <br><br>
 
-    <label>Confirmar Contraseña:</label>
-    <div style="position:relative; display:inline-block;">
-      <input type="password" id="confirmar_contraseña" name="confirmar_contraseña" required style="padding-right:35px;">
-      <svg id="togglePass2" class="eye-icon" onclick="togglePassword('confirmar_contraseña', 'togglePass2')" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-          <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12zm11 4a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/>
-          <circle cx="12" cy="12" r="2"/>
-      </svg>
-    </div>
-    <br><br>
-
-    <label>Tipo:</label>
-    <select name="tipo">
-        <option value="Usuario">Usuario</option>
-        <option value="Colaborador">Colaborador</option>
-        <option value="Administrador">Administrador</option>
-        <option value="SuperAdministrador">SuperAdministrador</option>
-    </select><br><br>
-
-    <input type="submit" value="Añadir Usuario">
-</form>
+</div>
 <br><br>
 
 <h2>Lista de Usuarios</h2>

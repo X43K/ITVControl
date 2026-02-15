@@ -185,6 +185,11 @@ th { background-color: #eee; }
     .dia-sa { color:#ff4d4d !important; } /* sábado */
     .dia-do { color:#ff4d4d !important; } /* domingo */
 }
+  body {
+    margin: 15px;       /* margen superior, inferior, izquierdo y derecho */
+    font-family: Arial, sans-serif; /* fuente consistente */
+}
+
 </style>
 </head>
 <body>

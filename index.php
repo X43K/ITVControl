@@ -230,6 +230,11 @@ ul{margin:0;padding-left:18px}
     .menu img{filter: invert(1) hue-rotate(180deg);}
     h1 img{filter:none;}
 }
+  body {
+    margin: 15px;       /* margen superior, inferior, izquierdo y derecho */
+    font-family: Arial, sans-serif; /* fuente consistente */
+}
+
 </style>
 </head>
 <body>
@@ -246,13 +251,13 @@ ul{margin:0;padding-left:18px}
     <?php endif; ?>
 </div>
 
-</br>
+<br>
 
 <h1>
 <img src="images/logo.webp" width="30" style="vertical-align: middle;"> Página Principal - Gestión de ITV
 </h1>
 
-</br>
+<br>
 
 <div class="menu">
     <a href="index.php"><img src="images/index.webp" width="80"></a>
@@ -264,7 +269,7 @@ ul{margin:0;padding-left:18px}
     <a href="logout.php"><img src="images/logout.webp" width="80"></a>
 </div>
 
-</br>
+<br>
 
 <?php if($proxima_itv): ?>
 <div class="proxima-itv">
@@ -279,7 +284,7 @@ ul{margin:0;padding-left:18px}
 
 <h2>Vehículos</h2>
 
-</br>
+<br>
 
 <table>
 <thead>

@@ -91,7 +91,7 @@ body { margin:15px; font-family:Arial,sans-serif; }
 
 /* Menú */
 .menu { margin-bottom:15px; }
-.menu a { margin-right:5px; }
+.menu a { margin-right:0px; }
 .menu img { width:80px; height:auto; vertical-align:middle; transition:filter 0.3s ease; }
 h1 img { vertical-align:middle; }
 
@@ -143,26 +143,26 @@ ul { margin:0; padding-left:18px; }
     <strong><?= $_SESSION['usuario'] ?> | <?= $_SESSION['tipo'] ?></strong>
     <div id="fecha-hora"></div>
 </div>
+  
 <br>
 
 <h1>
-    <img src="images/logo.webp" alt="Logo" width="30">
-    Gestionar Estaciones
+<img src="images/logo.webp" width="30" style="vertical-align: middle;"> Gestionar Estaciones
 </h1>
 <br>
 
 <div class="menu">
-    <a href="index.php"><img src="images/index.webp" alt="index"></a>
-    <a href="citas.php"><img src="images/citas.webp" alt="citas"></a>
-    <a href="vehiculos.php"><img src="images/vehiculos.webp" alt="vehiculos"></a>
+    <a href="index.php"><img src="images/index.webp" width="80" alt="index"></a>
+    <a href="citas.php"><img src="images/citas.webp" width="80" alt="citas"></a>
+    <a href="vehiculos.php"><img src="images/vehiculos.webp" width="80" alt="vehiculos"></a>
     <?php if ($is_admin): ?>
-        <a href="estaciones.php"><img src="images/estaciones.webp" alt="estaciones"></a>
+        <a href="estaciones.php"><img src="images/estaciones.webp" width="80" alt="estaciones"></a>
     <?php endif; ?>
     <?php if ($is_superadmin): ?>
-        <a href="usuarios.php"><img src="images/usuarios.webp" alt="usuarios"></a>
+        <a href="usuarios.php"><img src="images/usuarios.webp" awidth="80" lt="usuarios"></a>
     <?php endif; ?>
-    <a href="imprimir.php"><img src="images/imprimir.webp" alt="imprimir"></a>
-    <a href="logout.php"><img src="images/logout.webp" alt="logout"></a>
+    <a href="imprimir.php"><img src="images/imprimir.webp" width="80" alt="imprimir"></a>
+    <a href="logout.php"><img src="images/logout.webp" width="80" alt="logout"></a>
 </div>
 <br>
 

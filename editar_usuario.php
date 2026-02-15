@@ -88,7 +88,7 @@ body { margin:15px; font-family:Arial,sans-serif; }
 
 /* Menú */
 .menu { margin-bottom:15px; }
-.menu a { margin-right:5px; }
+.menu a { margin-right:0px; }
 .menu img { width:80px; height:auto; vertical-align:middle; transition:filter 0.3s ease; }
 h1 img { vertical-align:middle; }
 
@@ -128,11 +128,11 @@ input[type="submit"] { cursor:pointer; }
 </head>
 <body>
 
-</br>
+<br>
 
 <h1><img src="images/logo.webp" width="30"> Editar Usuario: <?= htmlspecialchars($usuario['usuario']) ?></h1>
 
-</br>
+<br>
 
 <div class="menu">
     <a href="index.php"><img src="images/index.webp" alt="index"></a>
@@ -148,7 +148,7 @@ input[type="submit"] { cursor:pointer; }
     <a href="logout.php"><img src="images/logout.webp" alt="logout"></a>
 </div>
 
-</br>
+<br>
 
 <?php if (isset($error)): ?>
     <p class="rojo_intenso"><?= htmlspecialchars($error) ?></p>
@@ -156,7 +156,7 @@ input[type="submit"] { cursor:pointer; }
 
 <h2>Editar Usuario</h2>
 
-</br>
+<br>
 
 <form method="POST">
     <label>Usuario:</label>
