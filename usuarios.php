@@ -21,18 +21,22 @@ $usuarios = json_decode(file_get_contents($usuarios_file), true);
 
 // Procesar formulario de añadir usuario
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!empty($_POST['usuario']) && !empty($_POST['contraseña']) && !empty($_POST['tipo'])) {
-        $nuevo_usuario = [
-            'usuario' => $_POST['usuario'],
-            'contraseña' => password_hash($_POST['contraseña'], PASSWORD_DEFAULT),
-            'tipo' => $_POST['tipo']
-        ];
+    if (!empty($_POST['usuario']) && !empty($_POST['contraseña']) && !empty($_POST['confirmar_contraseña']) && !empty($_POST['tipo'])) {
+        if ($_POST['contraseña'] !== $_POST['confirmar_contraseña']) {
+            $error = "Las contraseñas no coinciden.";
+        } else {
+            $nuevo_usuario = [
+                'usuario' => $_POST['usuario'],
+                'contraseña' => password_hash($_POST['contraseña'], PASSWORD_DEFAULT),
+                'tipo' => $_POST['tipo']
+            ];
 
-        $usuarios[] = $nuevo_usuario;
-        file_put_contents($usuarios_file, json_encode($usuarios, JSON_PRETTY_PRINT));
+            $usuarios[] = $nuevo_usuario;
+            file_put_contents($usuarios_file, json_encode($usuarios, JSON_PRETTY_PRINT));
 
-        header('Location: usuarios.php');
-        exit();
+            header('Location: usuarios.php');
+            exit();
+        }
     } else {
         $error = "Todos los campos son obligatorios.";
     }
@@ -69,6 +73,21 @@ h1 img { vertical-align:middle; }
 input, select { padding:5px; margin:2px 0; border-radius:4px; }
 input[type="submit"] { cursor:pointer; }
 
+/* Íconos de ojo */
+.eye-icon {
+    position:absolute;
+    right:5px;
+    top:5px;
+    cursor:pointer;
+    user-select:none;
+    width:22px;
+    height:22px;
+    fill:#000;
+}
+@media (prefers-color-scheme: dark) {
+    .eye-icon { fill:#fff; }
+}
+
 /* Tablas */
 table { border-collapse:collapse; width:100%; }
 th, td { border:1px solid #ccc; padding:8px; vertical-align:top; }
@@ -78,7 +97,7 @@ a { text-decoration:underline; }
 /* Mensajes de error */
 .rojo_intenso { color:#cc0000; }
 
-/* ===== BLOQUE USUARIO (igual que página principal) ===== */
+/* ===== BLOQUE USUARIO ===== */
 .user-info {
     position: fixed;
     top: 10px;
@@ -88,10 +107,10 @@ a { text-decoration:underline; }
     color: inherit;
 }
 
-/* PRÓXIMA ITV placeholder para consistencia */
+/* PRÓXIMA ITV placeholder */
 .proxima-itv { display:none; }
 
-/* ===== MODO OSCURO AUTOMÁTICO ===== */
+/* ===== MODO OSCURO ===== */
 @media (prefers-color-scheme: dark) {
     body { background:#000; color:#ddd; }
     h1,h2,h3,h4,p,strong { color:#ddd; }
@@ -108,7 +127,7 @@ a { text-decoration:underline; }
 
 <!-- BLOQUE USUARIO -->
 <div class="user-info">
-    <strong><?= $_SESSION['usuario'] ?> | <?= $_SESSION['tipo'] ?></strong>
+    <strong><?= htmlspecialchars($_SESSION['usuario']) ?> | <?= htmlspecialchars($_SESSION['tipo']) ?></strong>
     <div id="fecha-hora"></div>
 </div>
 <br>
@@ -142,7 +161,27 @@ a { text-decoration:underline; }
 <br>
 <form method="POST">
     <label>Usuario:</label><input type="text" name="usuario" required><br><br>
-    <label>Contraseña:</label><input type="password" name="contraseña" required><br><br>
+
+    <label>Contraseña:</label>
+    <div style="position:relative; display:inline-block;">
+      <input type="password" id="contraseña" name="contraseña" required style="padding-right:35px;">
+      <svg id="togglePass1" class="eye-icon" onclick="togglePassword('contraseña', 'togglePass1')" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12zm11 4a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/>
+          <circle cx="12" cy="12" r="2"/>
+      </svg>
+    </div>
+    <br><br>
+
+    <label>Confirmar Contraseña:</label>
+    <div style="position:relative; display:inline-block;">
+      <input type="password" id="confirmar_contraseña" name="confirmar_contraseña" required style="padding-right:35px;">
+      <svg id="togglePass2" class="eye-icon" onclick="togglePassword('confirmar_contraseña', 'togglePass2')" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12zm11 4a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/>
+          <circle cx="12" cy="12" r="2"/>
+      </svg>
+    </div>
+    <br><br>
+
     <label>Tipo:</label>
     <select name="tipo">
         <option value="Usuario">Usuario</option>
@@ -150,6 +189,7 @@ a { text-decoration:underline; }
         <option value="Administrador">Administrador</option>
         <option value="SuperAdministrador">SuperAdministrador</option>
     </select><br><br>
+
     <input type="submit" value="Añadir Usuario">
 </form>
 <br><br>
@@ -181,6 +221,7 @@ a { text-decoration:underline; }
 <p class="small" style="text-align:left;"><?= htmlspecialchars($autor_text) ?></p>
 
 <script>
+// Actualizar fecha y hora en tiempo real
 function actualizarFechaHora(){
     const d=new Date();
     document.getElementById('fecha-hora').innerText =
@@ -188,6 +229,27 @@ function actualizarFechaHora(){
 }
 actualizarFechaHora();
 setInterval(actualizarFechaHora,1000);
+
+// Mostrar / ocultar contraseñas (SVG cambia)
+function togglePassword(inputId, iconId) {
+    const input = document.getElementById(inputId);
+    const icon = document.getElementById(iconId);
+    const isPassword = input.type === "password";
+    input.type = isPassword ? "text" : "password";
+    icon.innerHTML = isPassword
+        ? '<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12zm11 4a4 4 0 0 1-4-4h-2a6 6 0 0 0 12 0h-2a4 4 0 0 1-4 4z"/><circle cx="12" cy="12" r="2"/>'
+        : '<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12zm11 4a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/><circle cx="12" cy="12" r="2"/>';
+}
+
+// Validar contraseñas iguales antes de enviar
+document.querySelector("form").addEventListener("submit", function(e) {
+    const pass1 = document.getElementById("contraseña").value;
+    const pass2 = document.getElementById("confirmar_contraseña").value;
+    if (pass1 !== pass2) {
+        e.preventDefault();
+        alert("Las contraseñas no coinciden. Por favor, verifícalas.");
+    }
+});
 </script>
 
 </body>

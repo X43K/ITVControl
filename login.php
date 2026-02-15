@@ -63,7 +63,7 @@ body {
     padding:20px;
 }
 h1 {
-    font-size:26px; /* Aumentado de 20px a 26px */
+    font-size:26px;
     margin-bottom:20px;
 }
 h1 img {
@@ -96,6 +96,21 @@ input[type=submit]:hover {
     background:#0066ff;
 }
 
+/* Ícono del ojo */
+.eye-icon {
+    position:absolute;
+    right:5px;
+    top:6px;
+    cursor:pointer;
+    user-select:none;
+    width:22px;
+    height:22px;
+    fill:#000;
+}
+@media (prefers-color-scheme: dark) {
+    .eye-icon { fill:#fff; }
+}
+
 /* ===== MODO OSCURO AUTOMÁTICO ===== */
 @media (prefers-color-scheme: dark) {
     body {
@@ -105,16 +120,12 @@ input[type=submit]:hover {
     h1,label,p {
         color:#ddd;
     }
-
-    /* Campos de texto */
     input[type=text],
     input[type=password] {
         background:#222;
         color:#ddd;
         border:1px solid #555;
     }
-
-    /* Botón */
     input[type=submit] {
         background:#0066ff;
         color:#fff;
@@ -138,7 +149,13 @@ input[type=submit]:hover {
     <input type="text" id="usuario" name="usuario" autocomplete="username" autocapitalize="none" spellcheck="false" required>
 
     <label for="contraseña">Contraseña:</label>
-    <input type="password" id="contraseña" name="contraseña" autocomplete="current-password" required>
+    <div style="position:relative; display:inline-block;">
+        <input type="password" id="contraseña" name="contraseña" autocomplete="current-password" required style="padding-right:35px;">
+        <svg id="togglePass" class="eye-icon" onclick="togglePassword('contraseña','togglePass')" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12zm11 4a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/>
+            <circle cx="12" cy="12" r="2"/>
+        </svg>
+    </div>
 
     <br><br>
     <input type="submit" value="Iniciar Sesión">
@@ -150,6 +167,19 @@ input[type=submit]:hover {
 
 <h4 class="small" style="margin-top:12px;"><?= htmlspecialchars($version) ?></h4>
 <p class="small"><?= htmlspecialchars($autor) ?></p>
+
+<script>
+// Mostrar / ocultar contraseña (SVG cambia)
+function togglePassword(inputId, iconId){
+    const input = document.getElementById(inputId);
+    const icon = document.getElementById(iconId);
+    const isPassword = input.type === "password";
+    input.type = isPassword ? "text" : "password";
+    icon.innerHTML = isPassword
+        ? '<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12zm11 4a4 4 0 0 1-4-4h-2a6 6 0 0 0 12 0h-2a4 4 0 0 1-4 4z"/><circle cx="12" cy="12" r="2"/>'
+        : '<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12zm11 4a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/><circle cx="12" cy="12" r="2"/>';
+}
+</script>
 
 </body>
 </html>

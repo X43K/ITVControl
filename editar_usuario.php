@@ -45,16 +45,20 @@ if (!$usuario_encontrado) {
 
 // Procesar formulario de edición
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!empty($_POST['usuario']) && !empty($_POST['contraseña']) && !empty($_POST['tipo'])) {
-        $usuario['usuario'] = $_POST['usuario'];
-        $usuario['contraseña'] = password_hash($_POST['contraseña'], PASSWORD_DEFAULT);
-        $usuario['tipo'] = $_POST['tipo'];
-
-        if (file_put_contents($usuarios_file, json_encode($usuarios, JSON_PRETTY_PRINT))) {
-            header('Location: usuarios.php');
-            exit();
+    if (!empty($_POST['usuario']) && !empty($_POST['contraseña']) && !empty($_POST['confirmar_contraseña']) && !empty($_POST['tipo'])) {
+        if ($_POST['contraseña'] !== $_POST['confirmar_contraseña']) {
+            $error = "Las contraseñas no coinciden.";
         } else {
-            $error = "No se pudo actualizar el usuario. Verifique los permisos del archivo.";
+            $usuario['usuario'] = $_POST['usuario'];
+            $usuario['contraseña'] = password_hash($_POST['contraseña'], PASSWORD_DEFAULT);
+            $usuario['tipo'] = $_POST['tipo'];
+
+            if (file_put_contents($usuarios_file, json_encode($usuarios, JSON_PRETTY_PRINT))) {
+                header('Location: usuarios.php');
+                exit();
+            } else {
+                $error = "No se pudo actualizar el usuario. Verifique los permisos del archivo.";
+            }
         }
     } else {
         $error = "Todos los campos son obligatorios.";
@@ -91,6 +95,21 @@ h1 img { vertical-align:middle; }
 /* Formulario */
 input, select { padding:5px; margin:2px 0; border-radius:4px; }
 input[type="submit"] { cursor:pointer; }
+
+/* Íconos de ojo */
+.eye-icon {
+    position:absolute;
+    right:5px;
+    top:5px;
+    cursor:pointer;
+    user-select:none;
+    width:22px;
+    height:22px;
+    fill:#000;
+}
+@media (prefers-color-scheme: dark) {
+    .eye-icon { fill:#fff; }
+}
 
 /* Mensajes de error */
 .rojo_intenso { color:#cc0000; }
@@ -144,7 +163,24 @@ input[type="submit"] { cursor:pointer; }
     <input type="text" name="usuario" value="<?= htmlspecialchars($usuario['usuario']) ?>" required><br><br>
 
     <label>Contraseña:</label>
-    <input type="password" name="contraseña" required><br><br>
+    <div style="position:relative; display:inline-block;">
+        <input type="password" id="contraseña" name="contraseña" required style="padding-right:35px;">
+        <svg id="togglePass1" class="eye-icon" onclick="togglePassword('contraseña', 'togglePass1')" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12zm11 4a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/>
+            <circle cx="12" cy="12" r="2"/>
+        </svg>
+    </div>
+    <br><br>
+
+    <label>Confirmar Contraseña:</label>
+    <div style="position:relative; display:inline-block;">
+        <input type="password" id="confirmar_contraseña" name="confirmar_contraseña" required style="padding-right:35px;">
+        <svg id="togglePass2" class="eye-icon" onclick="togglePassword('confirmar_contraseña', 'togglePass2')" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12zm11 4a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/>
+            <circle cx="12" cy="12" r="2"/>
+        </svg>
+    </div>
+    <br><br>
 
     <label>Tipo:</label>
     <select name="tipo">
@@ -159,6 +195,29 @@ input[type="submit"] { cursor:pointer; }
 
 <h4 class="small" style="margin-top:12px; text-align:left;"><?= htmlspecialchars($version_text) ?></h4>
 <p class="small" style="text-align:left;"><?= htmlspecialchars($autor_text) ?></p>
+
+<script>
+// Mostrar / ocultar contraseñas (SVG cambia)
+function togglePassword(inputId, iconId) {
+    const input = document.getElementById(inputId);
+    const icon = document.getElementById(iconId);
+    const isPassword = input.type === "password";
+    input.type = isPassword ? "text" : "password";
+    icon.innerHTML = isPassword
+        ? '<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12zm11 4a4 4 0 0 1-4-4h-2a6 6 0 0 0 12 0h-2a4 4 0 0 1-4 4z"/><circle cx="12" cy="12" r="2"/>'
+        : '<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12zm11 4a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/><circle cx="12" cy="12" r="2"/>';
+}
+
+// Validar contraseñas iguales antes de enviar
+document.querySelector("form").addEventListener("submit", function(e) {
+    const pass1 = document.getElementById("contraseña").value;
+    const pass2 = document.getElementById("confirmar_contraseña").value;
+    if (pass1 !== pass2) {
+        e.preventDefault();
+        alert("Las contraseñas no coinciden. Por favor, verifícalas.");
+    }
+});
+</script>
 
 </body>
 </html>
