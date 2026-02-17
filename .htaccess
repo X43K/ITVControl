@@ -1,12 +1,17 @@
-ErrorDocument 403 /itv/acceso-restringido.html
+# Página de error personalizada
+ErrorDocument 403 /itv/acceso-restringido.php
 
-# Bloquear acceso a todos los archivos .json dentro de /itv/
+# Bloquear todos los .json
 <FilesMatch "\.json$">
-  <IfModule mod_authz_core.c>
-    Require all denied
-  </IfModule>
-  <IfModule !mod_authz_core.c>
-    Order allow,deny
-    Deny from all
-  </IfModule>
+  Require all denied
 </FilesMatch>
+
+# Proteger logs
+<Files "ips_bloqueadas.log">
+  Require all denied
+</Files>
+
+<Files "ips_permanentemente_bloqueadas.log">
+  Require all denied
+</Files>
+
