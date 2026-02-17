@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>403 - Acceso Restringido</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    color:white;
+}
+
+.container{
+    background: rgba(0,0,0,0.75);
+    padding:50px;
+    border-radius:15px;
+    text-align:center;
+    width:90%;
+    max-width:500px;
+    box-shadow:0 0 25px rgba(0,0,0,0.6);
+    border:1px solid rgba(255,255,255,0.1);
+}
+
+.logo{
+    width:120px;
+    margin-bottom:25px;
+}
+
+h1{
+    font-size:60px;
+    color:#ff4c4c;
+}
+
+h2{
+    margin-top:10px;
+    font-weight:400;
+    letter-spacing:1px;
+}
+
+p{
+    margin-top:20px;
+    font-size:16px;
+    color:#cccccc;
+}
+
+.security{
+    margin-top:30px;
+    font-size:14px;
+    color:#00ffcc;
+    letter-spacing:2px;
+}
+
+.btn{
+    display:inline-block;
+    margin-top:30px;
+    padding:12px 25px;
+    background:#ff4c4c;
+    color:white;
+    text-decoration:none;
+    border-radius:30px;
+    transition:0.3s;
+}
+
+.btn:hover{
+    background:#ff0000;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- Cambia la ruta del logo -->
+    <img src="images/logo.webp" class="logo" alt="Logo">
+
+    <h1>403</h1>
+    <h2>Acceso Restringido</h2>
+
+    <p>
+        El recurso solicitado está protegido por razones de seguridad.<br>
+        No tienes permisos para acceder a este contenido.
+    </p>
+
+    <div class="security">
+        🔒 SISTEMA DE SEGURIDAD ACTIVO
+    </div>
+
+    <a href="logout.php" class="btn">Volver al inicio</a>
+
+</div>
+
+</body>
+</html>

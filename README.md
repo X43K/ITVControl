@@ -30,6 +30,8 @@
 - Si es necesario, editar `apache2.conf` -> `sudo nano /etc/apache2/apache2.conf` editando en el bloque `<Directory /var/www/>` la linea `AllowOverride None` por `AllowOverride All`, por ultimo reinicie Apache2 `sudo systemctl restart apache2`. Esto protegera el acceso remoto a los archivos `.json` que guardan datos sensibles mediante el uso de `.htaccess` situado en la raiz del proyecto.
 - Ejemplo de .htaccess con bloqueo de acceso remoto a .json:
 ```apache
+ErrorDocument 403 /itv/acceso-restringido.html
+
 # Bloquear acceso a todos los archivos .json dentro de /itv/
 <FilesMatch "\.json$">
   <IfModule mod_authz_core.c>
