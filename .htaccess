@@ -6,12 +6,12 @@ ErrorDocument 403 /itv/acceso-restringido.php
   Require all denied
 </FilesMatch>
 
-# Bloquear todos los .log
-<FilesMatch "\.log$">
+# Bloquear todos los .log excepto logs sensibles que PHP necesita escribir
+<FilesMatch "^(?!ips_bloqueadas\.log$)(?!ips_permanentemente_bloqueadas\.log$).*\.log$">
   Require all denied
 </FilesMatch>
 
-# Proteger logs
+# Bloquear acceso HTTP directo a los logs sensibles
 <Files "ips_bloqueadas.log">
   Require all denied
 </Files>
@@ -19,3 +19,16 @@ ErrorDocument 403 /itv/acceso-restringido.php
 <Files "ips_permanentemente_bloqueadas.log">
   Require all denied
 </Files>
+
+# Permitir PHP, recursos y directorios; bloquear todo lo demás
+<FilesMatch ".*">
+  <If "-d %{REQUEST_FILENAME}">
+    Require all granted
+  </If>
+  <ElseIf "%{REQUEST_FILENAME} =~ /\.(php|css|js|jpg|jpeg|png|gif|svg|webp)$/i">
+    Require all granted
+  </ElseIf>
+  <Else>
+    Require all denied
+  </Else>
+</FilesMatch>
