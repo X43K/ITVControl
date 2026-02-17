@@ -1,4 +1,6 @@
 <?php
+session_start(); // Necesario para obtener usuario
+
 http_response_code(403);
 
 // CONFIGURACIÓN
@@ -21,32 +23,36 @@ $ip = getRealIP();
 $fecha = date("Y-m-d H:i:s");
 $archivo = $_SERVER['REQUEST_URI'] ?? 'UNKNOWN';
 $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? 'UNKNOWN';
+$usuario = $_SESSION['usuario'] ?? 'ANONIMO'; // Usuario logueado
 
-// Verificar si ya está bloqueada permanentemente
-$ipsBloqueadas = file_exists($bloqueadasFile) ? file($bloqueadasFile, FILE_IGNORE_NEW_LINES) : [];
+// Solo registrar si el intento es a .json o .log
+if (preg_match('/\.(json|log)$/i', $archivo)) {
 
-$bloqueado = in_array($ip, $ipsBloqueadas);
+    // Verificar si ya está bloqueada permanentemente
+    $ipsBloqueadas = file_exists($bloqueadasFile) ? file($bloqueadasFile, FILE_IGNORE_NEW_LINES) : [];
+    $bloqueado = in_array($ip, $ipsBloqueadas);
 
-// Contar intentos anteriores
-$intentos = 0;
-if (file_exists($logFile)) {
-    $lineas = file($logFile);
-    foreach ($lineas as $linea) {
-        if (strpos($linea, "IP: $ip ") !== false) {
-            $intentos++;
+    // Contar intentos anteriores solo de .json o .log
+    $intentos = 0;
+    if (file_exists($logFile)) {
+        $lineas = file($logFile);
+        foreach ($lineas as $linea) {
+            if (strpos($linea, "IP: $ip ") !== false && preg_match('/\.(json|log)/i', $linea)) {
+                $intentos++;
+            }
         }
     }
-}
 
-// Si supera límite y no está aún en bloqueadas → añadir
-if ($intentos >= $maxIntentos && !$bloqueado) {
-    file_put_contents($bloqueadasFile, $ip . PHP_EOL, FILE_APPEND | LOCK_EX);
-    $bloqueado = true;
-}
+    // Si supera límite y no está aún en bloqueadas → añadir
+    if ($intentos >= $maxIntentos && !$bloqueado) {
+        file_put_contents($bloqueadasFile, $ip . PHP_EOL, FILE_APPEND | LOCK_EX);
+        $bloqueado = true;
+    }
 
-// Registrar intento actual
-$registro = "[$fecha] IP: $ip | Archivo: $archivo | UA: $userAgent" . PHP_EOL;
-file_put_contents($logFile, $registro, FILE_APPEND | LOCK_EX);
+    // Registrar intento actual
+    $registro = "[$fecha] IP: $ip | Usuario: $usuario | Archivo: $archivo | UA: $userAgent" . PHP_EOL;
+    file_put_contents($logFile, $registro, FILE_APPEND | LOCK_EX);
+}
 
 // Obtener país
 $pais = "Desconocido";
@@ -65,9 +71,8 @@ if ($geo && $geo->status === "success") {
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>403 - Acceso Restringido</title>
 
-<?php if(!$bloqueado): ?>
-<meta http-equiv="refresh" content="5;url=logout.php">
-<?php endif; ?>
+<!-- Redirección automática para todos los casos -->
+<meta http-equiv="refresh" content="7;url=logout.php">
 
 <style>
 body{
@@ -131,6 +136,8 @@ IP detectada: <strong><?php echo htmlspecialchars($ip); ?></strong>
 <?php endif; ?>
 <br>
 País: <?php echo htmlspecialchars($pais); ?>
+<br>
+Usuario: <strong><?php echo htmlspecialchars($usuario); ?></strong>
 </div>
 
 <?php if($bloqueado): ?>
@@ -139,7 +146,6 @@ País: <?php echo htmlspecialchars($pais); ?>
 Intentos detectados: <?php echo $intentos; ?>
 </div>
 <?php else: ?>
-<p>Será redirigido automáticamente en 5 segundos...</p>
 <a href="logout.php" class="btn">Volver al inicio</a>
 <?php endif; ?>
 
