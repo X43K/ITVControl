@@ -1,3 +1,5 @@
+ErrorDocument 403 /itv/acceso-restringido.html
+
 # Bloquear acceso a todos los archivos .json dentro de /itv/
 <FilesMatch "\.json$">
   <IfModule mod_authz_core.c>
