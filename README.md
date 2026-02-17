@@ -25,7 +25,10 @@
 - Administrador - Puede hacer todo lo anterior + modificar/eliminar citas, eliminar vehiculos y gestionar estaciones.
 - SuperAdministrador - Puede hacer todo lo anterior + añadir/modificar/eliminar usuarios.
 
-### SE RECOMIENDA EDITAR O ELIMINAR EL USUARIO `admin`. ANTES DE ELIMINARLO CREE OTRO `SuperAdministrador` PARA PODER SEGUIR GESTIONANDO LOS USUARIOS DEL SISTEMA, YA QUE ES EL UNICO QUE TIENE ESTE PERMISO.
+## SEGURIDAD
+- Se recomienda editar/eliminar el usuario `admin`. Si decide eliminarlo, antes cree otro `SuperAdministrador` para poder seguir gestionando los usuarios del sistema, ya que es el unico que tiene este permiso.
+- Si es necesario, editar `apache2.conf` -> `sudo nano /etc/apache2/apache2.conf` editando en el bloque `<Directory /var/www/>` la linea `AllowOverride None` por `AllowOverride All`, por ultimo reinicie Apache2 `sudo systemctl restart apache2`. Esto protegera el acceso remoto a los archivos `.json` que guardan datos sensibles mediante el uso de `.htaccess` situado en la raiz del proyecto.
+
 
 <img src="https://github.com/X43K/ITVControl/blob/1a1353d5830b926422414690ca60931f1bb142c8/images/ejemplo1.webp">
 <img src="https://github.com/X43K/ITVControl/blob/1a1353d5830b926422414690ca60931f1bb142c8/images/ejemplo2.webp">
@@ -34,7 +37,6 @@
 - Reporta errores en la sección Issues.
 - Sugiere mejoras.
 - Prueba la aplicación y envía feedback.
-
 
 
 
