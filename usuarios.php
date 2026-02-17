@@ -13,11 +13,60 @@ $is_superadmin = isset($_SESSION['tipo']) && $_SESSION['tipo'] === 'SuperAdminis
 
 // Cargar usuarios
 $usuarios_file = 'usuarios.json';
+$log_file = 'usuarios-fail.log';
+
 if (!file_exists($usuarios_file)) {
-    file_put_contents($usuarios_file, json_encode([])); // Crear archivo vacío si no existe
+    file_put_contents($usuarios_file, json_encode([]));
 }
 
 $usuarios = json_decode(file_get_contents($usuarios_file), true);
+if (!is_array($usuarios)) $usuarios = [];
+
+/* ================= VER LOG ================= */
+$log_modal = null;
+$total_intentos = 0;
+
+if (isset($_GET['ver_log'])) {
+    $usuario_log = $_GET['ver_log'];
+
+    if (file_exists($log_file)) {
+        $lineas = file($log_file, FILE_IGNORE_NEW_LINES);
+        $filtrado = [];
+
+        foreach ($lineas as $linea) {
+            if (stripos($linea, "Usuario: $usuario_log") !== false) {
+                $filtrado[] = $linea;
+            }
+        }
+
+        $filtrado = array_reverse($filtrado);
+        $total_intentos = count($filtrado);
+        $log_modal = $filtrado;
+    } else {
+        $log_modal = [];
+    }
+}
+
+/* ================= LIMPIAR LOG ================= */
+if (isset($_GET['limpiar_log'])) {
+    $usuario_limpiar = $_GET['limpiar_log'];
+
+    if (file_exists($log_file)) {
+        $lineas = file($log_file);
+        $nuevo = [];
+
+        foreach ($lineas as $linea) {
+            if (stripos($linea, "Usuario: $usuario_limpiar") === false) {
+                $nuevo[] = $linea;
+            }
+        }
+
+        file_put_contents($log_file, implode('', $nuevo));
+    }
+
+    header('Location: usuarios.php');
+    exit();
+}
 
 // Procesar formulario de añadir usuario
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -42,6 +91,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+// ======= Preprocesar si hay registros de log para cada usuario =======
+if (file_exists($log_file)) {
+    $lineas_log = file($log_file, FILE_IGNORE_NEW_LINES);
+    foreach ($usuarios as &$usuario) {
+        $usuario['tiene_log'] = false;
+        foreach ($lineas_log as $linea) {
+            if (stripos($linea, "Usuario: {$usuario['usuario']}") !== false) {
+                $usuario['tiene_log'] = true;
+                break;
+            }
+        }
+    }
+}
+
 // Cargar versión y autor desde version.xk
 $version_text = 'v.1.4';
 $autor_text = 'B174M3 // XaeK';
@@ -62,82 +125,24 @@ if (file_exists('version.xk')) {
 <link rel="stylesheet" href="style.css">
 <style>
 body { margin:15px; font-family:Arial,sans-serif; }
-
-/* Menú */
 .menu { margin-bottom:15px; }
 .menu a { margin-right:0px; }
 .menu img { width:80px; height:auto; vertical-align:middle; transition:filter 0.3s ease; }
 h1 img { vertical-align:middle; }
-
-/* Formulario */
 input, select { padding:5px; margin:2px 0; border-radius:4px; }
 input[type="submit"] { cursor:pointer; }
-
-/* Íconos de ojo */
-.eye-icon {
-    position:absolute;
-    right:5px;
-    top:5px;
-    cursor:pointer;
-    user-select:none;
-    width:22px;
-    height:22px;
-    fill:#000;
-}
-@media (prefers-color-scheme: dark) {
-    .eye-icon { fill:#fff; }
-}
-
-/* Tablas */
+.eye-icon { position:absolute; right:5px; top:5px; cursor:pointer; user-select:none; width:22px; height:22px; fill:#000; }
+@media (prefers-color-scheme: dark) { .eye-icon { fill:#fff; } }
 table { border-collapse:collapse; width:100%; }
 th, td { border:1px solid #ccc; padding:8px; vertical-align:top; }
 th { background:#eee; }
 a { text-decoration:underline; }
-
-/* Mensajes de error */
 .rojo_intenso { color:#cc0000; }
-
-/* ===== BLOQUE USUARIO ===== */
-.user-info {
-    position: fixed;
-    top: 10px;
-    right: 15px;
-    text-align: right;
-    font-size: 14px;
-    color: inherit;
-}
-
-/* PRÓXIMA ITV placeholder */
+.user-info { position: fixed; top: 10px; right: 15px; text-align: right; font-size: 14px; color: inherit; }
 .proxima-itv { display:none; }
-
-/* ===== CASILLA PREMIUM INFO USUARIOS ===== */
-.info-usuarios {
-    flex:1;
-    padding:20px;
-    border:2px solid #4a90e2;
-    border-radius:12px;
-    background: linear-gradient(135deg, #f0f8ff, #dbe9ff);
-    box-shadow: 2px 2px 12px rgba(0,0,0,0.15);
-    font-size:14px;
-    line-height:1.5;
-    color: #000;
-    transition: all 0.3s ease;
-    position: relative;
-}
-.info-usuarios::before {
-    content: "\2139"; /* Ícono de información ℹ */
-    font-size: 22px;
-    color: #4a90e2;
-    position: absolute;
-    top:10px;
-    left:10px;
-}
-.info-usuarios:hover {
-    transform: translateY(-2px);
-    box-shadow: 4px 4px 14px rgba(0,0,0,0.25);
-}
-
-/* Modo oscuro */
+.info-usuarios { flex:1; padding:20px; border:2px solid #4a90e2; border-radius:12px; background: linear-gradient(135deg, #f0f8ff, #dbe9ff); box-shadow: 2px 2px 12px rgba(0,0,0,0.15); font-size:14px; line-height:1.5; color: #000; transition: all 0.3s ease; position: relative; }
+.info-usuarios::before { content: "\2139"; font-size: 22px; color: #4a90e2; position: absolute; top:10px; left:10px; }
+.info-usuarios:hover { transform: translateY(-2px); box-shadow: 4px 4px 14px rgba(0,0,0,0.25); }
 @media (prefers-color-scheme: dark) {
     body { background:#000; color:#ddd; }
     h1,h2,h3,h4,p,strong { color:#ddd; }
@@ -147,23 +152,13 @@ a { text-decoration:underline; }
     .menu img:not([alt="Logo"]) { filter: invert(1) hue-rotate(180deg); }
     h1 img { filter:none; }
     .rojo_intenso { color:#f33; }
-
-    /* Casilla modo oscuro */
-    .info-usuarios {
-        border:2px solid #3399ff;
-        background: linear-gradient(135deg, #111827, #1e293b);
-        box-shadow: 2px 2px 12px rgba(0,0,0,0.5);
-        color:#ddd;
-    }
-    .info-usuarios::before {
-        color:#3399ff;
-    }
+    .info-usuarios { border:2px solid #3399ff; background: linear-gradient(135deg, #111827, #1e293b); box-shadow: 2px 2px 12px rgba(0,0,0,0.5); color:#ddd; }
+    .info-usuarios::before { color:#3399ff; }
 }
 </style>
 </head>
 <body>
 
-<!-- BLOQUE USUARIO -->
 <div class="user-info">
     <strong><?= htmlspecialchars($_SESSION['usuario']) ?> | <?= htmlspecialchars($_SESSION['tipo']) ?></strong>
     <div id="fecha-hora"></div>
@@ -174,21 +169,20 @@ a { text-decoration:underline; }
     <img src="images/logo.webp" alt="Logo" width="30"> Gestionar Usuarios</h1>
 <br>
 
-      <div class="menu">
-        <a title="index" href="index.php"><img src="images/index.webp" alt="index" width="80"></a>
-        <a title="citas" href="citas.php"><img src="images/citas.webp" alt="citas" width="80"></a>
-        <a title="vehiculos" href="vehiculos.php"><img src="images/vehiculos.webp" alt="vehiculos" width="80"></a>
-        <?php if ($is_admin): ?>
-            <a title="estaciones" href="estaciones.php"><img src="images/estaciones.webp" alt="estaciones" width="80"></a>
-            <a title="seguridad" href="ips_bloqueadas.php"><img src="images/secury.webp" alt="seguridad" width="80"></a>
-        <?php endif; ?>
-        <?php if ($is_superadmin): ?>
-            <a title="usuarios" href="usuarios.php"><img src="images/usuarios.webp" alt="usuarios" width="80"></a>
-        <?php endif; ?>
-        <a title="imprimir" href="imprimir.php"><img src="images/imprimir.webp" alt="imprimir" width="80"></a>
-        <a title="logout" href="logout.php"><img src="images/logout.webp" alt="logout" width="80"></a>
-    </div>
-  
+<div class="menu">
+    <a title="index" href="index.php"><img src="images/index.webp" alt="index" width="80"></a>
+    <a title="citas" href="citas.php"><img src="images/citas.webp" alt="citas" width="80"></a>
+    <a title="vehiculos" href="vehiculos.php"><img src="images/vehiculos.webp" alt="vehiculos" width="80"></a>
+    <?php if ($is_admin): ?>
+        <a title="estaciones" href="estaciones.php"><img src="images/estaciones.webp" alt="estaciones" width="80"></a>
+        <a title="seguridad" href="ips_bloqueadas.php"><img src="images/secury.webp" alt="seguridad" width="80"></a>
+    <?php endif; ?>
+    <?php if ($is_superadmin): ?>
+        <a title="usuarios" href="usuarios.php"><img src="images/usuarios.webp" alt="usuarios" width="80"></a>
+    <?php endif; ?>
+    <a title="imprimir" href="imprimir.php"><img src="images/imprimir.webp" alt="imprimir" width="80"></a>
+    <a title="logout" href="logout.php"><img src="images/logout.webp" alt="logout" width="80"></a>
+</div>
 <br>
 
 <?php if (isset($error)): ?>
@@ -199,8 +193,6 @@ a { text-decoration:underline; }
 <br>
 
 <div style="display:flex; gap:20px; align-items:flex-start;">
-
-    <!-- Formulario -->
     <form method="POST" style="flex:1;">
         <label>Usuario:</label><input type="text" name="usuario" required><br><br>
 
@@ -235,7 +227,6 @@ a { text-decoration:underline; }
         <input type="submit" value="Añadir Usuario">
     </form>
 
-    <!-- Casilla informativa premium -->
     <div class="info-usuarios">
         <strong>Tipos de usuario:</strong><br><br>
         <strong>Usuario</strong> - Puede consultar e imprimir.<br>
@@ -243,7 +234,6 @@ a { text-decoration:underline; }
         <strong>Administrador</strong> - Puede hacer todo lo anterior + modificar/eliminar citas, eliminar vehículos y gestionar estaciones.<br>
         <strong>SuperAdministrador</strong> - Puede hacer todo lo anterior + añadir/modificar/eliminar usuarios.
     </div>
-
 </div>
 <br><br>
 
@@ -253,6 +243,7 @@ a { text-decoration:underline; }
         <tr>
             <th>Usuario</th>
             <th>Tipo</th>
+            <th>Estado</th>
             <th>Acciones</th>
         </tr>
     </thead>
@@ -262,8 +253,37 @@ a { text-decoration:underline; }
                 <td><?= htmlspecialchars($usuario['usuario']) ?></td>
                 <td><?= htmlspecialchars($usuario['tipo']) ?></td>
                 <td>
-                    <a href="editar_usuario.php?usuario=<?= urlencode($usuario['usuario']) ?>">Editar</a> |
-                    <a href="eliminar_usuario.php?usuario=<?= urlencode($usuario['usuario']) ?>">Eliminar</a>
+                    <?php if (!empty($usuario['bloqueado'])): ?>
+                        <span style="color:#cc0000;font-weight:bold;">🔴 Bloqueado</span>
+                    <?php else: ?>
+                        <span style="color:green;">🟢 Activo</span>
+                    <?php endif; ?>
+                </td>
+                <td style="display:flex; gap:5px; flex-wrap:wrap;">
+                    <form action="editar_usuario.php" method="get" style="margin:0;">
+                        <input type="hidden" name="usuario" value="<?= htmlspecialchars($usuario['usuario']) ?>">
+                        <button type="submit" style="padding:4px 8px; cursor:pointer;">Editar</button>
+                    </form>
+
+                    <form action="eliminar_usuario.php" method="get" style="margin:0;" onsubmit="return confirm('¿Estás seguro de eliminar este usuario?');">
+                        <input type="hidden" name="usuario" value="<?= htmlspecialchars($usuario['usuario']) ?>">
+                        <button type="submit" style="padding:4px 8px; cursor:pointer; background-color:#cc0000; color:#fff;">Eliminar</button>
+                    </form>
+
+                    <!-- Ver intentos solo si hay registros -->
+                    <?php if (!empty($usuario['tiene_log'])): ?>
+                        <form action="usuarios.php" method="get" style="margin:0;">
+                            <input type="hidden" name="ver_log" value="<?= htmlspecialchars($usuario['usuario']) ?>">
+                            <button type="submit" style="padding:4px 8px; cursor:pointer; background-color:#4a90e2; color:#fff;">Ver intentos</button>
+                        </form>
+                    <?php endif; ?>
+
+                    <?php if (!empty($usuario['bloqueado'])): ?>
+                        <form action="desbloquear_usuario.php" method="post" style="margin:0;">
+                            <input type="hidden" name="usuario" value="<?= htmlspecialchars($usuario['usuario']) ?>">
+                            <button type="submit" style="padding:4px 8px; cursor:pointer; background-color:#28a745; color:#fff;">Debloquear</button>
+                        </form>
+                    <?php endif; ?>
                 </td>
             </tr>
         <?php endforeach; ?>
@@ -274,16 +294,13 @@ a { text-decoration:underline; }
 <p class="small" style="text-align:left;"><?= htmlspecialchars($autor_text) ?></p>
 
 <script>
-// Actualizar fecha y hora en tiempo real
 function actualizarFechaHora(){
     const d=new Date();
-    document.getElementById('fecha-hora').innerText =
-        d.toLocaleDateString('es-ES')+' '+d.toLocaleTimeString('es-ES');
+    document.getElementById('fecha-hora').innerText = d.toLocaleDateString('es-ES')+' '+d.toLocaleTimeString('es-ES');
 }
 actualizarFechaHora();
 setInterval(actualizarFechaHora,1000);
 
-// Mostrar / ocultar contraseñas (SVG cambia)
 function togglePassword(inputId, iconId) {
     const input = document.getElementById(inputId);
     const icon = document.getElementById(iconId);
@@ -294,7 +311,6 @@ function togglePassword(inputId, iconId) {
         : '<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12zm11 4a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/><circle cx="12" cy="12" r="2"/>';
 }
 
-// Validar contraseñas iguales antes de enviar
 document.querySelector("form").addEventListener("submit", function(e) {
     const pass1 = document.getElementById("contraseña").value;
     const pass2 = document.getElementById("confirmar_contraseña").value;
@@ -304,6 +320,49 @@ document.querySelector("form").addEventListener("submit", function(e) {
     }
 });
 </script>
+
+<?php if ($log_modal !== null): ?>
+<div style="
+position:fixed;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+width:70%;
+max-height:70%;
+overflow:auto;
+background:inherit;
+color:inherit;
+border:2px solid currentColor;
+padding:20px;
+z-index:9999;
+box-shadow:0 0 20px rgba(0,0,0,0.5);
+">
+<h3>Intentos fallidos (<?= $total_intentos ?>)</h3>
+
+<pre style="font-size:12px;">
+<?php
+if (empty($log_modal)) {
+    echo "No hay intentos registrados.";
+} else {
+    foreach ($log_modal as $linea) {
+        echo htmlspecialchars($linea) . "\n";
+    }
+}
+?>
+</pre>
+
+<br>
+
+<a href="usuarios.php?limpiar_log=<?= urlencode($_GET['ver_log']) ?>"
+onclick="return confirm('¿Eliminar todos los registros de este usuario?')"
+style="color:#cc0000;font-weight:bold;">
+Limpiar registros
+</a>
+
+<br><br>
+<a href="usuarios.php" style="font-weight:bold;">Cerrar</a>
+</div>
+<?php endif; ?>
 
 </body>
 </html>

@@ -27,7 +27,8 @@
 
 ## SEGURIDAD
 - Se recomienda editar/eliminar el usuario `admin`. Si decide eliminarlo, antes cree otro `SuperAdministrador` para poder seguir gestionando los usuarios del sistema, ya que es el unico que tiene este permiso.
-- Se ha añadido una capa de seguridad para evitar la exposicion de los archivos con datos sesibles `.json` y `.log`. Si es necesario, editar `apache2.conf` -> `sudo nano /etc/apache2/apache2.conf` editando en el bloque `<Directory /var/www/>` la linea `AllowOverride None` por `AllowOverride All`, por ultimo reinicie Apache2 `sudo systemctl restart apache2`. Esto protegera el acceso remoto a los archivos `.json` y `.log` que guardan datos sensibles mediante el uso de `.htaccess` situado en la raiz del proyecto.
+- Se ha añadido una capa de seguridad para evitar la exposicion de los archivos con datos sensibles. Si es necesario, editar `apache2.conf` -> `sudo nano /etc/apache2/apache2.conf` editando en el bloque `<Directory /var/www/>` la linea `AllowOverride None` por `AllowOverride All`, por ultimo reinicie Apache2 `sudo systemctl restart apache2`. Aquellas IP que intenten acceder a contenidos no autorizados seran bloqueadas, pudiendo unicamente Administradores y SuperAdministradores acceder a la pestaña para ver y desbloquear dichas IP.
+- Se ha añadido una capa de seguridad que limita a 3 intentos fallidos de login. Se guarda un Log con los intentos fallidos y solo el SuperAdministrador podra desbloquear dichos usuarios bloqueados, ya que es el unico que puede acceder a la gestion de usuarios.
 
 <img src="https://github.com/X43K/ITVControl/blob/1a1353d5830b926422414690ca60931f1bb142c8/images/ejemplo1.webp">
 <img src="https://github.com/X43K/ITVControl/blob/1a1353d5830b926422414690ca60931f1bb142c8/images/ejemplo2.webp">

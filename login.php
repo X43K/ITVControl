@@ -2,14 +2,13 @@
 include __DIR__ . '/check_bloqueo.php';
 session_start();
 
-// Si ya está logueado, redirigir
 if (isset($_SESSION['usuario'])) {
     header('Location: index.php'); exit();
 }
 
 $usuarios_file = 'usuarios.json';
+$usuarios_fail_log = __DIR__ . '/usuarios-fail.log';
 
-// Procesar formulario
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!file_exists($usuarios_file)) die("El archivo de usuarios no existe.");
     $usuarios = json_decode(file_get_contents($usuarios_file), true);
@@ -17,23 +16,60 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $usuario_input = $_POST['usuario'] ?? '';
     $contraseña_input = $_POST['contraseña'] ?? '';
 
+    $ip = $_SERVER['REMOTE_ADDR'] ?? 'UNKNOWN';
+    $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? 'UNKNOWN';
+    $fecha = date("Y-m-d H:i:s");
+
     $usuario_encontrado = false;
-    foreach ($usuarios as $usuario) {
+    $error = "Usuario o contraseña incorrectos.";
+
+    foreach ($usuarios as &$usuario) {
         if ($usuario['usuario'] === $usuario_input) {
             $usuario_encontrado = true;
+
+            if (!isset($usuario['intentos'])) $usuario['intentos'] = 0;
+            if (!isset($usuario['bloqueado'])) $usuario['bloqueado'] = false;
+
+            if ($usuario['bloqueado']) {
+                $error = "Su cuenta ha sido bloqueada.";
+                break;
+            }
+
             if (password_verify($contraseña_input, $usuario['contraseña'])) {
+                // Login correcto → resetear intentos
+                $usuario['intentos'] = 0;
+                file_put_contents($usuarios_file, json_encode($usuarios, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+
                 $_SESSION['usuario'] = $usuario['usuario'];
                 $_SESSION['tipo'] = $usuario['tipo'];
                 header('Location: index.php'); exit();
             } else {
-                $error = "Contraseña incorrecta.";
+                // Incrementar intentos
+                $usuario['intentos']++;
+                if ($usuario['intentos'] >= 3) {
+                    $usuario['bloqueado'] = true;
+                    $error = "Su cuenta ha sido bloqueada tras 3 intentos fallidos.";
+                }
+
+                // Guardar cambios en usuarios.json
+                file_put_contents($usuarios_file, json_encode($usuarios, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+
+                // Registrar intento fallido en usuarios-fail.log
+                $registro = "[$fecha] Usuario: $usuario_input | IP: $ip | UA: $userAgent | Intentos: {$usuario['intentos']}\n";
+                file_put_contents($usuarios_fail_log, $registro, FILE_APPEND | LOCK_EX);
+
+                break;
             }
-            break;
         }
     }
 
-    if (!$usuario_encontrado) $error = "Usuario no encontrado.";
+    if (!$usuario_encontrado) {
+        // Registrar intento de usuario inexistente
+        $registro = "[$fecha] Usuario: $usuario_input (NO EXISTE) | IP: $ip | UA: $userAgent\n";
+        file_put_contents($usuarios_fail_log, $registro, FILE_APPEND | LOCK_EX);
+    }
 }
+
 
 // =====================
 // CARGA DE VERSION.XK
