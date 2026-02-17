@@ -27,8 +27,7 @@
 
 ## SEGURIDAD
 - Se recomienda editar/eliminar el usuario `admin`. Si decide eliminarlo, antes cree otro `SuperAdministrador` para poder seguir gestionando los usuarios del sistema, ya que es el unico que tiene este permiso.
-- Si es necesario, editar `apache2.conf` -> `sudo nano /etc/apache2/apache2.conf` editando en el bloque `<Directory /var/www/>` la linea `AllowOverride None` por `AllowOverride All`, por ultimo reinicie Apache2 `sudo systemctl restart apache2`. Esto protegera el acceso remoto a los archivos `.json` que guardan datos sensibles mediante el uso de `.htaccess` situado en la raiz del proyecto.
-- Se ha añadido una capa de seguridad para evitar la exposicion de los archivos con datos sesibles `.json`.
+- Se ha añadido una capa de seguridad para evitar la exposicion de los archivos con datos sesibles `.json`. Si es necesario, editar `apache2.conf` -> `sudo nano /etc/apache2/apache2.conf` editando en el bloque `<Directory /var/www/>` la linea `AllowOverride None` por `AllowOverride All`, por ultimo reinicie Apache2 `sudo systemctl restart apache2`. Esto protegera el acceso remoto a los archivos `.json` que guardan datos sensibles mediante el uso de `.htaccess` situado en la raiz del proyecto.
 
 <img src="https://github.com/X43K/ITVControl/blob/1a1353d5830b926422414690ca60931f1bb142c8/images/ejemplo1.webp">
 <img src="https://github.com/X43K/ITVControl/blob/1a1353d5830b926422414690ca60931f1bb142c8/images/ejemplo2.webp">
