@@ -49,6 +49,25 @@ foreach($log_lines as $line){
 // Obtener todas las IPs únicas del registro
 $ips_bloqueadas = array_keys($intentos);
 
+// Detectar posibles filtraciones de credenciales por IP y registrar usuarios
+$alertas = [];
+$usuarios_por_ip = [];
+foreach($ips_bloqueadas as $ip) {
+    $usuarios = [];
+    foreach($log_lines as $line){
+        if(strpos($line, "IP: $ip ") !== false && preg_match('/Usuario:\s*(.+?)\s*\|/', $line, $matches)){
+            $usuario_linea = trim($matches[1]);
+            if($usuario_linea !== 'ANONIMO') {
+                $usuarios[$usuario_linea] = true; // registrar usuario distinto de ANONIMO
+            }
+        }
+    }
+    if(!empty($usuarios)) {
+        $alertas[$ip] = true; // marcar alerta
+        $usuarios_por_ip[$ip] = implode('<br>', array_keys($usuarios)); // lista de usuarios en la celda
+    }
+}
+
 // Función para obtener país y código de bandera
 function obtenerPais($ip) {
     $geo = @json_decode(file_get_contents("http://ip-api.com/json/$ip"));
@@ -85,7 +104,7 @@ body {
 }
 
 table { width:100%; border-collapse: collapse; background:#fff; box-shadow:0 0 10px rgba(0,0,0,0.1); }
-th, td { padding:12px; border-bottom:1px solid #ddd; text-align:center; }
+th, td { padding:12px; border-bottom:1px solid #ddd; text-align:center; vertical-align:middle; }
 th { background:#004aad; color:#fff; }
 tr:hover { background:#f1f1f1; }
 
@@ -93,6 +112,8 @@ tr:hover { background:#f1f1f1; }
 
 button { padding:5px 10px; cursor:pointer; border:none; background:#ff4c4c; color:#fff; border-radius:4px; }
 button:hover { background:#ff0000; }
+
+.alerta { color:red; font-weight:bold; }
 
 @media (prefers-color-scheme: dark) {
     body { background:#000; color:#ddd; }
@@ -141,6 +162,7 @@ button:hover { background:#ff0000; }
 <?php else: ?>
 <table>
     <tr>
+        <th>⚠ Usuarios</th>
         <th>IP</th>
         <th>País</th>
         <th>Intentos</th>
@@ -150,8 +172,10 @@ button:hover { background:#ff0000; }
         list($pais, $codigoPais) = obtenerPais($ip);
         $num_intentos = $intentos[$ip] ?? 0;
         $mostrar_boton = in_array($ip, $ips_permanentes);
+        $usuarios_html = $usuarios_por_ip[$ip] ?? '';
     ?>
     <tr>
+        <td class="alerta"><?= $usuarios_html ?></td>
         <td><?= htmlspecialchars($ip) ?></td>
         <td>
             <?= htmlspecialchars($pais) ?>
