@@ -36,7 +36,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             if (password_verify($contraseña_input, $usuario['contraseña'])) {
-                // Login correcto → resetear intentos
                 $usuario['intentos'] = 0;
                 file_put_contents($usuarios_file, json_encode($usuarios, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 
@@ -44,17 +43,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['tipo'] = $usuario['tipo'];
                 header('Location: index.php'); exit();
             } else {
-                // Incrementar intentos
                 $usuario['intentos']++;
                 if ($usuario['intentos'] >= 3) {
                     $usuario['bloqueado'] = true;
                     $error = "Su cuenta ha sido bloqueada tras 3 intentos fallidos.";
                 }
 
-                // Guardar cambios en usuarios.json
                 file_put_contents($usuarios_file, json_encode($usuarios, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 
-                // Registrar intento fallido en usuarios-fail.log
                 $registro = "[$fecha] Usuario: $usuario_input | IP: $ip | UA: $userAgent | Intentos: {$usuario['intentos']}\n";
                 file_put_contents($usuarios_fail_log, $registro, FILE_APPEND | LOCK_EX);
 
@@ -64,16 +60,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (!$usuario_encontrado) {
-        // Registrar intento de usuario inexistente
         $registro = "[$fecha] Usuario: $usuario_input (NO EXISTE) | IP: $ip | UA: $userAgent\n";
         file_put_contents($usuarios_fail_log, $registro, FILE_APPEND | LOCK_EX);
     }
 }
 
-
-// =====================
-// CARGA DE VERSION.XK
-// =====================
 $version_file = 'version.xk';
 $version = 'v.1.0'; $autor = '';
 if(file_exists($version_file)){
@@ -148,7 +139,7 @@ input[type=submit]:hover {
     .eye-icon { fill:#fff; }
 }
 
-/* ===== MODO OSCURO AUTOMÁTICO ===== */
+/* ===== MODO OSCURO ===== */
 @media (prefers-color-scheme: dark) {
     body {
         background:#000;
@@ -166,10 +157,29 @@ input[type=submit]:hover {
     input[type=submit] {
         background:#0066ff;
         color:#fff;
-        border:none;
     }
     input[type=submit]:hover {
         background:#3399ff;
+    }
+}
+
+/* ===== CUADRO DE COOKIES ===== */
+.cookies-box {
+    margin-top: 25px;
+    padding: 12px;
+    border: 1px solid #ccc;
+    background: #f7f7f7;
+    color: #333;
+    width: 330px;
+    font-size: 13px;
+    border-radius: 6px;
+}
+
+@media (prefers-color-scheme: dark) {
+    .cookies-box {
+        border: 1px solid #555;
+        background: #1a1a1a;
+        color: #ccc;
     }
 }
 </style>
@@ -202,11 +212,16 @@ input[type=submit]:hover {
 <p style="color:red;"><?= htmlspecialchars($error) ?></p>
 <?php endif; ?>
 
+<!-- CUADRO DE COOKIES -->
+<div class="cookies-box">
+    Esta web utiliza únicamente cookies técnicas necesarias para el inicio de sesión.
+    No se emplean cookies de análisis, publicidad ni de terceros.
+</div>
+
 <h4 class="small" style="margin-top:12px;"><?= htmlspecialchars($version) ?></h4>
 <p class="small"><?= htmlspecialchars($autor) ?></p>
 
 <script>
-// Mostrar / ocultar contraseña (SVG cambia)
 function togglePassword(inputId, iconId){
     const input = document.getElementById(inputId);
     const icon = document.getElementById(iconId);
