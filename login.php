@@ -1,4 +1,5 @@
 <?php
+include __DIR__ . '/check_bloqueo.php';
 session_start();
 
 // Si ya está logueado, redirigir

@@ -174,19 +174,20 @@ function validarCita(form) {
 <h1><img src="images/logo.webp" alt="Logo" width="30" style="vertical-align: middle;"> Editar Cita</h1>
 <br>
 
-<div class="menu">
-    <a title="index" href="index.php"><img src="images/index.webp" alt="index" width="80"></a>
-    <a title="citas" href="citas.php"><img src="images/citas.webp" alt="citas" width="80"></a>
-    <a title="vehiculos" href="vehiculos.php"><img src="images/vehiculos.webp" alt="vehiculos" width="80"></a>
-    <?php if ($is_admin): ?>
-        <a title="estaciones" href="estaciones.php"><img src="images/estaciones.webp" alt="estaciones" width="80"></a>
-    <?php endif; ?>
-    <?php if ($is_superadmin): ?>
-        <a title="usuarios" href="usuarios.php"><img src="images/usuarios.webp" alt="usuarios" width="80"></a>
-    <?php endif; ?>
-    <a title="imprimir" href="imprimir.php"><img src="images/imprimir.webp" alt="imprimir" width="80"></a>
-    <a title="logout" href="logout.php"><img src="images/logout.webp" alt="logout" width="80"></a>
-</div>
+    <div class="menu">
+        <a title="index" href="index.php"><img src="images/index.webp" alt="index" width="80"></a>
+        <a title="citas" href="citas.php"><img src="images/citas.webp" alt="citas" width="80"></a>
+        <a title="vehiculos" href="vehiculos.php"><img src="images/vehiculos.webp" alt="vehiculos" width="80"></a>
+        <?php if ($is_admin): ?>
+            <a title="estaciones" href="estaciones.php"><img src="images/estaciones.webp" alt="estaciones" width="80"></a>
+            <a title="seguridad" href="ips_bloqueadas.php"><img src="images/secury.webp" alt="seguridad" width="80"></a>
+        <?php endif; ?>
+        <?php if ($is_superadmin): ?>
+            <a title="usuarios" href="usuarios.php"><img src="images/usuarios.webp" alt="usuarios" width="80"></a>
+        <?php endif; ?>
+        <a title="imprimir" href="imprimir.php"><img src="images/imprimir.webp" alt="imprimir" width="80"></a>
+        <a title="logout" href="logout.php"><img src="images/logout.webp" alt="logout" width="80"></a>
+    </div>
 
 <br>
 
