@@ -151,19 +151,21 @@ ul { margin:0; padding-left:18px; }
 </h1>
 <br>
 
-<div class="menu">
-    <a href="index.php"><img src="images/index.webp" width="80" alt="index"></a>
-    <a href="citas.php"><img src="images/citas.webp" width="80" alt="citas"></a>
-    <a href="vehiculos.php"><img src="images/vehiculos.webp" width="80" alt="vehiculos"></a>
-    <?php if ($is_admin): ?>
-        <a href="estaciones.php"><img src="images/estaciones.webp" width="80" alt="estaciones"></a>
-    <?php endif; ?>
-    <?php if ($is_superadmin): ?>
-        <a href="usuarios.php"><img src="images/usuarios.webp" awidth="80" lt="usuarios"></a>
-    <?php endif; ?>
-    <a href="imprimir.php"><img src="images/imprimir.webp" width="80" alt="imprimir"></a>
-    <a href="logout.php"><img src="images/logout.webp" width="80" alt="logout"></a>
-</div>
+    <div class="menu">
+        <a title="index" href="index.php"><img src="images/index.webp" alt="index" width="80"></a>
+        <a title="citas" href="citas.php"><img src="images/citas.webp" alt="citas" width="80"></a>
+        <a title="vehiculos" href="vehiculos.php"><img src="images/vehiculos.webp" alt="vehiculos" width="80"></a>
+        <?php if ($is_admin): ?>
+            <a title="estaciones" href="estaciones.php"><img src="images/estaciones.webp" alt="estaciones" width="80"></a>
+            <a title="seguridad" href="ips_bloqueadas.php"><img src="images/secury.webp" alt="seguridad" width="80"></a>
+        <?php endif; ?>
+        <?php if ($is_superadmin): ?>
+            <a title="usuarios" href="usuarios.php"><img src="images/usuarios.webp" alt="usuarios" width="80"></a>
+        <?php endif; ?>
+        <a title="imprimir" href="imprimir.php"><img src="images/imprimir.webp" alt="imprimir" width="80"></a>
+        <a title="logout" href="logout.php"><img src="images/logout.webp" alt="logout" width="80"></a>
+    </div>
+  
 <br>
 
 <?php if (isset($mensaje)): ?>
