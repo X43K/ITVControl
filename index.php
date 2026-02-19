@@ -94,7 +94,15 @@ foreach ($citas as $cita) {
 
 // Filtrar vehículos visibles y ordenar
 $vehiculos_filtrados = array_filter($vehiculos, fn($v) => in_array($v['estado'], ['ACTIVO','ITV RECHAZADA']));
-usort($vehiculos_filtrados, fn($a,$b) => calcular_dias_restantes($a['caducidad_itv']) <=> calcular_dias_restantes($b['caducidad_itv']));
+usort($vehiculos_filtrados, function($a, $b) {
+    // Primero: ITV RECHAZADA arriba
+    if ($a['estado'] === 'ITV RECHAZADA' && $b['estado'] !== 'ITV RECHAZADA') return -1;
+    if ($a['estado'] !== 'ITV RECHAZADA' && $b['estado'] === 'ITV RECHAZADA') return 1;
+
+    // Después: ordenar por días restantes
+    return calcular_dias_restantes($a['caducidad_itv']) <=> calcular_dias_restantes($b['caducidad_itv']);
+});
+
 
 // =====================
 // VERSION Y AUTOR
