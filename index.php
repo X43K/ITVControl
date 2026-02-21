@@ -173,7 +173,18 @@ table{border-collapse:collapse;width:100%}
 th,td{border:1px solid #ccc;padding:8px;vertical-align:top}
 th{background:#eee}
 ul{margin:0;padding-left:18px}
+/* ===== AJUSTE COLUMNAS ===== */
+th:nth-child(7),
+td:nth-child(7){
+    white-space: nowrap;
+}
 
+th:nth-child(3),
+td:nth-child(3){
+    width:1%;
+    white-space: nowrap;
+}
+/* ============================ */
 .user-info{
     position:fixed;
     top:10px;
