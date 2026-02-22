@@ -11,16 +11,24 @@ if (!isset($_SESSION['usuario']) || !in_array($_SESSION['tipo'], ['SuperAdminist
 $is_admin = isset($_SESSION['tipo']) && in_array($_SESSION['tipo'], ['Administrador', 'SuperAdministrador']);
 $is_superadmin = isset($_SESSION['tipo']) && $_SESSION['tipo'] === 'SuperAdministrador';
 
-// Cargar usuarios
+// Archivos base
 $usuarios_file = 'usuarios.json';
 $log_file = 'usuarios-fail.log';
 
+// Crear si no existe
 if (!file_exists($usuarios_file)) {
     file_put_contents($usuarios_file, json_encode([]));
 }
 
-$usuarios = json_decode(file_get_contents($usuarios_file), true);
+// Cargar usuarios con validación
+$usuarios_raw = file_get_contents($usuarios_file);
+$usuarios = json_decode($usuarios_raw, true);
 if (!is_array($usuarios)) $usuarios = [];
+
+// Ordenar alfabéticamente siempre
+usort($usuarios, function($a, $b) {
+    return strcasecmp($a['usuario'], $b['usuario']);
+});
 
 /* ================= VER LOG ================= */
 $log_modal = null;
@@ -68,30 +76,53 @@ if (isset($_GET['limpiar_log'])) {
     exit();
 }
 
-// Procesar formulario de añadir usuario
+/* ================= AÑADIR USUARIO ================= */
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!empty($_POST['usuario']) && !empty($_POST['contraseña']) && !empty($_POST['confirmar_contraseña']) && !empty($_POST['tipo'])) {
-        if ($_POST['contraseña'] !== $_POST['confirmar_contraseña']) {
-            $error = "Las contraseñas no coinciden.";
+    $usuario_nuevo = trim($_POST['usuario'] ?? '');
+    $pass = $_POST['contraseña'] ?? '';
+    $pass2 = $_POST['confirmar_contraseña'] ?? '';
+    $tipo = $_POST['tipo'] ?? '';
+
+    if ($usuario_nuevo === '' || $pass === '' || $pass2 === '' || $tipo === '') {
+        $error = "Todos los campos son obligatorios.";
+    } elseif ($pass !== $pass2) {
+        $error = "Las contraseñas no coinciden.";
+    } else {
+        // Verificar duplicado (case-insensitive)
+        $existe = false;
+        foreach ($usuarios as $u) {
+            if (strcasecmp($u['usuario'], $usuario_nuevo) === 0) {
+                $existe = true;
+                break;
+            }
+        }
+
+        if ($existe) {
+            $error = "El usuario ya existe.";
         } else {
             $nuevo_usuario = [
-                'usuario' => $_POST['usuario'],
-                'contraseña' => password_hash($_POST['contraseña'], PASSWORD_DEFAULT),
-                'tipo' => $_POST['tipo']
+                'usuario' => $usuario_nuevo,
+                'contraseña' => password_hash($pass, PASSWORD_DEFAULT),
+                'tipo' => $tipo
             ];
 
             $usuarios[] = $nuevo_usuario;
-            file_put_contents($usuarios_file, json_encode($usuarios, JSON_PRETTY_PRINT));
+
+            // Ordenar alfabéticamente
+            usort($usuarios, function($a, $b) {
+                return strcasecmp($a['usuario'], $b['usuario']);
+            });
+
+            // Guardar seguro
+            file_put_contents($usuarios_file, json_encode($usuarios, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 
             header('Location: usuarios.php');
             exit();
         }
-    } else {
-        $error = "Todos los campos son obligatorios.";
     }
 }
 
-// ======= Preprocesar si hay registros de log para cada usuario =======
+/* ======= Marcar si cada usuario tiene registros en el log ======= */
 if (file_exists($log_file)) {
     $lineas_log = file($log_file, FILE_IGNORE_NEW_LINES);
     foreach ($usuarios as &$usuario) {
@@ -104,8 +135,9 @@ if (file_exists($log_file)) {
         }
     }
 }
+unset($usuario);
 
-// Cargar versión y autor desde version.xk
+/* ======= Cargar versión y autor ======= */
 $version_text = 'v.1.4';
 $autor_text = 'B174M3 // XaeK';
 if (file_exists('version.xk')) {
@@ -231,8 +263,8 @@ a { text-decoration:underline; }
         <strong>Tipos de usuario:</strong><br><br>
         <strong>Usuario</strong> - Puede consultar e imprimir.<br>
         <strong>Colaborador</strong> - Puede hacer todo lo anterior + añadir citas, añadir vehículos y modificar estados y caducidades vehículos.<br>
-        <strong>Administrador</strong> - Puede hacer todo lo anterior + modificar/eliminar citas, eliminar vehículos y gestionar estaciones.<br>
-        <strong>SuperAdministrador</strong> - Puede hacer todo lo anterior + añadir/modificar/eliminar usuarios.
+        <strong>Administrador</strong> - Puede hacer todo lo anterior + modificar/eliminar citas, eliminar vehiculos, gestionar estaciones, ver y desbloquear IPs bloqueadas por intentos de acceso no autorizado a archivos sensibles.<br>
+        <strong>SuperAdministrador</strong> - Puede hacer todo lo anterior + añadir/modificar/desbloquear/eliminar usuarios.
     </div>
 </div>
 <br><br>
@@ -270,7 +302,6 @@ a { text-decoration:underline; }
                         <button type="submit" style="padding:4px 8px; cursor:pointer; background-color:#cc0000; color:#fff;">Eliminar</button>
                     </form>
 
-                    <!-- Ver intentos solo si hay registros -->
                     <?php if (!empty($usuario['tiene_log'])): ?>
                         <form action="usuarios.php" method="get" style="margin:0;">
                             <input type="hidden" name="ver_log" value="<?= htmlspecialchars($usuario['usuario']) ?>">
@@ -281,7 +312,7 @@ a { text-decoration:underline; }
                     <?php if (!empty($usuario['bloqueado'])): ?>
                         <form action="desbloquear_usuario.php" method="post" style="margin:0;">
                             <input type="hidden" name="usuario" value="<?= htmlspecialchars($usuario['usuario']) ?>">
-                            <button type="submit" style="padding:4px 8px; cursor:pointer; background-color:#28a745; color:#fff;">Debloquear</button>
+                            <button type="submit" style="padding:4px 8px; cursor:pointer; background-color:#28a745; color:#fff;">Desbloquear</button>
                         </form>
                     <?php endif; ?>
                 </td>
@@ -313,8 +344,8 @@ function togglePassword(inputId, iconId) {
 
 document.querySelector("form").addEventListener("submit", function(e) {
     const pass1 = document.getElementById("contraseña").value;
-    const pass2 = document.getElementById("confirmar_contraseña").value;
-    if (pass1 !== pass2) {
+    const pass2 = document.getElementById("confirmar_contraseña").value
+        if (pass1 !== pass2) {
         e.preventDefault();
         alert("Las contraseñas no coinciden. Por favor, verifícalas.");
     }

@@ -23,7 +23,7 @@
 - Usuario - Puede consultar e imprimir
 - Colaborador - Puede hacer todo lo anterior + añadir citas, añadir vehiculos y modificar estados y caducidades vehiculos.
 - Administrador - Puede hacer todo lo anterior + modificar/eliminar citas, eliminar vehiculos, gestionar estaciones, ver y desbloquear IPs bloqueadas por intentos de acceso no autorizado a archivos sensibles.
-- SuperAdministrador - Puede hacer todo lo anterior + añadir/modificar/eliminar usuarios.
+- SuperAdministrador - Puede hacer todo lo anterior + añadir/modificar/desbloquear/eliminar usuarios.
 
 ## SEGURIDAD
 - Se recomienda editar/eliminar el usuario `admin`. Si decide eliminarlo, antes cree otro `SuperAdministrador` para poder seguir gestionando los usuarios del sistema, ya que es el unico que tiene este permiso.
