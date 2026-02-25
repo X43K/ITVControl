@@ -169,22 +169,72 @@ if ($version_local_num && $version_remota_num) {
 .azul{background:#3399ff;color:white}
 .verde{background:#4CAF50;color:white}
 
-table{border-collapse:collapse;width:100%}
+table{border-collapse:collapse;width:100%; table-layout:auto;}
 th,td{border:1px solid #ccc;padding:8px;vertical-align:top}
 th{background:#eee}
 ul{margin:0;padding-left:18px}
+
 /* ===== AJUSTE COLUMNAS ===== */
+
+/* 1️⃣ Vehículo → ancho dinámico máximo, permite saltos, nunca parte palabras */
+th:nth-child(1),
+td:nth-child(1){
+    white-space: normal;   /* permite saltos de línea */
+    word-break: keep-all;  /* nunca parte palabras */
+    width: 1%;             /* ancho mínimo que crece según contenido */
+    max-width: 100%;       /* no excede ancho de la tabla */
+}
+
+/* 2️⃣ Matrícula → siempre una sola línea */
+th:nth-child(2),
+td:nth-child(2){
+    white-space: nowrap;
+}
+
+/* 3️⃣ Tipo → puede saltar línea sin partir palabras */
+th:nth-child(3),
+td:nth-child(3){
+    white-space: normal;
+    word-break: keep-all;
+}
+
+/* 4️⃣ Estado → puede usar salto de línea sin dividir palabras, ancho mínimo */
+th:nth-child(4),
+td:nth-child(4){
+    white-space: normal;
+    word-break: keep-all;
+    width: auto;
+    min-width: 80px;
+}
+
+/* 5️⃣ Caducidad ITV → una sola línea */
+th:nth-child(5),
+td:nth-child(5){
+    white-space: nowrap;
+}
+
+/* 6️⃣ Días → mismo ancho que Estado, "X días" nunca se divide */
+th:nth-child(6),
+td:nth-child(6){
+    white-space: normal;       /* permite saltos para ITV CADUCADA/RECHAZADA */
+    word-break: keep-all;
+    width: auto;
+    min-width: 80px;
+}
+
+/* Clase especial para "X días" */
+td.dias-numero{
+    white-space: nowrap;       /* fuerza que números como "10 días" nunca se dividan */
+}
+
+/* 7️⃣ Cita Asignada → igual que antes */
 th:nth-child(7),
 td:nth-child(7){
     white-space: nowrap;
 }
 
-th:nth-child(3),
-td:nth-child(3){
-    width:1%;
-    white-space: nowrap;
-}
 /* ============================ */
+
 .user-info{
     position:fixed;
     top:10px;
@@ -193,7 +243,6 @@ td:nth-child(3){
     font-size:14px;
 }
 
-/* Botón de actualización flotante debajo del usuario */
 .update-button{
     display:block;
     margin-top:4px;
@@ -208,7 +257,6 @@ td:nth-child(3){
     text-decoration:underline;
 }
 
-/* PRÓXIMA ITV */
 .proxima-itv{
     position:fixed;
     top:90px;
@@ -239,7 +287,6 @@ td:nth-child(3){
     padding:6px;
 }
 
-/* ===== MODO OSCURO AUTOMÁTICO ===== */
 @media (prefers-color-scheme: dark) {
     body{background:#000;color:#ddd;}
     h1,h2,h3,h4,p,strong{color:#ddd;}
@@ -249,11 +296,11 @@ td:nth-child(3){
     .menu img{filter: invert(1) hue-rotate(180deg);}
     h1 img{filter:none;}
 }
-  body {
-    margin: 15px;       /* margen superior, inferior, izquierdo y derecho */
-    font-family: Arial, sans-serif; /* fuente consistente */
-}
 
+body {
+    margin: 15px;
+    font-family: Arial, sans-serif;
+}
 </style>
 </head>
 <body>
