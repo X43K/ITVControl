@@ -25,39 +25,34 @@ $archivo = $_SERVER['REQUEST_URI'] ?? 'UNKNOWN';
 $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? 'UNKNOWN';
 $usuario = $_SESSION['usuario'] ?? 'ANONIMO'; // Usuario logueado
 
-// Solo registrar si el intento es a .json o .log
-if (preg_match('/\.(json|log)$/i', $archivo)) {
+// Verificar si ya está bloqueada permanentemente
+$ipsBloqueadas = file_exists($bloqueadasFile) ? file($bloqueadasFile, FILE_IGNORE_NEW_LINES) : [];
+$bloqueado = in_array($ip, $ipsBloqueadas);
 
-    // Verificar si ya está bloqueada permanentemente
-    $ipsBloqueadas = file_exists($bloqueadasFile) ? file($bloqueadasFile, FILE_IGNORE_NEW_LINES) : [];
-    $bloqueado = in_array($ip, $ipsBloqueadas);
-
-    // Contar intentos anteriores solo de .json o .log
-    $intentos = 0;
-    if (file_exists($logFile)) {
-        $lineas = file($logFile);
-        foreach ($lineas as $linea) {
-            if (strpos($linea, "IP: $ip ") !== false && preg_match('/\.(json|log)/i', $linea)) {
-                $intentos++;
-            }
+// Contar intentos anteriores
+$intentos = 0;
+if (file_exists($logFile)) {
+    $lineas = file($logFile);
+    foreach ($lineas as $linea) {
+        if (strpos($linea, "IP: $ip ") !== false) {
+            $intentos++;
         }
     }
-
-    // Si supera límite y no está aún en bloqueadas → añadir
-    if ($intentos >= $maxIntentos && !$bloqueado) {
-        file_put_contents($bloqueadasFile, $ip . PHP_EOL, FILE_APPEND | LOCK_EX);
-        $bloqueado = true;
-    }
-
-    // Registrar intento actual
-    $registro = "[$fecha] IP: $ip | Usuario: $usuario | Archivo: $archivo | UA: $userAgent" . PHP_EOL;
-    file_put_contents($logFile, $registro, FILE_APPEND | LOCK_EX);
 }
+
+// Si supera límite y no está aún en bloqueadas → añadir
+if ($intentos >= $maxIntentos && !$bloqueado) {
+    file_put_contents($bloqueadasFile, $ip . PHP_EOL, FILE_APPEND | LOCK_EX);
+    $bloqueado = true;
+}
+
+// Registrar intento actual
+$registro = "[$fecha] IP: $ip | Usuario: $usuario | Archivo: $archivo | UA: $userAgent" . PHP_EOL;
+file_put_contents($logFile, $registro, FILE_APPEND | LOCK_EX);
 
 // Obtener país
 $pais = "Desconocido";
 $codigoPais = "";
-
 $geo = @json_decode(file_get_contents("http://ip-api.com/json/$ip"));
 if ($geo && $geo->status === "success") {
     $pais = $geo->country;
@@ -70,64 +65,21 @@ if ($geo && $geo->status === "success") {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>403 - Acceso Restringido</title>
-
-<!-- Redirección automática para todos los casos -->
 <meta http-equiv="refresh" content="7;url=logout.php">
-
 <style>
-body{
-    font-family: Arial, sans-serif;
-    background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
-    height:100vh;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    color:white;
-}
-.container{
-    background:rgba(0,0,0,0.8);
-    padding:40px;
-    border-radius:12px;
-    text-align:center;
-    width:90%;
-    max-width:600px;
-}
+body{font-family: Arial, sans-serif;background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);height:100vh;display:flex;justify-content:center;align-items:center;color:white;}
+.container{background:rgba(0,0,0,0.8);padding:40px;border-radius:12px;text-align:center;width:90%;max-width:600px;}
 h1{color:#ff4c4c;font-size:60px;}
-.ip-box{
-    margin-top:20px;
-    padding:12px;
-    background:rgba(255,0,0,0.2);
-    border:1px solid #ff4c4c;
-    border-radius:8px;
-}
-.bloqueado{
-    margin-top:20px;
-    padding:12px;
-    background:rgba(255,0,0,0.4);
-    border:1px solid red;
-    border-radius:8px;
-    font-weight:bold;
-}
-.btn{
-    display:inline-block;
-    margin-top:25px;
-    padding:10px 20px;
-    background:#ff4c4c;
-    color:white;
-    text-decoration:none;
-    border-radius:20px;
-}
+.ip-box{margin-top:20px;padding:12px;background:rgba(255,0,0,0.2);border:1px solid #ff4c4c;border-radius:8px;}
+.bloqueado{margin-top:20px;padding:12px;background:rgba(255,0,0,0.4);border:1px solid red;border-radius:8px;font-weight:bold;}
+.btn{display:inline-block;margin-top:25px;padding:10px 20px;background:#ff4c4c;color:white;text-decoration:none;border-radius:20px;}
 </style>
 </head>
 <body>
-
 <div class="container">
-  
 <img src="images/logo.webp" width="40" class="logo" alt="Logo">
-
 <h1>403</h1>
 <h2>Acceso Restringido</h2>
-
 <div class="ip-box">
 ⚠ Su intento ha sido registrado.<br>
 IP detectada: <strong><?php echo htmlspecialchars($ip); ?></strong>

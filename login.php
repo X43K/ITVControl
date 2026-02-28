@@ -3,7 +3,8 @@ include __DIR__ . '/check_bloqueo.php';
 session_start();
 
 if (isset($_SESSION['usuario'])) {
-    header('Location: index.php'); exit();
+    header('Location: index.php');
+    exit();
 }
 
 $usuarios_file = 'usuarios.json';
@@ -13,7 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!file_exists($usuarios_file)) die("El archivo de usuarios no existe.");
     $usuarios = json_decode(file_get_contents($usuarios_file), true);
 
-    $usuario_input = $_POST['usuario'] ?? '';
+    $usuario_input = trim($_POST['usuario'] ?? '');
     $contraseña_input = $_POST['contraseña'] ?? '';
 
     $ip = $_SERVER['REMOTE_ADDR'] ?? 'UNKNOWN';
@@ -39,9 +40,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $usuario['intentos'] = 0;
                 file_put_contents($usuarios_file, json_encode($usuarios, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 
+                /* ===== SESIÓN ===== */
                 $_SESSION['usuario'] = $usuario['usuario'];
                 $_SESSION['tipo'] = $usuario['tipo'];
-                header('Location: index.php'); exit();
+
+                // 💡 Nuevo: asignar flota (si existe)
+                if (!empty($usuario['flota'])) {
+                    $_SESSION['flota'] = strtoupper(trim($usuario['flota']));
+                } else {
+                    unset($_SESSION['flota']); // SuperAdmins no tienen flota
+                }
+
+                header('Location: index.php');
+                exit();
             } else {
                 $usuario['intentos']++;
                 if ($usuario['intentos'] >= 3) {
@@ -66,23 +77,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $version_file = 'version.xk';
-$version = 'v.1.0'; $autor = '';
-if(file_exists($version_file)){
+$version = 'v.1.0';
+$autor = '';
+if (file_exists($version_file)) {
     $lines = file($version_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-    if(isset($lines[0])) $version = $lines[0];
-    if(isset($lines[1])) $autor = $lines[1];
+    if (isset($lines[0])) $version = $lines[0];
+    if (isset($lines[1])) $autor = $lines[1];
 }
 ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Iniciar Sesión</title>
-
-<link rel="shortcut icon" href="images/logo.webp">
-<link rel="icon" sizes="64x64" href="images/logo.webp">
-<link rel="apple-touch-icon" sizes="180x180" href="images/logo.webp">
-
+<title>ITVGestion</title>
+<link rel="icon" href="images/logo.webp">
+<link rel="stylesheet" href="style.css">
 <style>
 body {
     font-family: Arial, sans-serif;
@@ -119,6 +128,7 @@ input[type=submit] {
     background:#004aad;
     color:#fff;
     border:none;
+    border-radius:4px;
 }
 input[type=submit]:hover {
     background:#0066ff;
@@ -141,15 +151,9 @@ input[type=submit]:hover {
 
 /* ===== MODO OSCURO ===== */
 @media (prefers-color-scheme: dark) {
-    body {
-        background:#000;
-        color:#ddd;
-    }
-    h1,label,p {
-        color:#ddd;
-    }
-    input[type=text],
-    input[type=password] {
+    body { background:#000; color:#ddd; }
+    h1,label,p { color:#ddd; }
+    input[type=text], input[type=password] {
         background:#222;
         color:#ddd;
         border:1px solid #555;
@@ -174,7 +178,6 @@ input[type=submit]:hover {
     font-size: 13px;
     border-radius: 6px;
 }
-
 @media (prefers-color-scheme: dark) {
     .cookies-box {
         border: 1px solid #555;
@@ -232,6 +235,26 @@ function togglePassword(inputId, iconId){
         : '<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12zm11 4a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/><circle cx="12" cy="12" r="2"/>';
 }
 </script>
+<script>
+// Toggle contraseña ya existente
+function togglePassword(inputId, iconId){
+    const input = document.getElementById(inputId);
+    const icon = document.getElementById(iconId);
+    const isPassword = input.type === "password";
+    input.type = isPassword ? "text" : "password";
+    icon.innerHTML = isPassword
+        ? '<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12zm11 4a4 4 0 0 1-4-4h-2a6 6 0 0 0 12 0h-2a4 4 0 0 1-4 4z"/><circle cx="12" cy="12" r="2"/>'
+        : '<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12zm11 4a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/><circle cx="12" cy="12" r="2"/>';
+}
 
+// ===== Capturar Enter para enviar formulario =====
+const loginForm = document.querySelector('form');
+loginForm.addEventListener('keydown', function(e){
+    if(e.key === 'Enter'){
+        e.preventDefault(); // previene doble submit
+        loginForm.submit();
+    }
+});
+</script>
 </body>
 </html>

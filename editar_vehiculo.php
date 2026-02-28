@@ -10,6 +10,10 @@ $is_admin = in_array($_SESSION['tipo'], ['Administrador','SuperAdministrador']);
 $is_superadmin = $_SESSION['tipo'] === 'SuperAdministrador';
 $is_colab = in_array($_SESSION['tipo'], ['Colaborador','Administrador','SuperAdministrador']);
 
+// Obtener flota del usuario
+$flota_usuario = $_SESSION['flota'] ?? null;
+$flota_texto = $is_superadmin ? "Todas las flotas" : ($flota_usuario ? strtoupper($flota_usuario) : "Sin flota asignada");
+
 // Obtener matrícula del vehículo
 if (!isset($_GET['id']) || empty($_GET['id'])) {
     header('Location: vehiculos.php'); exit();
@@ -29,6 +33,18 @@ foreach ($vehiculos as &$vehiculo) {
     }
 }
 if ($vehiculo_editar === null) die("No se encontró el vehículo: " . htmlspecialchars($id_vehiculo));
+
+// Cargar flotas de usuarios
+$usuarios_file = 'usuarios.json';
+$flotas = [];
+if (file_exists($usuarios_file)) {
+    $usuarios = json_decode(file_get_contents($usuarios_file), true);
+    foreach ($usuarios as $u) {
+        if (isset($u['flota']) && !in_array($u['flota'],$flotas)) {
+            $flotas[] = $u['flota'];
+        }
+    }
+}
 
 // Funciones
 function calcular_dias_restantes($caducidad_itv) {
@@ -60,6 +76,12 @@ if ($_SERVER['REQUEST_METHOD']==='POST') {
     if (!empty($_POST['estado']) && !empty($_POST['caducidad_itv'])) {
         $vehiculo_editar['estado'] = $_POST['estado'];
         $vehiculo_editar['caducidad_itv'] = $_POST['caducidad_itv'];
+
+        // Solo SuperAdmin puede cambiar flota
+        if ($is_superadmin && isset($_POST['flota']) && in_array($_POST['flota'],$flotas)) {
+            $vehiculo_editar['flota'] = $_POST['flota'];
+        }
+
         if (file_put_contents($vehiculos_file,json_encode($vehiculos,JSON_PRETTY_PRINT))) {
             header('Location: vehiculos.php'); exit();
         } else $error="No se pudieron guardar los cambios.";
@@ -79,7 +101,8 @@ if(file_exists($version_file)){
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Editar Vehículo</title>
+<title>ITVGestion</title>
+<link rel="icon" href="images/logo.webp">
 <link rel="stylesheet" href="style.css">
 <style>
 body{margin:15px;font-family:Arial,sans-serif;}
@@ -102,49 +125,76 @@ input[type=submit]:hover{background:#0066ff;}
     h1 img{filter:none;}
 }
 h1, h2{color:inherit;}
+
+/* ===== INFO DE USUARIO ===== */
+.user-info{
+    position: fixed;
+    top: 10px;
+    right: 15px;
+    text-align: right;
+    font-size: 14px;
+    background: rgba(255,255,255,0.6); /* mismo fondo que el código 2 */
+    padding: 5px 10px; /* relleno idéntico */
+    border-radius: 8px;
+}
+.user-info strong{ display: block; }
+.user-info small{ color: #4a90e2; font-weight: bold; }
+
+/* ===== MODO OSCURO ===== */
+@media (prefers-color-scheme: dark){
+    .user-info{ background: rgba(0,0,0,0.5); }
+    .user-info small{ color: #3399ff; }
+}
+  
 </style>
 </head>
 <body>
 
-<div class="user-info" style="position:fixed;top:10px;right:15px;text-align:right;font-size:14px;">
-    <strong><?= $_SESSION['usuario'] ?> | <?= $_SESSION['tipo'] ?></strong>
-        <div id="fecha-hora"></div>
+<div class="user-info">
+    <strong><?= htmlspecialchars($_SESSION['usuario']) ?> | <?= htmlspecialchars($_SESSION['tipo']) ?></strong>
+    <small><?= htmlspecialchars($flota_texto) ?></small>
+    <div id="fecha-hora"></div>
 </div>
 
-<br>
-
-<h1>
-<img src="images/logo.webp" width="30" style="vertical-align:middle;"> Editar Vehículo
-</h1>
-  
-<br>
+<h1><img src="images/logo.webp" width="30" style="vertical-align: middle;"> Página Principal - Gestión de ITV</h1>
+<hr style="border:1px solid #4a90e2; margin:10px 0 20px 0;">
 
     <div class="menu">
-        <a title="index" href="index.php"><img src="images/index.webp" alt="index" width="80"></a>
-        <a title="citas" href="citas.php"><img src="images/citas.webp" alt="citas" width="80"></a>
-        <a title="vehiculos" href="vehiculos.php"><img src="images/vehiculos.webp" alt="vehiculos" width="80"></a>
-        <?php if ($is_admin): ?>
-            <a title="estaciones" href="estaciones.php"><img src="images/estaciones.webp" alt="estaciones" width="80"></a>
-            <a title="seguridad" href="ips_bloqueadas.php"><img src="images/secury.webp" alt="seguridad" width="80"></a>
-        <?php endif; ?>
-        <?php if ($is_superadmin): ?>
-            <a title="usuarios" href="usuarios.php"><img src="images/usuarios.webp" alt="usuarios" width="80"></a>
-        <?php endif; ?>
-        <a title="imprimir" href="imprimir.php"><img src="images/imprimir.webp" alt="imprimir" width="80"></a>
-        <a title="logout" href="logout.php"><img src="images/logout.webp" alt="logout" width="80"></a>
+      <a title="index" href="index.php"><img src="images/index.webp" alt="index" width="80"></a>
+      <a title="citas" href="citas.php"><img src="images/citas.webp" alt="citas" width="80"></a>
+      <a title="vehiculos" href="vehiculos.php"><img src="images/vehiculos.webp" alt="vehiculos" width="80"></a>
+     <?php if(in_array($_SESSION['tipo'], ['Administrador','SuperAdministrador'])): ?>
+      <a title="estaciones" href="estaciones.php"><img src="images/estaciones.webp" alt="estaciones" width="80"></a>
+      <a title="seguridad" href="ips_bloqueadas.php"><img src="images/secury.webp" alt="seguridad" width="80"></a>
+      <a title="usuarios" href="usuarios.php"><img src="images/usuarios.webp" alt="usuarios" width="80"></a>
+     <?php endif; ?>
+      <a title="imprimir" href="imprimir.php"><img src="images/imprimir.webp" alt="imprimir" width="80"></a>
+      <a title="logout" href="logout.php"><img src="images/logout.webp" alt="logout" width="80"></a>
     </div>
-
-<br>
-
+  
+    <br><br><br>
+  
 <h2>Editar Vehículo</h2>
 <?php if(isset($error)): ?><p style="color:red;"><?= htmlspecialchars($error) ?></p><?php endif; ?>
 
 <form method="POST" style="max-width:400px;">
     <label>Vehículo:</label>
-    <input type="text" value="<?= htmlspecialchars($vehiculo_editar['vehiculo']) ?>" disabled>
+    <input 
+        type="text" 
+        name="vehiculo"
+        value="<?= htmlspecialchars($vehiculo_editar['vehiculo']) ?>" 
+        <?= !$is_superadmin ? 'readonly' : '' ?>
+        style="font-size: calc(1em + 4px);"
+    >
   <br>
     <label>Matrícula:</label>
-    <input type="text" value="<?= htmlspecialchars($vehiculo_editar['matricula']) ?>" disabled>
+    <input 
+        type="text" 
+        name="matricula"
+        value="<?= htmlspecialchars($vehiculo_editar['matricula']) ?>" 
+        <?= !$is_superadmin ? 'readonly' : '' ?>
+        style="font-size: calc(1em + 4px);"
+    >
   <br>
     <label>Estado:</label>
     <select name="estado">
@@ -156,6 +206,15 @@ h1, h2{color:inherit;}
     <label>Caducidad ITV:</label>
     <input type="date" name="caducidad_itv" value="<?= htmlspecialchars($vehiculo_editar['caducidad_itv']) ?>" required>
   <br>
+    <?php if($is_superadmin): ?>
+    <label>Flota:</label>
+    <select name="flota">
+        <?php foreach($flotas as $f): ?>
+        <option value="<?= htmlspecialchars($f) ?>" <?= ($vehiculo_editar['flota'] ?? '') === $f ? 'selected':'' ?>><?= htmlspecialchars($f) ?></option>
+        <?php endforeach; ?>
+    </select>
+    <br>
+    <?php endif; ?>
     <input type="submit" value="Guardar Cambios">
 </form>
 
