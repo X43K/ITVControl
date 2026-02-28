@@ -10,6 +10,10 @@ if (!isset($_SESSION['usuario'])) {
 $is_admin = isset($_SESSION['tipo']) && in_array($_SESSION['tipo'], ['Administrador', 'SuperAdministrador']);
 $is_superadmin = isset($_SESSION['tipo']) && $_SESSION['tipo'] === 'SuperAdministrador';
 
+// Obtener flota del usuario
+$flota_usuario = $_SESSION['flota'] ?? null;
+$flota_texto = $is_superadmin ? "Todas las flotas" : ($flota_usuario ? strtoupper($flota_usuario) : "Sin flota asignada");
+
 // Cargar vehículos
 $vehiculos_file = 'vehiculos.json';
 if (!file_exists($vehiculos_file)) die("El archivo de vehículos no existe.");
@@ -66,6 +70,15 @@ function obtener_color_y_texto($vehiculo) {
 }
 
 // =====================
+// FILTRAR VEHÍCULOS POR FLOTA (si no es SuperAdministrador)
+// =====================
+if (!$is_superadmin && $flota_usuario) {
+    $vehiculos = array_filter($vehiculos, function($v) use ($flota_usuario) {
+        return isset($v['flota']) && strtoupper(trim($v['flota'])) === strtoupper(trim($flota_usuario));
+    });
+}
+
+// =====================
 // PRÓXIMA ITV GLOBAL
 // =====================
 $proxima_itv = null;
@@ -73,16 +86,12 @@ $ts_min = null;
 $ahora = new DateTime();
 
 foreach ($citas as $cita) {
+    if ($cita['tipo_cita'] !== 'Primera') continue;
 
-    if ($cita['tipo_cita'] !== 'Primera') {
-        continue;
-    }
+    // Filtrar por flota si no es superadmin
+    if (!$is_superadmin && isset($cita['flota']) && strtoupper($cita['flota']) !== strtoupper($flota_usuario)) continue;
 
-    $dt = DateTime::createFromFormat(
-        'Y-m-d H:i',
-        $cita['fecha_cita'].' '.$cita['hora_cita']
-    );
-
+    $dt = DateTime::createFromFormat('Y-m-d H:i', $cita['fecha_cita'].' '.$cita['hora_cita']);
     if ($dt && $dt >= $ahora) {
         $ts = $dt->getTimestamp();
         if ($ts_min === null || $ts < $ts_min) {
@@ -92,17 +101,13 @@ foreach ($citas as $cita) {
     }
 }
 
-// Filtrar vehículos visibles y ordenar
+// Filtrar y ordenar vehículos
 $vehiculos_filtrados = array_filter($vehiculos, fn($v) => in_array($v['estado'], ['ACTIVO','ITV RECHAZADA']));
 usort($vehiculos_filtrados, function($a, $b) {
-    // Primero: ITV RECHAZADA arriba
     if ($a['estado'] === 'ITV RECHAZADA' && $b['estado'] !== 'ITV RECHAZADA') return -1;
     if ($a['estado'] !== 'ITV RECHAZADA' && $b['estado'] === 'ITV RECHAZADA') return 1;
-
-    // Después: ordenar por días restantes
     return calcular_dias_restantes($a['caducidad_itv']) <=> calcular_dias_restantes($b['caducidad_itv']);
 });
-
 
 // =====================
 // VERSION Y AUTOR
@@ -114,54 +119,19 @@ if (file_exists('version.xk')) {
     if (isset($lineas[0])) $version = trim($lineas[0]);
     if (isset($lineas[1])) $autor = trim($lineas[1]);
 }
-
-// =====================
-// COMPROBAR ACTUALIZACIÓN FUNCIONAL
-// =====================
-$hay_actualizacion = false;
-$github_version_url = 'https://raw.githubusercontent.com/X43K/ITVControl/main/version.xk';
-
-$opts = [
-    "http" => [
-        "method" => "GET",
-        "header" => "User-Agent: PHP/ITVControl-Updater\r\n"
-    ]
-];
-$context = stream_context_create($opts);
-$contenido_remoto = @file_get_contents($github_version_url, false, $context);
-
-$version_local_num = null;
-$version_remota_num = null;
-
-// Limpiar y extraer número de versión local
-if (preg_match('/v?(\d+\.\d+)/', $version, $m)) {
-    $version_local_num = $m[1]; // ej: "2.1"
-}
-
-// Limpiar y extraer número de versión remota
-if ($contenido_remoto !== false) {
-    $lineas_remotas = preg_split("/\r?\n/", trim($contenido_remoto));
-    if (!empty($lineas_remotas[0])) {
-        if (preg_match('/v?(\d+\.\d+)/', trim($lineas_remotas[0]), $mr)) {
-            $version_remota_num = $mr[1]; // ej: "2.2"
-        }
-    }
-}
-
-// Comparar versiones
-if ($version_local_num && $version_remota_num) {
-    $hay_actualizacion = version_compare($version_remota_num, $version_local_num, '>');
-}
 ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="refresh" content="60">
-<title>Página Principal - Gestión de ITV</title>
+<title>ITVGestion</title>
 <link rel="icon" href="images/logo.webp">
 <link rel="stylesheet" href="style.css">
+
+  <meta http-equiv="refresh" content="60">
+
 <style>
+/* ===== COLORES DE ESTADO ===== */
 .negro{background:black;color:grey}
 .rojo_intenso{background:#cc0000;color:white}
 .naranja_intenso{background:#ff6600;color:white}
@@ -169,194 +139,117 @@ if ($version_local_num && $version_remota_num) {
 .azul{background:#3399ff;color:white}
 .verde{background:#4CAF50;color:white}
 
+/* ===== TABLAS ===== */
 table{border-collapse:collapse;width:100%; table-layout:auto;}
 th,td{border:1px solid #ccc;padding:8px;vertical-align:top}
 th{background:#eee}
+
+/* ===== ANCHOS DE COLUMNAS (tus originales) ===== */
+th:nth-child(1), td:nth-child(1){white-space:normal;word-break:keep-all;width:1%;max-width:100%;}
+th:nth-child(2), td:nth-child(2){white-space:nowrap;}
+th:nth-child(3), td:nth-child(3){white-space:normal;word-break:keep-all;}
+th:nth-child(4), td:nth-child(4){white-space:normal;word-break:keep-all;width:auto;min-width:80px;}
+th:nth-child(5), td:nth-child(5){white-space:nowrap;}
+th:nth-child(6), td:nth-child(6){white-space:normal;word-break:keep-all;width:auto;min-width:80px;}
+th:nth-child(7), td:nth-child(7){white-space:nowrap;}
+td.dias-numero{white-space:nowrap;}
 ul{margin:0;padding-left:18px}
 
-/* ===== AJUSTE COLUMNAS ===== */
-
-/* 1️⃣ Vehículo → ancho dinámico máximo, permite saltos, nunca parte palabras */
-th:nth-child(1),
-td:nth-child(1){
-    white-space: normal;   /* permite saltos de línea */
-    word-break: keep-all;  /* nunca parte palabras */
-    width: 1%;             /* ancho mínimo que crece según contenido */
-    max-width: 100%;       /* no excede ancho de la tabla */
-}
-
-/* 2️⃣ Matrícula → siempre una sola línea */
-th:nth-child(2),
-td:nth-child(2){
-    white-space: nowrap;
-}
-
-/* 3️⃣ Tipo → puede saltar línea sin partir palabras */
-th:nth-child(3),
-td:nth-child(3){
-    white-space: normal;
-    word-break: keep-all;
-}
-
-/* 4️⃣ Estado → puede usar salto de línea sin dividir palabras, ancho mínimo */
-th:nth-child(4),
-td:nth-child(4){
-    white-space: normal;
-    word-break: keep-all;
-    width: auto;
-    min-width: 80px;
-}
-
-/* 5️⃣ Caducidad ITV → una sola línea */
-th:nth-child(5),
-td:nth-child(5){
-    white-space: nowrap;
-}
-
-/* 6️⃣ Días → mismo ancho que Estado, "X días" nunca se divide */
-th:nth-child(6),
-td:nth-child(6){
-    white-space: normal;       /* permite saltos para ITV CADUCADA/RECHAZADA */
-    word-break: keep-all;
-    width: auto;
-    min-width: 80px;
-}
-
-/* Clase especial para "X días" */
-td.dias-numero{
-    white-space: nowrap;       /* fuerza que números como "10 días" nunca se dividan */
-}
-
-/* 7️⃣ Cita Asignada → igual que antes */
-th:nth-child(7),
-td:nth-child(7){
-    white-space: nowrap;
-}
-
-/* ============================ */
-
+/* ===== INFO DE USUARIO ===== */
 .user-info{
     position:fixed;
     top:10px;
     right:15px;
     text-align:right;
     font-size:14px;
+    background:rgba(255,255,255,0.6);
+    padding:5px 10px;
+    border-radius:8px;
+}
+.user-info strong{display:block;}
+.user-info small{color:#4a90e2;font-weight:bold;}
+
+/* ===== MODO OSCURO ===== */
+@media (prefers-color-scheme: dark){
+    .user-info{background:rgba(0,0,0,0.5);}
+    .user-info small{color:#3399ff;}
 }
 
-.update-button{
-    display:block;
-    margin-top:4px;
-    font-weight:bold;
-    text-align:right;
-}
-.update-button a{
-    color:red;
-    text-decoration:none;
-}
-.update-button a:hover{
-    text-decoration:underline;
-}
-
+/* ===== PRÓXIMA ITV ===== */
 .proxima-itv{
     position:fixed;
-    top:90px;
+    top:100px;
     right:20px;
     width:260px;
     border:2px solid #000;
     background:#f8f8f8;
 }
 .proxima-itv .titulo{
-    background:#d9968c;
+    background:#4a90e2;
+    color:#fff;
     text-align:center;
     font-weight:bold;
-    font-size:20px;
+    font-size:18px;
     padding:8px;
+    border-bottom:1px solid #000;
 }
-.proxima-itv .fila{
-    display:flex;
-    border-top:1px solid #000;
-}
-.proxima-itv .label{
-    width:40%;
-    padding:6px;
-    font-weight:bold;
-    border-right:1px solid #000;
-}
-.proxima-itv .valor{
-    width:60%;
-    padding:6px;
-}
+.proxima-itv .fila{display:flex;border-top:1px solid #000;}
+.proxima-itv .label{width:40%;padding:6px;font-weight:bold;border-right:1px solid #000;}
+.proxima-itv .valor{width:60%;padding:6px;}
 
+/* ===== MODO OSCURO ===== */
 @media (prefers-color-scheme: dark) {
     body{background:#000;color:#ddd;}
     h1,h2,h3,h4,p,strong{color:#ddd;}
-    th{background:#222;color:#fff;}
+    th{background:#1c75bc;color:#fff;}
     .proxima-itv{background:#111;border-color:#555;color:#ddd;}
-    .proxima-itv .titulo{background:#660000;color:#fff;}
+    .proxima-itv .titulo{background:#1c75bc;}
     .menu img{filter: invert(1) hue-rotate(180deg);}
     h1 img{filter:none;}
+    .user-info{background:rgba(0,0,0,0.5);}
+    .user-info small{color:#3399ff;}
 }
 
-body {
-    margin: 15px;
-    font-family: Arial, sans-serif;
-}
+/* ===== BASE ===== */
+body { margin:15px; font-family:Arial,sans-serif; }
 </style>
 </head>
 <body>
 
 <div class="user-info">
-    <strong><?= $_SESSION['usuario'] ?> | <?= $_SESSION['tipo'] ?></strong>
+    <strong><?= htmlspecialchars($_SESSION['usuario']) ?> | <?= htmlspecialchars($_SESSION['tipo']) ?></strong>
+    <small><?= htmlspecialchars($flota_texto) ?></small>
     <div id="fecha-hora"></div>
-    <?php if($hay_actualizacion): ?>
-        <div class="update-button">
-            <a href="https://github.com/X43K/ITVControl" target="_blank">
-                ¡Existe una actualización disponible!
-            </a>
-        </div>
-    <?php endif; ?>
 </div>
 
-<br>
-
-<h1>
-<img src="images/logo.webp" width="30" style="vertical-align: middle;"> Página Principal - Gestión de ITV
-</h1>
-
-<br>
+<h1><img src="images/logo.webp" width="30" style="vertical-align: middle;"> Página Principal - Gestión de ITV</h1>
+<hr style="border:1px solid #4a90e2; margin:10px 0 20px 0;">
 
     <div class="menu">
-        <a title="index" href="index.php"><img src="images/index.webp" alt="index" width="80"></a>
-        <a title="citas" href="citas.php"><img src="images/citas.webp" alt="citas" width="80"></a>
-        <a title="vehiculos" href="vehiculos.php"><img src="images/vehiculos.webp" alt="vehiculos" width="80"></a>
-        <?php if ($is_admin): ?>
-            <a title="estaciones" href="estaciones.php"><img src="images/estaciones.webp" alt="estaciones" width="80"></a>
-            <a title="seguridad" href="ips_bloqueadas.php"><img src="images/secury.webp" alt="seguridad" width="80"></a>
-        <?php endif; ?>
-        <?php if ($is_superadmin): ?>
-            <a title="usuarios" href="usuarios.php"><img src="images/usuarios.webp" alt="usuarios" width="80"></a>
-        <?php endif; ?>
-        <a title="imprimir" href="imprimir.php"><img src="images/imprimir.webp" alt="imprimir" width="80"></a>
-        <a title="logout" href="logout.php"><img src="images/logout.webp" alt="logout" width="80"></a>
+      <a title="index" href="index.php"><img src="images/index.webp" alt="index" width="80"></a>
+      <a title="citas" href="citas.php"><img src="images/citas.webp" alt="citas" width="80"></a>
+      <a title="vehiculos" href="vehiculos.php"><img src="images/vehiculos.webp" alt="vehiculos" width="80"></a>
+     <?php if(in_array($_SESSION['tipo'], ['Administrador','SuperAdministrador'])): ?>
+      <a title="estaciones" href="estaciones.php"><img src="images/estaciones.webp" alt="estaciones" width="80"></a>
+      <a title="seguridad" href="ips_bloqueadas.php"><img src="images/secury.webp" alt="seguridad" width="80"></a>
+      <a title="usuarios" href="usuarios.php"><img src="images/usuarios.webp" alt="usuarios" width="80"></a>
+     <?php endif; ?>
+      <a title="imprimir" href="imprimir.php"><img src="images/imprimir.webp" alt="imprimir" width="80"></a>
+      <a title="logout" href="logout.php"><img src="images/logout.webp" alt="logout" width="80"></a>
     </div>
-
-<br>
-
+  
+    <br><br><br>
+  
 <?php if($proxima_itv): ?>
 <div class="proxima-itv">
     <div class="titulo">PRÓXIMA ITV</div>
     <div class="fila"><div class="label">FECHA</div><div class="valor"><?= formatear_fecha($proxima_itv['fecha_cita']) ?></div></div>
     <div class="fila"><div class="label">HORA</div><div class="valor"><?= $proxima_itv['hora_cita'] ?></div></div>
-    <div class="fila"><div class="label">ESTACIÓN</div>
-        <div class="valor"><?= $proxima_itv['estacion_cita'] ?> <?= $proxima_itv['tipo_cita']==='Primera'?'1ª':'2ª' ?></div>
-    </div>
+    <div class="fila"><div class="label">ESTACIÓN</div><div class="valor"><?= htmlspecialchars($proxima_itv['estacion_cita']) ?> <?= $proxima_itv['tipo_cita']==='Primera'?'1ª':'2ª' ?></div></div>
 </div>
 <?php endif; ?>
-
+  
 <h2>Vehículos</h2>
-
-<br>
-
 <table>
 <thead>
 <tr>
@@ -371,12 +264,12 @@ $info = obtener_color_y_texto($v);
 $citas_v = obtener_citas_vehiculo($v['matricula'],$citas);
 ?>
 <tr class="<?= $info['color'] ?>">
-<td><?= $v['vehiculo'] ?></td>
-<td><?= $v['matricula'] ?></td>
-<td><?= $v['tipo'] ?? '-' ?></td>
-<td><?= $v['estado'] ?></td>
+<td><?= htmlspecialchars($v['vehiculo']) ?></td>
+<td><?= htmlspecialchars($v['matricula']) ?></td>
+<td><?= htmlspecialchars($v['tipo'] ?? '-') ?></td>
+<td><?= htmlspecialchars($v['estado']) ?></td>
 <td><?= formatear_fecha($v['caducidad_itv']) ?></td>
-<td><?= $info['texto_dias'] ?></td>
+<td><?= htmlspecialchars($info['texto_dias']) ?></td>
 <td>
 <?php if($citas_v): ?><ul>
 <?php foreach($citas_v as $c): ?>
@@ -384,8 +277,7 @@ $citas_v = obtener_citas_vehiculo($v['matricula'],$citas);
     $c['fecha_cita']===$proxima_itv['fecha_cita'] &&
     $c['hora_cita']===$proxima_itv['hora_cita'] &&
     $c['vehiculo']===$proxima_itv['vehiculo']) ? 'color:red;font-weight:bold;' : '' ?>">
-<strong style="color:inherit"><?= formatear_fecha($c['fecha_cita']) ?></strong>
-<?= $c['hora_cita'] ?> – <?= $c['estacion_cita'] ?> <?= $c['tipo_cita']==='Primera'?'1ª':'2ª' ?>
+<strong><?= formatear_fecha($c['fecha_cita']) ?></strong> <?= htmlspecialchars($c['hora_cita']) ?> – <?= htmlspecialchars($c['estacion_cita']) ?> <?= $c['tipo_cita']==='Primera'?'1ª':'2ª' ?>
 </li>
 <?php endforeach; ?></ul><?php else: ?>Sin cita<?php endif; ?>
 </td>
@@ -394,7 +286,6 @@ $citas_v = obtener_citas_vehiculo($v['matricula'],$citas);
 </tbody>
 </table>
 
-<!-- VERSIÓN Y AUTOR -->
 <h4 class="small version-title" style="margin-top:12px; text-align:left;"><?= htmlspecialchars($version) ?></h4>
 <p class="small version-author" style="text-align:left;"><?= htmlspecialchars($autor) ?></p>
 
@@ -407,6 +298,5 @@ function actualizarFechaHora(){
 actualizarFechaHora();
 setInterval(actualizarFechaHora,1000);
 </script>
-
 </body>
 </html>

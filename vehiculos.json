@@ -4,6 +4,7 @@
         "matricula": "1234TST",
         "tipo": "Autobuses y microbuses",
         "estado": "ACTIVO",
-        "caducidad_itv": "2026-08-04"
+        "caducidad_itv": "2026-08-04",
+        "flota": "TEST"
     }
 ]

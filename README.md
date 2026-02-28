@@ -20,10 +20,13 @@
 - usuario: `usuario` contraseña: `usuario` Nivel: Usuario (Consultar e imprimir)
 
 ## Tipos de usuario
-- Usuario - Puede consultar e imprimir
-- Colaborador - Puede hacer todo lo anterior + añadir citas, añadir vehiculos y modificar estados y caducidades vehiculos.
-- Administrador - Puede hacer todo lo anterior + modificar/eliminar citas, eliminar vehiculos, gestionar estaciones, ver y desbloquear IPs bloqueadas por intentos de acceso no autorizado a archivos sensibles.
-- SuperAdministrador - Puede hacer todo lo anterior + añadir/modificar/desbloquear/eliminar usuarios.
+
+- Usuario - Puede consultar e imprimir.
+- Colaborador - Todo lo anterior + añadir citas, vehículos y modificar estados/caducidades.
+- Administrador - Todo lo anterior + gestionar estaciones, ver IPs bloqueadas, añadir/modificar/desbloquear/eliminar usuarios.
+- SuperAdministrador - Todo lo anterior + editar id, matricula y flota vehiculo + desbloquear IPs bloqueadas.
+
+- El SuperAdministrador es el unico que puede interactuar con todas las flotas. los demas usuarios includos los Administradores unicamente podran interactuar con su flota asignada no pudiento interferir en las demás. 
 
 ## SEGURIDAD
 - Se recomienda editar/eliminar el usuario `admin`. Si decide eliminarlo, antes cree otro `SuperAdministrador` para poder seguir gestionando los usuarios del sistema, ya que es el unico que tiene este permiso.
