@@ -141,7 +141,16 @@ function mostrarVehiculo($matricula, $vehiculos) {
     }
     return $matricula;
 }
-
+// =====================
+// VERSION Y AUTOR
+// =====================
+$version = 'v.1.0';
+$autor = 'Desconocido';
+if (file_exists('version.xk')) {
+    $lineas = file('version.xk', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    if (isset($lineas[0])) $version = trim($lineas[0]);
+    if (isset($lineas[1])) $autor = trim($lineas[1]);
+}
 // =====================
 // FILTRAR CITAS FUTURAS POR FLOTA
 // =====================
@@ -357,8 +366,8 @@ setInterval(actualizarFechaHora,1000);
 </tbody>
 </table>
 
-<h4 class="small" style="text-align:left; margin:4px 0;"><?= htmlspecialchars($version_info['version']) ?></h4>
-<p class="small" style="text-align:left; margin:0;"><?= htmlspecialchars($version_info['author']) ?></p>
+<h4 class="small version-title" style="margin-top:12px; text-align:left;"><?= htmlspecialchars($version) ?></h4>
+<p class="small version-author" style="text-align:left;"><?= htmlspecialchars($autor) ?></p>
 
 </body>
 </html>
