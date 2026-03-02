@@ -36,6 +36,9 @@
 <img src="https://github.com/X43K/ITVControl/blob/1a1353d5830b926422414690ca60931f1bb142c8/images/ejemplo1.webp">
 <img src="https://github.com/X43K/ITVControl/blob/1a1353d5830b926422414690ca60931f1bb142c8/images/ejemplo2.webp">
 
+## Actualizar
+- Cuando exista una version superior dis ponible en el canal oficial de GitHub, aparecera un aviso en la pagina principal. Ademas del aviso de "Nueva version disponible" tambien aparecera un aviso de la version actual instalada y la nueva version disponible. En el caso de que el usuario sea un Administrador o SuperAdministrador, tambien aparecera un boton para realizar una Actualizacion automatica a la nueva version. Recuerde tener asignados a los archvos los permisos de escritura necesarior para poder realizar dicha actualizacion.
+
 ## Cómo contribuir
 - Reporta errores en la sección Issues.
 - Sugiere mejoras.
