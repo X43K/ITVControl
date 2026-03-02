@@ -1,4 +1,4 @@
-<?php
+<?php 
 session_start();
 
 // Redirigir al login si no hay usuario logueado
@@ -87,8 +87,6 @@ $ahora = new DateTime();
 
 foreach ($citas as $cita) {
     if ($cita['tipo_cita'] !== 'Primera') continue;
-
-    // Filtrar por flota si no es superadmin
     if (!$is_superadmin && isset($cita['flota']) && strtoupper($cita['flota']) !== strtoupper($flota_usuario)) continue;
 
     $dt = DateTime::createFromFormat('Y-m-d H:i', $cita['fecha_cita'].' '.$cita['hora_cita']);
@@ -121,43 +119,19 @@ if (file_exists('version.xk')) {
 }
 
 // =====================
-// COMPROBAR ACTUALIZACIÓN DISPONIBLE DESDE GITHUB
+// COMPROBAR ACTUALIZACIÓN DESDE GITHUB (siempre sin cache)
 // =====================
-$github_version_url = 'https://raw.githubusercontent.com/X43K/ITVControl/main/version.xk';
-$ultima_version = '';
+$github_version_url = 'https://raw.githubusercontent.com/X43K/ITVControl/main/version.xk?t='.time();
 $ctx = stream_context_create([
-    'http' => ['timeout' => 4, 'header' => "User-Agent: ITVControl\r\n"]
+    'http' => [
+        'timeout' => 5,
+        'header' => "User-Agent: ITVControl\r\nCache-Control: no-cache\r\nPragma: no-cache\r\n"
+    ]
 ]);
+
 $contenido_remoto = @file_get_contents($github_version_url, false, $ctx);
-
-if ($contenido_remoto !== false && strlen(trim($contenido_remoto)) > 0) {
-    $lineas = explode("\n", trim($contenido_remoto));
-    if (isset($lineas[0])) {
-        // Extraer solo el número de versión (por ejemplo: "v.1.0" de "ITVControl v.1.0")
-        if (preg_match('/v\.\d+(\.\d+)*/i', $lineas[0], $matches)) {
-            $ultima_version = trim($matches[0]);
-        }
-    }
-}
-
-
-$mostrar_aviso = false;
-$version_num = null;
-$ultima_version_num = null;
+$ultima_version = '';
 $ultima_version_fallback = 'No se pudo comprobar actualización';
-
-// Extraer número de versión local (solo dígitos y puntos)
-if (preg_match('/\b(\d+(\.\d+)+)\b/', $version, $m)) {
-    $version_num = $m[1]; // ej: 1.0 o 1.2.3
-}
-
-// Obtener versión remota desde GitHub forzando recarga (anti-cache)
-$github_version_url = 'https://raw.githubusercontent.com/X43K/ITVControl/main/version.xk?t=' . time();
-$ctx = stream_context_create([
-    'http' => ['timeout' => 4, 'header' => "User-Agent: ITVControl\r\n"]
-]);
-$contenido_remoto = @file_get_contents($github_version_url, false, $ctx);
-$ultima_version = '';
 
 if ($contenido_remoto !== false && strlen(trim($contenido_remoto)) > 0) {
     $lineas = explode("\n", trim($contenido_remoto));
@@ -166,25 +140,23 @@ if ($contenido_remoto !== false && strlen(trim($contenido_remoto)) > 0) {
     }
 }
 
-// Extraer número de versión remota (solo dígitos y puntos)
-if ($ultima_version && preg_match('/\b(\d+(\.\d+)+)\b/', $ultima_version, $mr)) {
-    $ultima_version_num = $mr[1]; // ej: 1.1 o 1.2.3
-}
+// Extraer número de versión local y remota
+$version_num = null;
+$ultima_version_num = null;
+if (preg_match('/\b(\d+(\.\d+)+)\b/', $version, $m)) $version_num = $m[1];
+if ($ultima_version && preg_match('/\b(\d+(\.\d+)+)\b/', $ultima_version, $mr)) $ultima_version_num = $mr[1];
 
-
-// Comparar versiones si se obtuvo la versión remota
+// Mostrar aviso si la versión remota es mayor o si hay fallo de comprobación
+$mostrar_aviso = false;
 if ($version_num && $ultima_version_num && version_compare($ultima_version_num, $version_num, '>')) {
     $mostrar_aviso = true;
 } elseif (!$ultima_version_num) {
-    // Mostrar aviso con fallback si no se pudo obtener versión remota
     $mostrar_aviso = true;
 }
-
-if ($mostrar_aviso):
 ?>
-<!-- Aviso de nueva versión -->
+<?php if ($mostrar_aviso): ?>
 <div style="background:#ffcc00;border:2px solid #cc9900;padding:10px 15px;margin-bottom:5px;border-radius:8px;">
-    <div style="display:flex;align-items:center;gap:12px;">
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
         <span style="font-weight:bold;font-size:20px;color:red;">¡Existe una actualización disponible!</span>
         <?php if($is_admin || $is_superadmin): ?>
             <form action="actualizar.php" method="post" style="margin:0;">
@@ -196,13 +168,12 @@ if ($mostrar_aviso):
             </form>
         <?php endif; ?>
     </div>
-
-    <!-- Comparativa de versiones debajo -->
     <div style="font-weight:bold;font-size:12px;color:black;margin-top:4px;">
         Versión actual: <?= htmlspecialchars($version_num ?? $version) ?><br>
-        Versión disponible: <?= htmlspecialchars($ultima_version_num ?? $ultima_version_fallback) ?>
+        Versión disponible: <?= htmlspecialchars($ultima_version_num ?? $ultima_version ?? $ultima_version_fallback) ?>
     </div>
 </div>
+
 <?php endif; ?>
 
 <!DOCTYPE html>
