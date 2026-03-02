@@ -123,7 +123,6 @@ if (file_exists('version.xk')) {
 // =====================
 // COMPROBAR ACTUALIZACIÓN DISPONIBLE DESDE GITHUB
 // =====================
-
 $github_version_url = 'https://raw.githubusercontent.com/X43K/ITVControl/main/version.xk';
 $ultima_version = '';
 $ctx = stream_context_create([
@@ -141,22 +140,47 @@ if ($contenido_remoto !== false && strlen(trim($contenido_remoto)) > 0) {
     }
 }
 
+
 $mostrar_aviso = false;
 $version_num = null;
 $ultima_version_num = null;
+$ultima_version_fallback = 'No se pudo comprobar actualización';
 
 // Extraer número de versión local (solo dígitos y puntos)
 if (preg_match('/\b(\d+(\.\d+)+)\b/', $version, $m)) {
     $version_num = $m[1]; // ej: 1.0 o 1.2.3
 }
 
-// Extraer número de versión remota (solo dígitos y puntos)
-if ($ultima_version && preg_match('/\b(\d+(\.\d+)+)\b/', $ultima_version, $mr)) {
-    $ultima_version_num = $mr[1]; // ej: 1.1 o 1.2.3
+// Extraer número de versión remota desde GitHub en tiempo real
+$github_version_url = 'https://raw.githubusercontent.com/X43K/ITVControl/main/version.xk';
+$ctx = stream_context_create([
+    'http' => ['timeout' => 4, 'header' => "User-Agent: ITVControl\r\n"]
+]);
+$contenido_remoto = @file_get_contents($github_version_url, false, $ctx);
+
+$ultima_version = '';
+if ($contenido_remoto !== false && strlen(trim($contenido_remoto)) > 0) {
+    $lineas = explode("\n", trim($contenido_remoto));
+    if (isset($lineas[0])) {
+        // Extraer número de versión del primer renglón
+        if (preg_match('/v\.\d+(\.\d+)*/i', $lineas[0], $matches)) {
+            $ultima_version = trim($matches[0]);
+        }
+    }
 }
 
-// Comparar versiones usando version_compare(), totalmente compatible con múltiples puntos
+// Extraer solo el número de versión remota (ej: 1.2.3)
+if ($ultima_version && preg_match('/\b(\d+(\.\d+)+)\b/', $ultima_version, $mr)) {
+    $ultima_version_num = $mr[1];
+} else {
+    $ultima_version_num = null;
+}
+
+// Comparar versiones si se obtuvo la versión remota
 if ($version_num && $ultima_version_num && version_compare($ultima_version_num, $version_num, '>')) {
+    $mostrar_aviso = true;
+} elseif (!$ultima_version_num) {
+    // Mostrar aviso con fallback si no se pudo obtener versión remota
     $mostrar_aviso = true;
 }
 
@@ -164,38 +188,27 @@ if ($mostrar_aviso):
 ?>
 <!-- Aviso de nueva versión -->
 <div style="background:#ffcc00;border:2px solid #cc9900;padding:10px 15px;margin-bottom:5px;border-radius:8px;">
-    <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
-        <span style="font-weight:bold;font-size:25px;color:red;">
-            ¡Existe una actualización disponible!
-        </span>
+    <div style="display:flex;align-items:center;gap:12px;">
+        <span style="font-weight:bold;font-size:20px;color:red;">¡Existe una actualización disponible!</span>
         <?php if($is_admin || $is_superadmin): ?>
             <form action="actualizar.php" method="post" style="margin:0;">
-                <input type="hidden" name="version_actual" value="<?= htmlspecialchars($version_num) ?>">
-                <input type="hidden" name="version_nueva" value="<?= htmlspecialchars($ultima_version_num) ?>">
-                <button type="submit" style="
-    background:#4a90e2;
-    color:white;
-    border:none;
-    padding:6px 12px;
-    border-radius:6px;
-    font-weight:bold;
-    cursor:pointer;
-    font-size:25px;
-">
-    Actualizar ahora
-</button>
+                <input type="hidden" name="version_actual" value="<?= htmlspecialchars($version_num ?? $version) ?>">
+                <input type="hidden" name="version_nueva" value="<?= htmlspecialchars($ultima_version_num ?? $ultima_version_fallback) ?>">
+                <button type="submit" style="background:#4a90e2;color:white;border:none;padding:8px 16px;border-radius:6px;font-weight:bold;cursor:pointer;font-size:16px;">
+                    Actualizar ahora
+                </button>
             </form>
         <?php endif; ?>
     </div>
-    <!-- Comparativa de versiones debajo del aviso -->
-    <div style="font-weight:bold;font-size:12px;color:black;margin-top:8px;">
-        Versión actual: <?= htmlspecialchars($version_num) ?><br>
-        Versión disponible: <?= htmlspecialchars($ultima_version_num) ?>
+
+    <!-- Comparativa de versiones debajo -->
+    <div style="font-weight:bold;font-size:12px;color:black;margin-top:4px;">
+        Versión actual: <?= htmlspecialchars($version_num ?? $version) ?><br>
+        Versión disponible: <?= htmlspecialchars($ultima_version_num ?? $ultima_version_fallback) ?>
     </div>
 </div>
-<?php endif;
+<?php endif; ?>
 
-?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -204,7 +217,7 @@ if ($mostrar_aviso):
 <link rel="icon" href="images/logo.webp">
 <link rel="stylesheet" href="style.css">
 
-  <meta http-equiv="refresh" content="60">
+<meta http-equiv="refresh" content="60">
 
 <style>
 /* ===== COLORES DE ESTADO ===== */
@@ -301,21 +314,21 @@ body { margin:15px; font-family:Arial,sans-serif; }
 <h1><img src="images/logo.webp" width="30" style="vertical-align: middle;"> Página Principal - Gestión de ITV</h1>
 <hr style="border:1px solid #4a90e2; margin:10px 0 20px 0;">
 
-    <div class="menu">
-      <a title="index" href="index.php"><img src="images/index.webp" alt="index" width="80"></a>
-      <a title="citas" href="citas.php"><img src="images/citas.webp" alt="citas" width="80"></a>
-      <a title="vehiculos" href="vehiculos.php"><img src="images/vehiculos.webp" alt="vehiculos" width="80"></a>
-     <?php if(in_array($_SESSION['tipo'], ['Administrador','SuperAdministrador'])): ?>
-      <a title="estaciones" href="estaciones.php"><img src="images/estaciones.webp" alt="estaciones" width="80"></a>
-      <a title="seguridad" href="ips_bloqueadas.php"><img src="images/secury.webp" alt="seguridad" width="80"></a>
-      <a title="usuarios" href="usuarios.php"><img src="images/usuarios.webp" alt="usuarios" width="80"></a>
-     <?php endif; ?>
-      <a title="imprimir" href="imprimir.php"><img src="images/imprimir.webp" alt="imprimir" width="80"></a>
-      <a title="logout" href="logout.php"><img src="images/logout.webp" alt="logout" width="80"></a>
-    </div>
-  
-    <br><br><br>
-  
+<div class="menu">
+  <a title="index" href="index.php"><img src="images/index.webp" alt="index" width="80"></a>
+  <a title="citas" href="citas.php"><img src="images/citas.webp" alt="citas" width="80"></a>
+  <a title="vehiculos" href="vehiculos.php"><img src="images/vehiculos.webp" alt="vehiculos" width="80"></a>
+ <?php if(in_array($_SESSION['tipo'], ['Administrador','SuperAdministrador'])): ?>
+  <a title="estaciones" href="estaciones.php"><img src="images/estaciones.webp" alt="estaciones" width="80"></a>
+  <a title="seguridad" href="ips_bloqueadas.php"><img src="images/secury.webp" alt="seguridad" width="80"></a>
+  <a title="usuarios" href="usuarios.php"><img src="images/usuarios.webp" alt="usuarios" width="80"></a>
+ <?php endif; ?>
+  <a title="imprimir" href="imprimir.php"><img src="images/imprimir.webp" alt="imprimir" width="80"></a>
+  <a title="logout" href="logout.php"><img src="images/logout.webp" alt="logout" width="80"></a>
+</div>
+
+<br><br><br>
+
 <?php if($proxima_itv): ?>
 <div class="proxima-itv">
     <div class="titulo">PRÓXIMA ITV</div>
@@ -324,7 +337,7 @@ body { margin:15px; font-family:Arial,sans-serif; }
     <div class="fila"><div class="label">ESTACIÓN</div><div class="valor"><?= htmlspecialchars($proxima_itv['estacion_cita']) ?> <?= $proxima_itv['tipo_cita']==='Primera'?'1ª':'2ª' ?></div></div>
 </div>
 <?php endif; ?>
-  
+
 <h2>Vehículos</h2>
 <table>
 <thead>
