@@ -27,7 +27,6 @@ $citas = json_decode(file_get_contents($citas_file), true);
 // =====================
 // FUNCIONES
 // =====================
-
 function calcular_dias_restantes($caducidad_itv) {
     $fecha_actual = new DateTime('today');
     $fecha_caducidad = new DateTime($caducidad_itv);
@@ -108,7 +107,7 @@ usort($vehiculos_filtrados, function($a, $b) {
 });
 
 // =====================
-// VERSION Y AUTOR
+// VERSION LOCAL Y AUTOR
 // =====================
 $version = 'v.1.0';
 $autor = 'Desconocido';
@@ -119,42 +118,49 @@ if (file_exists('version.xk')) {
 }
 
 // =====================
-// COMPROBAR ACTUALIZACIÓN DESDE GITHUB (siempre sin cache)
+// COMPROBAR VERSION REMOTA DESDE GITHUB (sin cache)
 // =====================
-$github_version_url = 'https://raw.githubusercontent.com/X43K/ITVControl/main/version.xk?t='.time();
-$ctx = stream_context_create([
-    'http' => [
-        'timeout' => 5,
-        'header' => "User-Agent: ITVControl\r\nCache-Control: no-cache\r\nPragma: no-cache\r\n"
-    ]
-]);
-
-$contenido_remoto = @file_get_contents($github_version_url, false, $ctx);
-$ultima_version = '';
 $ultima_version_fallback = 'No se pudo comprobar actualización';
+$ultima_version = null;
+$github_url = 'https://raw.githubusercontent.com/X43K/ITVControl/main/version.xk';
 
-if ($contenido_remoto !== false && strlen(trim($contenido_remoto)) > 0) {
-    $lineas = explode("\n", trim($contenido_remoto));
-    if (isset($lineas[0]) && preg_match('/v\.\d+(\.\d+)*/i', $lineas[0], $matches)) {
-        $ultima_version = trim($matches[0]);
-    }
+if(function_exists('curl_version')){
+    $ch = curl_init();
+    curl_setopt($ch,CURLOPT_URL,$github_url.'?t='.time());
+    curl_setopt($ch,CURLOPT_RETURNTRANSFER,true);
+    curl_setopt($ch,CURLOPT_CONNECTTIMEOUT,5);
+    curl_setopt($ch,CURLOPT_TIMEOUT,5);
+    curl_setopt($ch,CURLOPT_HTTPHEADER,["User-Agent: ITVControl","Cache-Control:no-cache","Pragma:no-cache"]);
+    $res = curl_exec($ch);
+    curl_close($ch);
+    if($res && preg_match('/v\.\d+(\.\d+)*/i',$res,$m)) $ultima_version = trim($m[0]);
+} else {
+    $ctx = stream_context_create([
+        'http'=>[
+            'timeout'=>5,
+            'header'=>"User-Agent: ITVControl\r\nCache-Control:no-cache\r\nPragma:no-cache\r\n"
+        ]
+    ]);
+    $res = @file_get_contents($github_url.'?t='.time(), false, $ctx);
+    if($res && preg_match('/v\.\d+(\.\d+)*/i',$res,$m)) $ultima_version = trim($m[0]);
 }
 
-// Extraer número de versión local y remota
+// =====================
+// EXTRAER NUMEROS DE VERSION
+// =====================
 $version_num = null;
 $ultima_version_num = null;
-if (preg_match('/\b(\d+(\.\d+)+)\b/', $version, $m)) $version_num = $m[1];
-if ($ultima_version && preg_match('/\b(\d+(\.\d+)+)\b/', $ultima_version, $mr)) $ultima_version_num = $mr[1];
+if(preg_match('/\b(\d+(\.\d+)+)\b/',$version,$m)) $version_num = $m[1];
+if($ultima_version && preg_match('/\b(\d+(\.\d+)+)\b/',$ultima_version,$mr)) $ultima_version_num = $mr[1];
 
-// Mostrar aviso si la versión remota es mayor o si hay fallo de comprobación
+// =====================
+// DETERMINAR SI MOSTRAR AVISO
+// =====================
 $mostrar_aviso = false;
-if ($version_num && $ultima_version_num && version_compare($ultima_version_num, $version_num, '>')) {
-    $mostrar_aviso = true;
-} elseif (!$ultima_version_num) {
-    $mostrar_aviso = true;
-}
+if($version_num && $ultima_version_num && version_compare($ultima_version_num,$version_num,'>')) $mostrar_aviso=true;
+elseif(!$ultima_version_num) $mostrar_aviso=true;
 ?>
-<?php if ($mostrar_aviso): ?>
+<?php if($mostrar_aviso): ?>
 <div style="background:#ffcc00;border:2px solid #cc9900;padding:10px 15px;margin-bottom:5px;border-radius:8px;">
     <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
         <span style="font-weight:bold;font-size:20px;color:red;">¡Existe una actualización disponible!</span>
@@ -173,7 +179,6 @@ if ($version_num && $ultima_version_num && version_compare($ultima_version_num, 
         Versión disponible: <?= htmlspecialchars($ultima_version_num ?? $ultima_version ?? $ultima_version_fallback) ?>
     </div>
 </div>
-
 <?php endif; ?>
 
 <!DOCTYPE html>
