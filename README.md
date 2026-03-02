@@ -38,15 +38,14 @@
 
 ## Actualizar
 - Cuando exista una versión más reciente disponible en el canal oficial de GitHub, se mostrará un aviso en la página principal. Además del mensaje **“Nueva versión disponible”**, también se indicará la versión actualmente instalada y la nueva versión disponible.  
-
-Si el usuario tiene el rol de **Administrador** o **Superadministrador**, se mostrará un botón adicional que permitirá realizar la actualización automática a la nueva versión.  
-
-Recuerde asegurarse de que los archivos cuenten con los permisos de escritura necesarios para que la actualización pueda completarse correctamente.
+- Si el usuario tiene el rol de **Administrador** o **Superadministrador**, se mostrará un botón adicional que permitirá realizar la actualización automática a la nueva versión.  
+- Recuerde asegurarse de que los archivos cuenten con los permisos de escritura necesarios para que la actualización pueda completarse correctamente.
 
 ## Cómo contribuir
 - Reporta errores en la sección Issues.
 - Sugiere mejoras.
 - Prueba la aplicación y envía feedback.
+
 
 
 
