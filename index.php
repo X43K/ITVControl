@@ -163,12 +163,12 @@ elseif(!$ultima_version_num) $mostrar_aviso=true;
 <?php if($mostrar_aviso): ?>
 <div style="background:#ffcc00;border:2px solid #cc9900;padding:10px 15px;margin-bottom:5px;border-radius:8px;">
     <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-        <span style="font-weight:bold;font-size:20px;color:red;">¡Existe una actualización disponible!</span>
+        <span style="font-weight:bold;font-size:25px;color:red;">¡Existe una actualización disponible!</span>
         <?php if($is_admin || $is_superadmin): ?>
             <form action="actualizar.php" method="post" style="margin:0;">
                 <input type="hidden" name="version_actual" value="<?= htmlspecialchars($version_num ?? $version) ?>">
                 <input type="hidden" name="version_nueva" value="<?= htmlspecialchars($ultima_version_num ?? $ultima_version_fallback) ?>">
-                <button type="submit" style="background:#4a90e2;color:white;border:none;padding:8px 16px;border-radius:6px;font-weight:bold;cursor:pointer;font-size:16px;">
+                <button type="submit" style="background:#4a90e2;color:white;border:none;padding:8px 16px;border-radius:6px;font-weight:bold;cursor:pointer;font-size:25px;">
                     Actualizar ahora
                 </button>
             </form>
