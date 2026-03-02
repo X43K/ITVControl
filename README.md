@@ -37,12 +37,17 @@
 <img src="https://github.com/X43K/ITVControl/blob/1a1353d5830b926422414690ca60931f1bb142c8/images/ejemplo2.webp">
 
 ## Actualizar
-- Cuando exista una version superior dis ponible en el canal oficial de GitHub, aparecera un aviso en la pagina principal. Ademas del aviso de "Nueva version disponible" tambien aparecera un aviso de la version actual instalada y la nueva version disponible. En el caso de que el usuario sea un Administrador o SuperAdministrador, tambien aparecera un boton para realizar una Actualizacion automatica a la nueva version. Recuerde tener asignados a los archvos los permisos de escritura necesarior para poder realizar dicha actualizacion.
+- Cuando exista una versión más reciente disponible en el canal oficial de GitHub, se mostrará un aviso en la página principal. Además del mensaje **“Nueva versión disponible”**, también se indicará la versión actualmente instalada y la nueva versión disponible.  
+
+Si el usuario tiene el rol de **Administrador** o **Superadministrador**, se mostrará un botón adicional que permitirá realizar la actualización automática a la nueva versión.  
+
+Recuerde asegurarse de que los archivos cuenten con los permisos de escritura necesarios para que la actualización pueda completarse correctamente.
 
 ## Cómo contribuir
 - Reporta errores en la sección Issues.
 - Sugiere mejoras.
 - Prueba la aplicación y envía feedback.
+
 
 
 
