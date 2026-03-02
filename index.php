@@ -151,30 +151,26 @@ if (preg_match('/\b(\d+(\.\d+)+)\b/', $version, $m)) {
     $version_num = $m[1]; // ej: 1.0 o 1.2.3
 }
 
-// Extraer número de versión remota desde GitHub en tiempo real
-$github_version_url = 'https://raw.githubusercontent.com/X43K/ITVControl/main/version.xk';
+// Obtener versión remota desde GitHub forzando recarga (anti-cache)
+$github_version_url = 'https://raw.githubusercontent.com/X43K/ITVControl/main/version.xk?t=' . time();
 $ctx = stream_context_create([
     'http' => ['timeout' => 4, 'header' => "User-Agent: ITVControl\r\n"]
 ]);
 $contenido_remoto = @file_get_contents($github_version_url, false, $ctx);
-
 $ultima_version = '';
+
 if ($contenido_remoto !== false && strlen(trim($contenido_remoto)) > 0) {
     $lineas = explode("\n", trim($contenido_remoto));
-    if (isset($lineas[0])) {
-        // Extraer número de versión del primer renglón
-        if (preg_match('/v\.\d+(\.\d+)*/i', $lineas[0], $matches)) {
-            $ultima_version = trim($matches[0]);
-        }
+    if (isset($lineas[0]) && preg_match('/v\.\d+(\.\d+)*/i', $lineas[0], $matches)) {
+        $ultima_version = trim($matches[0]);
     }
 }
 
-// Extraer solo el número de versión remota (ej: 1.2.3)
+// Extraer número de versión remota (solo dígitos y puntos)
 if ($ultima_version && preg_match('/\b(\d+(\.\d+)+)\b/', $ultima_version, $mr)) {
-    $ultima_version_num = $mr[1];
-} else {
-    $ultima_version_num = null;
+    $ultima_version_num = $mr[1]; // ej: 1.1 o 1.2.3
 }
+
 
 // Comparar versiones si se obtuvo la versión remota
 if ($version_num && $ultima_version_num && version_compare($ultima_version_num, $version_num, '>')) {
