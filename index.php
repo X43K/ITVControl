@@ -119,6 +119,82 @@ if (file_exists('version.xk')) {
     if (isset($lineas[0])) $version = trim($lineas[0]);
     if (isset($lineas[1])) $autor = trim($lineas[1]);
 }
+
+// =====================
+// COMPROBAR ACTUALIZACIÓN DISPONIBLE DESDE GITHUB
+// =====================
+
+$github_version_url = 'https://raw.githubusercontent.com/X43K/ITVControl/main/version.xk';
+$ultima_version = '';
+$ctx = stream_context_create([
+    'http' => ['timeout' => 4, 'header' => "User-Agent: ITVControl\r\n"]
+]);
+$contenido_remoto = @file_get_contents($github_version_url, false, $ctx);
+
+if ($contenido_remoto !== false && strlen(trim($contenido_remoto)) > 0) {
+    $lineas = explode("\n", trim($contenido_remoto));
+    if (isset($lineas[0])) {
+        // Extraer solo el número de versión (por ejemplo: "v.1.0" de "ITVControl v.1.0")
+        if (preg_match('/v\.\d+(\.\d+)*/i', $lineas[0], $matches)) {
+            $ultima_version = trim($matches[0]);
+        }
+    }
+}
+
+$mostrar_aviso = false;
+$version_num = null;
+$ultima_version_num = null;
+
+// Extraer número de versión local (solo dígitos y puntos)
+if (preg_match('/\b(\d+(\.\d+)+)\b/', $version, $m)) {
+    $version_num = $m[1]; // ej: 1.0 o 1.2.3
+}
+
+// Extraer número de versión remota (solo dígitos y puntos)
+if ($ultima_version && preg_match('/\b(\d+(\.\d+)+)\b/', $ultima_version, $mr)) {
+    $ultima_version_num = $mr[1]; // ej: 1.1 o 1.2.3
+}
+
+// Comparar versiones usando version_compare(), totalmente compatible con múltiples puntos
+if ($version_num && $ultima_version_num && version_compare($ultima_version_num, $version_num, '>')) {
+    $mostrar_aviso = true;
+}
+
+if ($mostrar_aviso):
+?>
+<!-- Aviso de nueva versión -->
+<div style="background:#ffcc00;border:2px solid #cc9900;padding:10px 15px;margin-bottom:5px;border-radius:8px;">
+    <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+        <span style="font-weight:bold;font-size:25px;color:red;">
+            ¡Existe una actualización disponible!
+        </span>
+        <?php if($is_admin || $is_superadmin): ?>
+            <form action="actualizar.php" method="post" style="margin:0;">
+                <input type="hidden" name="version_actual" value="<?= htmlspecialchars($version_num) ?>">
+                <input type="hidden" name="version_nueva" value="<?= htmlspecialchars($ultima_version_num) ?>">
+                <button type="submit" style="
+    background:#4a90e2;
+    color:white;
+    border:none;
+    padding:6px 12px;
+    border-radius:6px;
+    font-weight:bold;
+    cursor:pointer;
+    font-size:25px;
+">
+    Actualizar ahora
+</button>
+            </form>
+        <?php endif; ?>
+    </div>
+    <!-- Comparativa de versiones debajo del aviso -->
+    <div style="font-weight:bold;font-size:12px;color:black;margin-top:8px;">
+        Versión actual: <?= htmlspecialchars($version_num) ?><br>
+        Versión disponible: <?= htmlspecialchars($ultima_version_num) ?>
+    </div>
+</div>
+<?php endif;
+
 ?>
 <!DOCTYPE html>
 <html lang="es">
