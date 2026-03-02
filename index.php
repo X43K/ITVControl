@@ -333,14 +333,18 @@ $citas_v = obtener_citas_vehiculo($v['matricula'],$citas);
 <td><?= htmlspecialchars($info['texto_dias']) ?></td>
 <td>
 <?php if($citas_v): ?><ul>
-<?php foreach($citas_v as $c): ?>
-<li style="<?= ($proxima_itv &&
-    $c['fecha_cita']===$proxima_itv['fecha_cita'] &&
-    $c['hora_cita']===$proxima_itv['hora_cita'] &&
-    $c['vehiculo']===$proxima_itv['vehiculo']) ? 'color:red;font-weight:bold;' : '' ?>">
-<strong><?= formatear_fecha($c['fecha_cita']) ?></strong> <?= htmlspecialchars($c['hora_cita']) ?> – <?= htmlspecialchars($c['estacion_cita']) ?> <?= $c['tipo_cita']==='Primera'?'1ª':'2ª' ?>
+<?php foreach($citas_v as $c): 
+    // Todas las citas de tipo "Primera" que coincidan con la fecha de la próxima cita
+    $es_cita_proxima_dia = $proxima_itv &&
+        $c['tipo_cita'] === 'Primera' &&
+        $c['fecha_cita'] === $proxima_itv['fecha_cita'];
+?>
+<li style="<?= $es_cita_proxima_dia ? 'color:black; font-weight:bold; text-decoration:underline;' : '' ?>">
+    <?= formatear_fecha($c['fecha_cita']) ?> <?= htmlspecialchars($c['hora_cita']) ?> – 
+    <?= htmlspecialchars($c['estacion_cita']) ?> <?= $c['tipo_cita']==='Primera'?'1ª':'2ª' ?>
 </li>
-<?php endforeach; ?></ul><?php else: ?>Sin cita<?php endif; ?>
+<?php endforeach; ?></ul>
+<?php else: ?>Sin cita<?php endif; ?>
 </td>
 </tr>
 <?php endforeach; ?>
