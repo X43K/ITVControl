@@ -325,8 +325,38 @@ setInterval(actualizarFechaHora,1000);
     <input type="submit" value="Añadir Cita">
 </form>
 <?php endif; ?>
+  
+  <h2 style="display:inline-flex; align-items:center; gap:8px; margin:0;">
+  Lista de Citas Futuras
+  <button class="boton-vista" onclick="window.location.href='calendario_citas.php'">Cambiar a modo calendario</button>
+</h2>
 
-<h2>Lista de Citas Futuras</h2>
+<style>
+.boton-vista {
+  background:#4a90e2;
+  color:#fff;
+  border:none;
+  padding:4px 10px;
+  border-radius:6px;
+  cursor:pointer;
+  font-size:13px;
+  transition:background 0.2s ease-in-out;
+}
+.boton-vista:hover {
+  background:#1c75bc;
+}
+@media (prefers-color-scheme: dark) {
+  .boton-vista {
+    background: linear-gradient(135deg,#1c75bc,#0066cc);
+    color:#fff;
+    border:1px solid #005bb5;
+  }
+  .boton-vista:hover {
+    background: linear-gradient(135deg,#005bb5,#1c75bc);
+  }
+}
+</style>
+  
 <table>
 <thead>
 <tr>
