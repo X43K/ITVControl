@@ -31,7 +31,7 @@ $archivos = [];
 foreach ($data['tree'] as $item) {
     if ($item['type'] === 'blob') {
         $ext = strtolower(pathinfo($item['path'], PATHINFO_EXTENSION));
-        if ($ext !== 'json') $archivos[] = $item['path'];
+        if ($ext !== 'json' && $ext !== 'log') $archivos[] = $item['path'];
     }
 }
 $total = count($archivos);
