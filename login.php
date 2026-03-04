@@ -1,5 +1,79 @@
 <?php
 include __DIR__ . '/check_bloqueo.php';
+
+/* ===== NUEVO: LOG DE LOGIN DETALLADO ===== */
+$registro_login_file = __DIR__ . '/registro_login.log';
+
+function log_login($usuario, $success, $ip, $userAgent, $intentos=0) {
+    global $registro_login_file;
+
+    $fecha = new DateTime('now', new DateTimeZone('Europe/Madrid'));
+    $timestamp = $fecha->format('Y-m-d H:i:s');
+
+    $resultado = $success ? "ok" : "error";
+
+    // Geolocalización básica via ip-api.com
+    $pais = 'UNKNOWN';
+    $region = 'UNKNOWN';
+    $ciudad = 'UNKNOWN';
+    try {
+        if (!in_array(substr($ip,0,3), ['127','10.','192','169'])) { // omitir IPs privadas
+            $ip_enc = urlencode($ip);
+            $geo = @file_get_contents("http://ip-api.com/json/$ip_enc?fields=status,countryCode,regionName,city");
+            if($geo) {
+                $geoData = json_decode($geo, true);
+                if(isset($geoData['status']) && $geoData['status']=='success') {
+                    $pais = $geoData['countryCode'] ?? 'UNKNOWN';
+                    $region = $geoData['regionName'] ?? 'UNKNOWN';
+                    $ciudad = $geoData['city'] ?? 'UNKNOWN';
+                }
+            }
+        }
+    } catch (Exception $e) {
+        // ignoramos errores
+    }
+
+    // Parse simple de user agent
+    $browser = 'UNKNOWN';
+    $os = 'UNKNOWN';
+    $device = 'UNKNOWN';
+
+    // Browser
+    if (preg_match('/MSIE ([0-9\.]+)/', $userAgent, $m)) $browser = 'IE '.$m[1];
+    elseif (preg_match('/Firefox\/([0-9\.]+)/', $userAgent, $m)) $browser = 'Firefox '.$m[1];
+    elseif (preg_match('/Chrome\/([0-9\.]+)/', $userAgent, $m)) $browser = 'Chrome '.$m[1];
+    elseif (preg_match('/Safari\/([0-9\.]+)/', $userAgent, $m)) $browser = 'Safari '.$m[1];
+
+    // OS
+    if (preg_match('/Windows NT ([0-9\.]+)/', $userAgent, $m)) $os = 'Windows '.$m[1];
+    elseif (preg_match('/Mac OS X ([0-9_]+)/', $userAgent, $m)) $os = 'macOS '.str_replace('_', '.', $m[1]);
+    elseif (preg_match('/Linux/', $userAgent)) $os = 'Linux';
+
+    // Device
+    if (preg_match('/Mobile|Android|iPhone|iPad/', $userAgent)) $device = 'Mobile';
+    elseif (preg_match('/Tablet/', $userAgent)) $device = 'Tablet';
+    elseif (preg_match('/bot|crawl|spider|slurp/i', $userAgent)) $device = 'Bot';
+    else $device = 'Desktop';
+
+    $linea = sprintf("[%s] %s | Usuario: %s | IP: %s | Pais: %s | Region: %s | Ciudad: %s | UA: %s | Browser: %s | OS: %s | Device: %s | Intentos: %d\n",
+        $timestamp,
+        $resultado,
+        $usuario,
+        $ip,
+        $pais,
+        $region,
+        $ciudad,
+        $userAgent,
+        $browser,
+        $os,
+        $device,
+        $intentos
+    );
+
+    file_put_contents($registro_login_file, $linea, FILE_APPEND | LOCK_EX);
+}
+/* ===== FIN NUEVO LOG ===== */
+
 session_start();
 
 if (isset($_SESSION['usuario'])) {
@@ -25,7 +99,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $error = "Usuario o contraseña incorrectos.";
 
     foreach ($usuarios as &$usuario) {
-        if ($usuario['usuario'] === $usuario_input) {
+        if (strcasecmp($usuario['usuario'], $usuario_input) === 0) {
             $usuario_encontrado = true;
 
             if (!isset($usuario['intentos'])) $usuario['intentos'] = 0;
@@ -51,6 +125,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     unset($_SESSION['flota']); // SuperAdmins no tienen flota
                 }
 
+                /* ===== NUEVO: LOG DE LOGIN EXITOSO ===== */
+                log_login($usuario['usuario'], true, $ip, $userAgent, $usuario['intentos']);
+                /* ===== FIN LOG ===== */
+
                 header('Location: index.php');
                 exit();
             } else {
@@ -65,6 +143,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $registro = "[$fecha] Usuario: $usuario_input | IP: $ip | UA: $userAgent | Intentos: {$usuario['intentos']}\n";
                 file_put_contents($usuarios_fail_log, $registro, FILE_APPEND | LOCK_EX);
 
+                /* ===== NUEVO: LOG DE LOGIN FALLIDO ===== */
+                log_login($usuario_input, false, $ip, $userAgent, $usuario['intentos']);
+                /* ===== FIN LOG ===== */
+
                 break;
             }
         }
@@ -73,6 +155,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!$usuario_encontrado) {
         $registro = "[$fecha] Usuario: $usuario_input (NO EXISTE) | IP: $ip | UA: $userAgent\n";
         file_put_contents($usuarios_fail_log, $registro, FILE_APPEND | LOCK_EX);
+
+        /* ===== NUEVO: LOG DE USUARIO NO EXISTENTE ===== */
+        log_login($usuario_input, false, $ip, $userAgent, 0);
+        /* ===== FIN LOG ===== */
     }
 }
 
@@ -93,6 +179,7 @@ if (file_exists($version_file)) {
 <link rel="icon" href="images/logo.webp">
 <link rel="stylesheet" href="style.css">
 <style>
+/* ===== TU CSS EXISTENTE ===== */
 body {
     font-family: Arial, sans-serif;
     background:#fff;
@@ -215,7 +302,6 @@ input[type=submit]:hover {
 <p style="color:red;"><?= htmlspecialchars($error) ?></p>
 <?php endif; ?>
 
-<!-- CUADRO DE COOKIES -->
 <div class="cookies-box">
     Esta web utiliza únicamente cookies técnicas necesarias para el inicio de sesión.
     No se emplean cookies de análisis, publicidad ni de terceros.
@@ -234,24 +320,11 @@ function togglePassword(inputId, iconId){
         ? '<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12zm11 4a4 4 0 0 1-4-4h-2a6 6 0 0 0 12 0h-2a4 4 0 0 1-4 4z"/><circle cx="12" cy="12" r="2"/>'
         : '<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12zm11 4a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/><circle cx="12" cy="12" r="2"/>';
 }
-</script>
-<script>
-// Toggle contraseña ya existente
-function togglePassword(inputId, iconId){
-    const input = document.getElementById(inputId);
-    const icon = document.getElementById(iconId);
-    const isPassword = input.type === "password";
-    input.type = isPassword ? "text" : "password";
-    icon.innerHTML = isPassword
-        ? '<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12zm11 4a4 4 0 0 1-4-4h-2a6 6 0 0 0 12 0h-2a4 4 0 0 1-4 4z"/><circle cx="12" cy="12" r="2"/>'
-        : '<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12zm11 4a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/><circle cx="12" cy="12" r="2"/>';
-}
 
-// ===== Capturar Enter para enviar formulario =====
 const loginForm = document.querySelector('form');
 loginForm.addEventListener('keydown', function(e){
     if(e.key === 'Enter'){
-        e.preventDefault(); // previene doble submit
+        e.preventDefault();
         loginForm.submit();
     }
 });

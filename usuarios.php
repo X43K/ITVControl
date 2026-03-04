@@ -13,6 +13,7 @@ $flota_usuario = strtoupper(trim($_SESSION['flota'] ?? ''));
 /* ================= ARCHIVOS ================= */
 $usuarios_file = 'usuarios.json';
 $log_file = 'usuarios-fail.log';
+$registro_historico_file = 'registro_login.log';
 
 if (!file_exists($usuarios_file)) {
     file_put_contents($usuarios_file, json_encode([]));
@@ -65,6 +66,28 @@ if ($_SESSION['tipo'] === 'Administrador') {
 usort($usuarios, function($a, $b) {
     return strcasecmp($a['usuario'], $b['usuario']);
 });
+
+/* ================= VER LOG HISTORICO ================= */
+$log_modal_historico = null;
+$total_historico = 0;
+
+if (isset($_GET['ver_historico'])) {
+    $usuario_log = $_GET['ver_historico'];
+    if (file_exists($registro_historico_file)) {
+        $lineas = file($registro_historico_file, FILE_IGNORE_NEW_LINES);
+        $filtrado = [];
+        foreach ($lineas as $linea) {
+            if (stripos($linea, "Usuario: $usuario_log") !== false) {
+                $filtrado[] = $linea;
+            }
+        }
+        $filtrado = array_reverse($filtrado);
+        $total_historico = count($filtrado);
+        $log_modal_historico = $filtrado;
+    } else {
+        $log_modal_historico = [];
+    }
+}
 
 /* ================= VER LOG ================= */
 $log_modal = null;
@@ -150,6 +173,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+/* ================= MARCAR LOG HISTORICO ================= */
+if (file_exists($registro_historico_file)) {
+    $lineas_historico = file($registro_historico_file, FILE_IGNORE_NEW_LINES);
+    foreach ($usuarios as &$usuario) {
+        $usuario['tiene_historico'] = false;
+        foreach ($lineas_historico as $linea) {
+            if (stripos($linea, "Usuario: {$usuario['usuario']}") !== false) {
+                $usuario['tiene_historico'] = true;
+                break;
+            }
+        }
+    }
+}
+unset($usuario);
+
 /* ================= MARCAR LOGS ================= */
 if (file_exists($log_file)) {
     $lineas_log = file($log_file, FILE_IGNORE_NEW_LINES);
@@ -173,6 +211,67 @@ if (file_exists('version.xk')) {
     $version_text = $lines[0] ?? $version_text;
     $autor_text = $lines[1] ?? $autor_text;
 }
+
+/* ================= TAMAÑO LOGS ================= */
+$registro_historico_file = 'registro_login.log';
+$tamano_log_mb = 0;
+
+if (file_exists($registro_historico_file)) {
+    $tamano_log_bytes = filesize($registro_historico_file);
+    $tamano_log_mb = round($tamano_log_bytes / 1024 / 1024, 2); // Convertir a MB
+}
+
+/* ================= FORMATO TAMAÑO LOGS ================= */
+function formato_tamano($bytes) {
+    $unidades = ['B', 'KB', 'MB', 'GB', 'TB'];
+    $i = 0;
+    while ($bytes >= 1024 && $i < count($unidades) - 1) {
+        $bytes /= 1024;
+        $i++;
+    }
+    return round($bytes, 2) . ' ' . $unidades[$i];
+}
+
+// Obtener tamaño del log
+$registro_historico_file = 'registro_login.log';
+$tamano_log_formateado = '0 B';
+
+if (file_exists($registro_historico_file)) {
+    $tamano_log_bytes = filesize($registro_historico_file);
+    $tamano_log_formateado = formato_tamano($tamano_log_bytes);
+}
+
+/* ================= LIMPIAR LOGS ANTERIORES A X AÑOS ================= */
+if ($is_superadmin && isset($_POST['borrar_logs_anteriores'])) {
+    $anios = intval($_POST['conservar_anios']);
+    if ($anios < 1) $anios = 1;
+
+    $registro_historico_file = 'registro_login.log';
+
+    if (file_exists($registro_historico_file)) {
+        $lineas = file($registro_historico_file, FILE_IGNORE_NEW_LINES);
+        $nuevo = [];
+
+        // Fecha límite: conservar solo los logs desde esta fecha en adelante
+        $fecha_limite = strtotime("-$anios years January 1");
+
+        foreach ($lineas as $linea) {
+            // Extraemos la fecha del log (primeros 19 caracteres: [YYYY-MM-DD HH:MM:SS])
+            if (preg_match('/\[(\d{4}-\d{2}-\d{2}) \d{2}:\d{2}:\d{2}\]/', $linea, $matches)) {
+                $fecha_linea = strtotime($matches[1]);
+                if ($fecha_linea >= $fecha_limite) {
+                    $nuevo[] = $linea;
+                }
+            }
+        }
+
+        file_put_contents($registro_historico_file, implode("\n", $nuevo) . "\n");
+        $mensaje = "Logs antiguos borrados, conservando los últimos $anios años.";
+    } else {
+        $mensaje = "El archivo de logs no existe.";
+    }
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -475,10 +574,17 @@ Flota:<input type="text" name="flota" <?= $is_superadmin ? '' : 'required' ?> st
 <button type="submit" style="padding:4px 8px; cursor:pointer; background-color:#cc0000; color:#fff;">Eliminar</button>
 </form>
 
+<?php if (!empty($usuario['tiene_historico'])): ?>
+<form action="usuarios.php" method="get" style="margin:0;">
+<input type="hidden" name="ver_historico" value="<?= htmlspecialchars($usuario['usuario']) ?>">
+<button type="submit" style="padding:4px 8px; cursor:pointer; background:#b35f00 !important; background-image:none !important; color:#fff !important; font-weight:bold; border:none; border-radius:4px;">Ver Log HISTORICOS</button>
+</form>
+<?php endif; ?>
+  
 <?php if (!empty($usuario['tiene_log'])): ?>
 <form action="usuarios.php" method="get" style="margin:0;">
 <input type="hidden" name="ver_log" value="<?= htmlspecialchars($usuario['usuario']) ?>">
-<button type="submit" style="padding:4px 8px; cursor:pointer; background-color:#ff6600; color:#fff;">Ver Log</button>
+<button type="submit" style="padding:4px 8px; cursor:pointer; background:#cc3333 !important; background-image:none !important;color:#fff !important; font-weight:bold; border:none; border-radius:4px;">Ver Log FAILS</button>
 </form>
 <?php endif; ?>
 </td>
@@ -487,9 +593,75 @@ Flota:<input type="text" name="flota" <?= $is_superadmin ? '' : 'required' ?> st
 </tbody>
 </table>
 
+<br><br><br>
+  
+<?php if ($is_superadmin): ?>
+<p><strong>Tamaño log:</strong> <?= $tamano_log_formateado ?></p>
+<h3>Borrar logs HISTORICOS antiguos</h3>
+<form method="post" style="margin-bottom:20px;">
+    <label>Conservar últimos 
+        <input type="number" name="conservar_anios" value="4" min="1" style="width:60px;"> años
+    </label>
+    <button type="submit" name="borrar_logs_anteriores" 
+            style="padding:4px 8px; margin-left:10px; background:#cc0000; color:#fff; border:none; border-radius:4px; cursor:pointer;">
+        Aceptar
+    </button>
+</form>
+<?php endif; ?>
+
+<br><br><br>
+<br><br><br>
+
+
 <h4 class="small version-title" style="margin-top:12px; text-align:left;"><?= htmlspecialchars($version_text) ?></h4>
 <p class="small version-author" style="text-align:left;"><?= htmlspecialchars($autor_text) ?></p>
 
+  <?php if ($log_modal_historico !== null): ?>
+<div id="logModalHistorico" style="
+position:fixed;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+width:70%;
+max-height:70%;
+overflow:auto;
+background:inherit;
+color:inherit;
+border:2px solid currentColor;
+padding:20px;
+z-index:9999;
+box-shadow:0 0 20px rgba(0,0,0,0.5);
+">
+<h3>Log histórico (<?= $total_historico ?>)</h3>
+
+<pre style="font-size:12px; white-space:pre-wrap; word-wrap:break-word;">
+<?php
+if (empty($log_modal_historico)) {
+    echo "No hay registros históricos para este usuario.";
+} else {
+    foreach ($log_modal_historico as $linea) {
+        $linea_html = htmlspecialchars($linea);
+        if (stripos($linea, 'ok') !== false) {
+            echo "<span style='color:green;'>$linea_html</span>\n";
+        } elseif (stripos($linea, 'error') !== false) {
+            echo "<span style='color:red;'>$linea_html</span>\n";
+        } else {
+            echo $linea_html . "\n";
+        }
+    }
+}
+?>
+</pre>
+
+<div style="margin-top:10px; display:flex; gap:10px; justify-content:flex-end;">
+    <button onclick="document.getElementById('logModalHistorico').style.display='none'"
+            style="padding:4px 8px; border:1px solid #777; border-radius:4px; cursor:pointer;">
+        Cerrar
+    </button>
+</div>
+</div>
+<?php endif; ?>
+  
 <?php if ($log_modal !== null): ?>
 <div id="logModal" style="
 position:fixed;
