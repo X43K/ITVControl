@@ -88,7 +88,8 @@ function actualizarArchivo(indice) {
         barra.style.width = '100%';
         barra.textContent = 'Actualización completada';
         resumen.innerHTML = `Archivos actualizados: ${actualizados} / ${total} <br>Errores: ${errores}`;
-        if (errores > 0) botonesDiv.style.display = 'block';
+        botonesDiv.style.display = 'block';
+        retryBtn.style.display = errores > 0 ? 'inline-block' : 'none';
         return;
     }
 
