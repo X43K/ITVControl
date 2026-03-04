@@ -112,6 +112,9 @@ ksort($citas_por_mes);
 <link rel="icon" href="images/logo.webp">
 <link rel="stylesheet" href="style.css">
 <style>
+    
+  <meta http-equiv="refresh" content="60">
+
 /* ===== BASE ===== */
 body { margin:15px; font-family:Arial,sans-serif; }
 
