@@ -290,7 +290,7 @@ $puede_eliminar = $is_superadmin || ($is_admin && strtoupper($v['flota']??'')===
 <a href="editar_vehiculo.php?id=<?= urlencode($v['matricula']) ?>" class="boton-editar">Editar</a>
 <?php endif; ?>
 <?php if($puede_eliminar): ?>
- | <a href="eliminar_vehiculo.php?id=<?= urlencode($v['matricula']) ?>" class="boton-eliminar">Eliminar</a>
+<a href="eliminar_vehiculo.php?id=<?= urlencode($v['matricula']) ?>" class="boton-eliminar">Eliminar</a>
 <?php endif; ?>
 </td>
 <?php endif; ?>

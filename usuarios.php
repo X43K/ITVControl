@@ -566,12 +566,12 @@ Flota:<input type="text" name="flota" <?= $is_superadmin ? '' : 'required' ?> st
 <td style="display:flex; gap:5px; flex-wrap:wrap;">
 <form action="editar_usuario.php" method="get" style="margin:0;">
 <input type="hidden" name="usuario" value="<?= htmlspecialchars($usuario['usuario']) ?>">
-<button type="submit" style="padding:4px 8px; cursor:pointer;">Editar</button>
+<button type="submit" style="padding:4px 8px; background:#4CAF50 !important; cursor:pointer;">Editar</button>
 </form>
 
 <form action="eliminar_usuario.php" method="get" style="margin:0;" onsubmit="return confirm('¿Estás seguro de eliminar este usuario?');">
 <input type="hidden" name="usuario" value="<?= htmlspecialchars($usuario['usuario']) ?>">
-<button type="submit" style="padding:4px 8px; cursor:pointer; background-color:#cc0000; color:#fff;">Eliminar</button>
+<button type="submit" style="padding:4px 8px; cursor:pointer; background:#cc0000 !important; color:#fff;">Eliminar</button>
 </form>
 
 <?php if (!empty($usuario['tiene_historico'])): ?>

@@ -383,7 +383,7 @@ setInterval(actualizarFechaHora,1000);
         <td>
       <?php if($is_admin): ?>
             <a href="editar_cita.php?id=<?= urlencode($cita['id_cita']) ?>" class="boton-editar">Editar</a>
-            | 
+             
             <a href="eliminar_cita.php?id=<?= urlencode($cita['id_cita']) ?>" class="boton-eliminar">Eliminar</a>
         <?php endif; ?>
         </td>
