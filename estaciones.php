@@ -257,9 +257,13 @@ th{background:#eee;color:#000;}
         <?php endif; ?>
     </td>
     <td>
-        <a href="?eliminar=<?=$i?>" onclick="return confirm('¿Seguro que quieres eliminar/desasignar esta estación?');" class="rojo_intenso">
-            <?= $is_superadmin ? 'Eliminar' : 'Desasignar' ?>
-        </a>
+<button 
+    style="padding:4px 8px; cursor:pointer; background:#cc0000 !important; color:#fff; border-radius:4px;"
+    onclick="if(confirm('¿Seguro que quieres eliminar/desasignar esta estación?')){ 
+        window.location.href='?eliminar=<?=$i?>'; 
+    }">
+    <?= $is_superadmin ? 'Eliminar' : 'Desasignar' ?>
+</button>
     </td>
 </tr>
 <?php endforeach; ?>
