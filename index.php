@@ -61,7 +61,8 @@ function obtener_color_y_texto($vehiculo) {
     $dias = calcular_dias_restantes($vehiculo['caducidad_itv']);
     if ($estado === 'ITV RECHAZADA') return ['color'=>'rojo_intenso','texto_dias'=>'ITV RECHAZADA'];
     if ($dias < 0) return ['color'=>'rojo_intenso','texto_dias'=>'ITV CADUCADA'];
-    if ($dias <= 1) return ['color'=>'rojo_intenso','texto_dias'=>$dias.' día'.($dias==1?'':'s')];
+    if ($dias == 0) return ['color'=>'rojo_intenso','texto_dias'=>'CADUCA HOY'];
+if ($dias == 1) return ['color'=>'rojo_intenso','texto_dias'=>'1 día'];
     if ($dias < 10) return ['color'=>'naranja_intenso','texto_dias'=>$dias.' días'];
     if ($dias <= 20) return ['color'=>'naranja_suave','texto_dias'=>$dias.' días'];
     if ($dias <= 35) return ['color'=>'azul','texto_dias'=>$dias.' días'];
@@ -328,7 +329,11 @@ $citas_v = obtener_citas_vehiculo($v['matricula'],$citas);
 <td><?= htmlspecialchars($v['vehiculo']) ?></td>
 <td><?= htmlspecialchars($v['matricula']) ?></td>
 <td><?= htmlspecialchars($v['tipo'] ?? '-') ?></td>
-<td><?= htmlspecialchars($v['estado']) ?></td>
+<?php
+$dias_estado = calcular_dias_restantes($v['caducidad_itv']);
+$estado_mostrar = ($dias_estado < 0 && $v['estado'] === 'ACTIVO') ? 'ITV CADUCADA' : $v['estado'];
+?>
+<td><?= htmlspecialchars($estado_mostrar) ?></td>
 <td><?= formatear_fecha($v['caducidad_itv']) ?></td>
 <td><?= htmlspecialchars($info['texto_dias']) ?></td>
 <td>
