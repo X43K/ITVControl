@@ -178,13 +178,13 @@ table.calendario {
 }
 .calendario .dia {
     font-weight:bold;
-    font-size:14px;
+    font-size:16px;
     margin-bottom:6px;
 }
 .cita {
     background:#4a90e2;
     color:#fff;
-    font-size:12px;
+    font-size:16px;
     border-radius:4px;
     padding:4px 6px;
     margin-bottom:6px;
