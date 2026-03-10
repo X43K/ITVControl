@@ -66,7 +66,7 @@ if ($cita_editar === null) die("No se encontró la cita con el ID proporcionado.
 // PROCESAR FORMULARIO
 // =====================
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $flota_cita = $is_superadmin ? ($_POST['flota'] ?? '') : $flota_usuario;
+    $flota_cita = $is_superadmin ? ($_POST['flota_cita'] ?? '') : $flota_usuario;
 
     if (!empty($_POST['fecha_cita']) && !empty($_POST['hora_cita']) && !empty($_POST['estacion_cita']) && !empty($_POST['tipo_cita']) && (!empty($flota_cita))) {
         $cita_editar['fecha_cita'] = $_POST['fecha_cita'];
