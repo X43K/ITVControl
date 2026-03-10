@@ -222,7 +222,7 @@ th{background:#eee;}
 </form>
 
 <div class="print-header">
-Impreso el <?= $fecha_impresion ?>
+    <?= $meses_txt[$mes] ?> <?= $anio ?> — Impreso el <?= $fecha_impresion ?>
 </div>
 
 <table>
@@ -269,6 +269,12 @@ if(isset($partes[1]))echo' - <span class="matricula">'.htmlspecialchars($partes[
 <?php endforeach;endif;?>
 </tbody>
 </table>
+
+<div class="print-footer">
+    <p><strong>Aviso importante:</strong><br>
+    Le informamos que, en caso de retraso por parte del usuario, superados los <strong>15 minutos de margen</strong> sobre la hora concertada, esta será anulada a favor de otros usuarios del servicio. Por motivos organizativos, el servicio de inspección empezará en el intervalo de los quince minutos siguientes a la hora concertada.
+    </p>
+</div>
 
 <h4 class="small no-imprimir" style="margin-top:12px;"><?=htmlspecialchars($version)?></h4>
 <p class="small no-imprimir"><?=htmlspecialchars($autor)?></p>
