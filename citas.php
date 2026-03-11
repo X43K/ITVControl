@@ -93,7 +93,11 @@ if ($is_colab && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['fecha_ci
             if (!$vehiculo_valido) $error = "Vehículo no permitido o no encontrado.";
         }
 
+
         if (empty($error)) {
+			
+
+			
             // Generar ID único de cita
             $anio = substr(date('Y'), -3);
             $prefijo = 'AA';
@@ -289,6 +293,7 @@ setInterval(actualizarFechaHora,1000);
 
 <?php if($is_colab): ?>
 <h2>Añadir Cita</h2>
+
 <form method="POST">
     <label>Fecha:</label><input type="date" name="fecha_cita" required><br>
     <label>Hora:</label><input type="time" name="hora_cita" required><br>
@@ -322,7 +327,7 @@ setInterval(actualizarFechaHora,1000);
     <?php endif; ?>
     <br>
 
-    <input type="submit" value="Añadir Cita">
+    <input type="submit" value="Añadir Cita" onclick="return comprobarCaducidadITV()">
 </form>
 <?php endif; ?>
   
@@ -399,5 +404,130 @@ setInterval(actualizarFechaHora,1000);
 <h4 class="small version-title" style="margin-top:12px; text-align:left;"><?= htmlspecialchars($version) ?></h4>
 <p class="small version-author" style="text-align:left;"><?= htmlspecialchars($autor) ?></p>
 
+<script>
+
+function comprobarCaducidadITV() {
+
+    const vehiculo = document.querySelector('[name="vehiculo"]').value;
+    const fechaCita = document.querySelector('[name="fecha_cita"]').value;
+
+    if(!vehiculo || !fechaCita) return true;
+
+    const vehiculos = <?php echo json_encode($vehiculos); ?>;
+
+    for (let v of vehiculos) {
+
+        if (v.matricula === vehiculo && v.caducidad_itv) {
+
+            let itv = new Date(v.caducidad_itv);
+            let cita = new Date(fechaCita);
+
+            // Diferencia en días (redondeada)
+            let diferencia = Math.round((cita - itv) / (1000*60*60*24));
+
+            // CASO 1: Cita después de caducidad
+            if (diferencia > 0) {
+                mostrarAlertaCustom(
+                    `⚠️ La fecha de la cita es posterior a la fecha de caducidad de la ITV del vehículo.<br>` +
+                    `Se está asignando <span style="color:red; font-weight:bold;">${diferencia} día(s)</span> después de la caducidad.<br><br>` +
+                    `¿Deseas continuar?`,
+                    function(confirmado){
+                        if(confirmado) document.querySelector('form').submit();
+                    }
+                );
+                return false;
+            }
+
+            // CASO 2: Cita más de 30 días antes de la caducidad
+            let diferenciaAntes = Math.round((itv - cita) / (1000*60*60*24));
+            if (diferenciaAntes > 30) {
+                mostrarAlertaCustom(
+                    `⚠️ La cita se ha asignado con más de 30 días de antelación respecto a la caducidad de la ITV.<br>` +
+                    `La próxima fecha de caducidad se adelantará <span style="color:red; font-weight:bold;">${diferenciaAntes} día(s)</span>.<br><br>` +
+                    `¿Deseas continuar?`,
+                    function(confirmado){
+                        if(confirmado) document.querySelector('form').submit();
+                    }
+                );
+                return false;
+            }
+
+        }
+
+    }
+
+    return true;
+}
+
+</script>
+
+<script>
+function mostrarAlertaCustom(mensaje, callback) {
+    const modal = document.createElement('div');
+    modal.style.position = 'fixed';
+    modal.style.top = '0';
+    modal.style.left = '0';
+    modal.style.width = '100%';
+    modal.style.height = '100%';
+    modal.style.display = 'flex';
+    modal.style.alignItems = 'center';
+    modal.style.justifyContent = 'center';
+    modal.style.zIndex = '9999';
+    modal.style.background = 'rgba(0,0,0,0.5)';
+
+    const caja = document.createElement('div');
+    caja.style.padding = '20px';
+    caja.style.borderRadius = '8px';
+    caja.style.maxWidth = '400px';
+    caja.style.textAlign = 'center';
+    caja.style.fontSize = '14px';
+    caja.style.lineHeight = '1.4';
+    caja.style.color = '#000';
+    caja.style.background = '#fff';
+    caja.style.boxShadow = '0 2px 10px rgba(0,0,0,0.3)';
+
+    // Detectar modo oscuro
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        caja.style.color = '#ddd';
+        caja.style.background = '#111';
+        caja.style.boxShadow = '0 2px 10px rgba(255,255,255,0.2)';
+    }
+
+    caja.innerHTML = mensaje;
+
+    const btnOk = document.createElement('button');
+    btnOk.textContent = 'Aceptar';
+    btnOk.style.margin = '10px';
+    btnOk.style.padding = '5px 10px';
+    btnOk.style.borderRadius = '4px';
+    btnOk.style.border = 'none';
+    btnOk.style.cursor = 'pointer';
+    btnOk.style.background = '#4a90e2';
+    btnOk.style.color = '#fff';
+    btnOk.onclick = () => { document.body.removeChild(modal); callback(true); };
+
+    const btnCancel = document.createElement('button');
+    btnCancel.textContent = 'Cancelar';
+    btnCancel.style.margin = '10px';
+    btnCancel.style.padding = '5px 10px';
+    btnCancel.style.borderRadius = '4px';
+    btnCancel.style.border = 'none';
+    btnCancel.style.cursor = 'pointer';
+    btnCancel.style.background = '#ccc';
+    btnCancel.style.color = '#000';
+    btnCancel.onclick = () => { document.body.removeChild(modal); callback(false); };
+
+    // Ajustar colores de botones en modo oscuro
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        btnCancel.style.background = '#444';
+        btnCancel.style.color = '#ddd';
+    }
+
+    caja.appendChild(btnOk);
+    caja.appendChild(btnCancel);
+    modal.appendChild(caja);
+    document.body.appendChild(modal);
+}
+</script>
 </body>
 </html>
