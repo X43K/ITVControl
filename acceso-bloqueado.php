@@ -19,6 +19,12 @@ if ($geo && $geo->status === "success") {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Acceso Bloqueado</title>
+
+<link rel="icon" href="images/logo.webp">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" sizes="180x180" href="images/logo.webp">
+<link rel="stylesheet" href="style.css">
+
 <style>
 body{
     font-family: Arial, sans-serif;
