@@ -51,10 +51,8 @@ if ($is_superadmin && file_exists($usuarios_file)) {
 // VEHÍCULOS DISPONIBLES PARA EL FORMULARIO
 // =====================
 if ($is_superadmin) {
-    // SuperAdmin puede ver todos los vehículos
     $vehiculos_disponibles = $vehiculos;
 } else {
-    // Colaborador o Administrador: solo vehículos de su propia flota
     $flota_usuario_upper = strtoupper($flota_usuario ?? '');
     $vehiculos_disponibles = array_filter($vehiculos, function($v) use ($flota_usuario_upper) {
         return isset($v['flota']) && strtoupper($v['flota']) === $flota_usuario_upper;
@@ -72,7 +70,6 @@ if ($is_colab && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['fecha_ci
     $tipo_cita = $_POST['tipo_cita'] ?? 'Primera';
     $vehiculo = $_POST['vehiculo'] ?? '';
 
-    // Determinar flota de la cita
     if ($is_superadmin) {
         $flota_cita = $_POST['flota'] ?? '';
         if (empty($flota_cita)) $error = "Debes seleccionar una flota para la cita.";
@@ -81,7 +78,7 @@ if ($is_colab && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['fecha_ci
     }
 
     if (empty($error) && $fecha_cita && $hora_cita && $estacion_cita) {
-        // Validar vehículo si se ha seleccionado
+
         if ($vehiculo !== '') {
             $vehiculo_valido = false;
             foreach ($vehiculos as $v) {
@@ -93,24 +90,21 @@ if ($is_colab && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['fecha_ci
             if (!$vehiculo_valido) $error = "Vehículo no permitido o no encontrado.";
         }
 
-
         if (empty($error)) {
-			
 
-			
-            // Generar ID único de cita
             $anio = substr(date('Y'), -3);
             $prefijo = 'AA';
             $ultimo_num = 0;
+
             foreach ($citas as $c) {
                 if (isset($c['id_cita']) && preg_match('/^'.$anio.$prefijo.'(\d{3})$/', $c['id_cita'], $m)) {
                     $num = intval($m[1]);
                     if ($num > $ultimo_num) $ultimo_num = $num;
                 }
             }
+
             $id_cita = $anio.$prefijo.str_pad($ultimo_num + 1,3,'0',STR_PAD_LEFT);
 
-            // Añadir cita
             $nueva_cita = [
                 'fecha_cita' => $fecha_cita,
                 'hora_cita' => $hora_cita,
@@ -120,11 +114,14 @@ if ($is_colab && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['fecha_ci
                 'flota' => $flota_cita,
                 'id_cita' => $id_cita
             ];
+
             $citas[] = $nueva_cita;
             file_put_contents($citas_file, json_encode($citas, JSON_PRETTY_PRINT));
+
             header('Location: citas.php');
             exit();
         }
+
     } else {
         $error = "Todos los campos son obligatorios.";
     }
@@ -145,29 +142,35 @@ function mostrarVehiculo($matricula, $vehiculos) {
     }
     return $matricula;
 }
+
 // =====================
-// VERSION Y AUTOR
-// =====================
-$version = 'v.1.0';
-$autor = 'Desconocido';
-if (file_exists('version.xk')) {
-    $lineas = file('version.xk', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-    if (isset($lineas[0])) $version = trim($lineas[0]);
-    if (isset($lineas[1])) $autor = trim($lineas[1]);
-}
-// =====================
-// FILTRAR CITAS FUTURAS POR FLOTA
+// FILTRAR CITAS FUTURAS
 // =====================
 $ahora = new DateTime();
+
 $citas = array_filter($citas, function($cita) use($ahora, $is_superadmin, $flota_usuario) {
+
     $dt = DateTime::createFromFormat('Y-m-d H:i', $cita['fecha_cita'].' '.$cita['hora_cita']);
+
     if (!$dt || $dt < $ahora) return false;
+
     if (!$is_superadmin) {
         return strtoupper($cita['flota'] ?? '') === strtoupper($flota_usuario ?? '');
     }
-    return true; // SuperAdmin ve todas
+
+    return true;
 });
+
 usort($citas, fn($a,$b) => strtotime($a['fecha_cita'].' '.$a['hora_cita']) <=> strtotime($b['fecha_cita'].' '.$b['hora_cita']));
+
+// =====================
+// VERSION Y AUTOR
+$version = 'v.1.0'; $autor = 'Desconocido';
+if(file_exists('version.xk')){
+    $lineas = file('version.xk', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    if(isset($lineas[0])) $version=$lineas[0];
+    if(isset($lineas[1])) $autor=$lineas[1];
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -408,6 +411,12 @@ setInterval(actualizarFechaHora,1000);
 
 function comprobarCaducidadITV() {
 
+    const tipo = document.querySelector('[name="tipo_cita"]').value;
+
+    if (tipo === "Segunda") {
+        return true;
+    }
+
     const vehiculo = document.querySelector('[name="vehiculo"]').value;
     const fechaCita = document.querySelector('[name="fecha_cita"]').value;
 
@@ -422,15 +431,13 @@ function comprobarCaducidadITV() {
             let itv = new Date(v.caducidad_itv);
             let cita = new Date(fechaCita);
 
-            // Diferencia en días (redondeada)
             let diferencia = Math.round((cita - itv) / (1000*60*60*24));
 
-            // CASO 1: Cita después de caducidad
             if (diferencia > 0) {
                 mostrarAlertaCustom(
-                    `⚠️ La fecha de la cita es posterior a la fecha de caducidad de la ITV del vehículo.<br>` +
-                    `Se está asignando <span style="color:red; font-weight:bold;">${diferencia} día(s)</span> después de la caducidad.<br><br>` +
-                    `¿Deseas continuar?`,
+                    `⚠️ La fecha de la cita es posterior a la fecha de caducidad de la ITV del vehículo.<br>
+                    Se está asignando <span style="color:red; font-weight:bold;">${diferencia} día(s)</span> después de la caducidad.<br><br>
+                    ¿Deseas continuar?`,
                     function(confirmado){
                         if(confirmado) document.querySelector('form').submit();
                     }
@@ -438,22 +445,22 @@ function comprobarCaducidadITV() {
                 return false;
             }
 
-            // CASO 2: Cita más de 30 días antes de la caducidad
             let diferenciaAntes = Math.round((itv - cita) / (1000*60*60*24));
+
             if (diferenciaAntes > 30) {
+
                 mostrarAlertaCustom(
-                    `⚠️ La cita se ha asignado con más de 30 días de antelación respecto a la caducidad de la ITV.<br>` +
-                    `La próxima fecha de caducidad se adelantará <span style="color:red; font-weight:bold;">${diferenciaAntes} día(s)</span>.<br><br>` +
-                    `¿Deseas continuar?`,
+                    `⚠️ La cita se ha asignado con más de 30 días de antelación respecto a la caducidad de la ITV.<br>
+                    La próxima fecha de caducidad se adelantará <span style="color:red; font-weight:bold;">${diferenciaAntes} día(s)</span>.<br><br>
+                    ¿Deseas continuar?`,
                     function(confirmado){
                         if(confirmado) document.querySelector('form').submit();
                     }
                 );
+
                 return false;
             }
-
         }
-
     }
 
     return true;
