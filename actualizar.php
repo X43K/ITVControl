@@ -42,6 +42,11 @@ $total = count($archivos);
 <head>
 <meta charset="UTF-8">
 <title>Actualizando ITVControl</title>
+<link rel="icon" href="images/logo.webp">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" sizes="180x180" href="images/logo.webp">
+<link rel="stylesheet" href="style.css">
+
 <style>
 body { font-family: Arial, sans-serif; margin:20px; }
 .progress-container { width:100%; background:#eee; border-radius:8px; overflow:hidden; margin-top:20px; }

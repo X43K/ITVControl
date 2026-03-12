@@ -97,6 +97,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
 <meta charset="UTF-8">
 <title>Eliminar Usuario</title>
+
+<link rel="icon" href="images/logo.webp">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" sizes="180x180" href="images/logo.webp">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>

@@ -25,7 +25,10 @@ $flota_texto = $is_superadmin ? "Todas las flotas" : ($flota_usuario ? strtouppe
 <meta charset="UTF-8">
 <title>ITVGestion</title>
 <link rel="icon" href="images/logo.webp">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" sizes="180x180" href="images/logo.webp">
 <link rel="stylesheet" href="style.css">
+
 <style>
 body {margin:15px;font-family:Arial,sans-serif; color:#000;}
 

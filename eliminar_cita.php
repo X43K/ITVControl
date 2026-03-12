@@ -72,8 +72,9 @@ if (file_exists('version.xk')) {
 <head>
 <meta charset="UTF-8">
 <title>Eliminar Cita</title>
-<link rel="shortcut icon" href="images/logo.webp">
-<link rel="icon" sizes="64x64" href="images/logo.webp">
+
+<link rel="icon" href="images/logo.webp">
+<link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" sizes="180x180" href="images/logo.webp">
 <link rel="stylesheet" href="style.css">
 <style>

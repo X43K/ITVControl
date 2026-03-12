@@ -65,6 +65,12 @@ if ($geo && $geo->status === "success") {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>403 - Acceso Restringido</title>
+
+<link rel="icon" href="images/logo.webp">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" sizes="180x180" href="images/logo.webp">
+<link rel="stylesheet" href="style.css">
+
 <meta http-equiv="refresh" content="7;url=logout.php">
 <style>
 body{font-family: Arial, sans-serif;background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);height:100vh;display:flex;justify-content:center;align-items:center;color:white;}

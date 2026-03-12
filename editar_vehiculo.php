@@ -103,7 +103,10 @@ if(file_exists($version_file)){
 <meta charset="UTF-8">
 <title>ITVGestion</title>
 <link rel="icon" href="images/logo.webp">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" sizes="180x180" href="images/logo.webp">
 <link rel="stylesheet" href="style.css">
+
 <style>
 body{margin:15px;font-family:Arial,sans-serif;}
 input, select{padding:4px; margin-top:4px; width:250px;}
