@@ -1,8 +1,8 @@
 # Página de error personalizada
 ErrorDocument 403 /itv/acceso-restringido.php
 
-# Bloquear todos los .json
-<FilesMatch "\.json$">
+# Bloquear todos los .json excepto manifest.json
+<FilesMatch "^(?!manifest\.json$).*\.json$">
   Require all denied
 </FilesMatch>
 
@@ -25,7 +25,7 @@ ErrorDocument 403 /itv/acceso-restringido.php
   <If "-d %{REQUEST_FILENAME}">
     Require all granted
   </If>
-  <ElseIf "%{REQUEST_FILENAME} =~ /\.(php|css|js|jpg|jpeg|png|gif|svg|webp)$/i">
+  <ElseIf "%{REQUEST_FILENAME} =~ /(manifest\.json|\.php|\.css|\.js|\.jpg|\.jpeg|\.png|\.gif|\.svg|\.webp)$/i">
     Require all granted
   </ElseIf>
   <Else>
