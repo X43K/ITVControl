@@ -159,6 +159,7 @@ th{background:#eee;}
 .fila-roja{border-left:5px solid #c00000;}
 .fila-azul{border-left:5px solid #004aad;}
 .fila-amarilla{border-left:5px solid #c9a600;}
+.fila-naranja{border-left:5px solid #c97f00;}
 .estado{font-weight:bold;text-transform:uppercase;font-size:10px;}
 .matricula{font-size:9px;}
 .dia-semana{font-weight:bold;}
@@ -246,8 +247,10 @@ $fecha_cita=DateTime::createFromFormat('Y-m-d',$cita['fecha_cita']);
 $caducidad=null;
 foreach($vehiculos as $v){if($v['matricula']===$vehiculo){$caducidad=DateTime::createFromFormat('Y-m-d',$v['caducidad_itv']);break;}}
 if($tipo==='primera'&&$fecha_cita&&$caducidad&&$fecha_cita>$caducidad){$clase_fila='fila-roja';$estado='PRIMERA INSPECCIÓN FUERA DE PLAZO';}
+elseif($tipo==='segunda'&&empty($vehiculo)){$clase_fila='fila-naranja';$estado='SEGUNDA INSPECCIÓN SIN VEHÍCULO';}
 elseif($tipo==='segunda'){$clase_fila='fila-azul';$estado='SEGUNDA INSPECCIÓN';}
 elseif($tipo==='primera'&&empty($vehiculo)){$clase_fila='fila-amarilla';$estado='PRIMERA INSPECCIÓN SIN VEHÍCULO';}
+
 $dia_abrev=obtener_dia_semana_abrev($cita['fecha_cita']);$dia_class='dia-'.$dia_abrev;
 ?>
 <tr class="<?=$clase_fila?>">
@@ -272,7 +275,7 @@ if(isset($partes[1]))echo' - <span class="matricula">'.htmlspecialchars($partes[
 <?php endforeach;endif;?>
 </tbody>
 </table>
-
+<br>
 <div class="print-footer">
     <p><strong>Aviso importante:</strong><br>
     Le informamos que, en caso de retraso por parte del usuario, superados los <strong>15 minutos de margen</strong> sobre la hora concertada, esta será anulada a favor de otros usuarios del servicio. Por motivos organizativos, el servicio de inspección empezará en el intervalo de los quince minutos siguientes a la hora concertada.
