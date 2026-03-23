@@ -75,6 +75,44 @@ usort($vehiculos_filtrados, function($a, $b) {
 });
 
 // =====================
+// HORIZONTE SEGURO
+// =====================
+$frecuencia_meses = 24;
+$tipos_detectados = [];
+
+foreach ($vehiculos as $v) {
+    $tipo = strtolower($v['tipo'] ?? '');
+
+    if (str_contains($tipo, 'autobus') ||
+        str_contains($tipo, 'microbus') ||
+        str_contains($tipo, 'mercador') ||
+        str_contains($tipo, 'tractora') ||
+        str_contains($tipo, 'remolque')) {
+        $frecuencia_meses = min($frecuencia_meses, 6);
+        $tipos_detectados[] = 'Semestral';
+    } elseif (str_contains($tipo, 'turismo') ||
+              str_contains($tipo, 'taxi') ||
+              str_contains($tipo, 'agricola') ||
+              str_contains($tipo, 'obras')) {
+        $frecuencia_meses = min($frecuencia_meses, 12);
+        $tipos_detectados[] = 'Anual';
+    } elseif (str_contains($tipo, 'moto') ||
+              str_contains($tipo, 'quad') ||
+              str_contains($tipo, 'ciclomotor')) {
+        $frecuencia_meses = min($frecuencia_meses, 24);
+        $tipos_detectados[] = 'Bienal';
+    }
+}
+
+$fecha_limite_obj = (new DateTime())->modify("+$frecuencia_meses months");
+$fecha_limite_obj->modify('-1 month');
+
+$mes_maximo = (int)$fecha_limite_obj->format('m');
+$anio_maximo = $fecha_limite_obj->format('Y');
+
+$fecha_impresion = date('d/m/Y H:i');
+
+// =====================
 // INFO DE IMPRESIÓN Y VERSION
 // =====================
 $fecha_impresion = date('d/m/Y H:i');
@@ -184,6 +222,13 @@ th{background:#eee;}
 <div class="print-header">
 <?= $meses_es[(int)$mes_seleccionado] ?> <?= $anio_seleccionado ?><br>Impreso el <?= $fecha_impresion ?>
 </div>
+
+<?php if (!empty($tipos_detectados)): ?>
+<div class="aviso-horizonte no-imprimir" style="color:orange;">
+⚠️ Para que aparezcan todos los vehículos es seguro imprimir
+<strong style="color:red;"><?= $meses_es[$mes_maximo] ?> <?= $anio_maximo ?></strong>.
+</div>
+<?php endif; ?>
 
 <table>
 <thead>
