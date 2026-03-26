@@ -300,27 +300,47 @@ foreach ($citas_por_mes as $mes => $dias):
         </thead>
         <tbody>
             <tr>
-            <?php
-            $col = 1;
-            for ($v = 1; $v < $inicio_semana; $v++, $col++) {
-                echo "<td class='vacio'></td>";
-            }
-            for ($d = 1; $d <= $dias_mes; $d++, $col++) {
-                $citas_dia = $dias[$d] ?? [];
-                echo "<td>";
-                echo "<div class='dia'>$d</div>";
-                foreach ($citas_dia as $c) {
-                    $veh = htmlspecialchars(mostrarVehiculo($c['vehiculo'] ?? '', $vehiculos));
-                    $hora = htmlspecialchars($c['hora_cita'] ?? '');
-                    $tipo = htmlspecialchars($c['tipo_cita'] ?? '');
-                    $est = htmlspecialchars($c['estacion_cita'] ?? '');
-                    echo "<div class='cita'>{$hora} - {$tipo}<br>{$est}<br>{$veh}</div>";
-                }
-                echo "</td>";
-                if ($col % 7 == 0 && $d < $dias_mes) echo "</tr><tr>";
-            }
-            while ($col % 7 != 1) { echo "<td class='vacio'></td>"; $col++; }
-            ?>
+<?php
+$col = 1;
+
+// Calcular desde qué día empezar (primer lunes válido o hoy)
+$hoy = new DateTime();
+$primer_dia_visible = 1;
+
+if ($anio == $hoy->format('Y') && $num_mes == $hoy->format('m')) {
+    $inicio_semana_hoy = clone $hoy;
+    $inicio_semana_hoy->modify('monday this week');
+    $primer_dia_visible = (int)$inicio_semana_hoy->format('j');
+}
+
+// Ajustar inicio real del calendario
+$primer_dia = new DateTime("$anio-$num_mes-$primer_dia_visible");
+$inicio_semana = (int)$primer_dia->format('N');
+
+// Celdas vacías antes del inicio
+for ($v = 1; $v < $inicio_semana; $v++, $col++) {
+    echo "<td class='vacio'></td>";
+}
+
+// Bucle de días (EMPIEZA en el día válido)
+for ($d = $primer_dia_visible; $d <= $dias_mes; $d++, $col++) {
+    $citas_dia = $dias[$d] ?? [];
+    echo "<td>";
+    echo "<div class='dia'>$d</div>";
+    foreach ($citas_dia as $c) {
+        $veh = htmlspecialchars(mostrarVehiculo($c['vehiculo'] ?? '', $vehiculos));
+        $hora = htmlspecialchars($c['hora_cita'] ?? '');
+        $tipo = htmlspecialchars($c['tipo_cita'] ?? '');
+        $est = htmlspecialchars($c['estacion_cita'] ?? '');
+        echo "<div class='cita'>{$hora} - {$tipo}<br>{$est}<br>{$veh}</div>";
+    }
+    echo "</td>";
+    if ($col % 7 == 0 && $d < $dias_mes) echo "</tr><tr>";
+}
+
+// Relleno final
+while ($col % 7 != 1) { echo "<td class='vacio'></td>"; $col++; }
+?>
             </tr>
         </tbody>
     </table>
