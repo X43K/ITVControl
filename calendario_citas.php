@@ -194,6 +194,49 @@ table.calendario {
     word-wrap:break-word;
 }
 
+
+/* ===== COLOR SABADOS/DOMINGOS ===== */
+.calendario td:nth-child(6) {
+    background-color: #fff59d; /* sábado amarillo */
+}
+
+.calendario td:nth-child(7) {
+    background-color: #ff8a80; /* domingo rojo */
+}
+
+/* MODO OSCURO */
+@media (prefers-color-scheme: dark) {
+    .calendario td:nth-child(6) {
+        background-color: #665c00; /* amarillo oscuro */
+    }
+    .calendario td:nth-child(7) {
+        background-color: #7f1d1d; /* rojo oscuro */
+    }
+}
+
+/* ===== CABECERA FINES DE SEMANA (AMARILLO/ROJO SUAVES) ===== */
+.calendario th:nth-child(6) {
+    background-color: #ffd54f; /* sábado amarillo suave */
+    color:#000;
+}
+
+.calendario th:nth-child(7) {
+    background-color: #ef5350; /* domingo rojo suave */
+    color:#fff;
+}
+
+/* MODO OSCURO */
+@media (prefers-color-scheme: dark) {
+    .calendario th:nth-child(6) {
+        background-color: #bfa134; /* amarillo más apagado */
+        color:#000;
+    }
+    .calendario th:nth-child(7) {
+        background-color: #b71c1c; /* rojo más profundo */
+        color:#fff;
+    }
+}
+
 /* ===== MODO OSCURO (ajustes pedidos) ===== */
 @media (prefers-color-scheme: dark) {
     .calendario-mes h2 { color:#fff; } /* <-- ahora blanco en modo oscuro */
@@ -201,6 +244,24 @@ table.calendario {
     .calendario td { border-color:#555; color:#ddd; }
     .calendario td.vacio { background:#111827; }
     .cita { background:#1c75bc; color:#fff; }
+}
+/* ===== TIPOS DE CITA (SOLUCIÓN DEFINITIVA) ===== */
+.cita.cita-segunda {
+    background:#4a90e2;
+}
+
+.cita.cita-primera {
+    background:#00bcd4;
+}
+
+/* MODO OSCURO (pisar el .cita general) */
+@media (prefers-color-scheme: dark) {
+    .cita.cita-segunda {
+        background:#4f6980;
+    }
+    .cita.cita-primera {
+        background:#1c75bc;
+    }
 }
 </style>
 </head>
@@ -332,7 +393,10 @@ for ($d = $primer_dia_visible; $d <= $dias_mes; $d++, $col++) {
         $hora = htmlspecialchars($c['hora_cita'] ?? '');
         $tipo = htmlspecialchars($c['tipo_cita'] ?? '');
         $est = htmlspecialchars($c['estacion_cita'] ?? '');
-        echo "<div class='cita'>{$hora} - {$tipo}<br>{$est}<br>{$veh}</div>";
+        $tipo_formateado = ($tipo === 'Segunda') ? '2ª' : '1ª';
+        $clase_tipo = ($tipo === 'Segunda') ? 'cita-segunda' : 'cita-primera';
+
+        echo "<div class='cita {$clase_tipo}'>{$hora} {$est} {$tipo_formateado}<br>{$veh}</div>";
     }
     echo "</td>";
     if ($col % 7 == 0 && $d < $dias_mes) echo "</tr><tr>";
