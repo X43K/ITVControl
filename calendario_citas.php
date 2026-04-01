@@ -364,17 +364,16 @@ foreach ($citas_por_mes as $mes => $dias):
 <?php
 $col = 1;
 
-// Calcular desde qué día empezar (primer lunes válido o hoy)
 $hoy = new DateTime();
-$primer_dia_visible = 1;
 
+// Empezar desde HOY si es el mes actual
 if ($anio == $hoy->format('Y') && $num_mes == $hoy->format('m')) {
-    $inicio_semana_hoy = clone $hoy;
-    $inicio_semana_hoy->modify('monday this week');
-    $primer_dia_visible = (int)$inicio_semana_hoy->format('j');
+    $primer_dia_visible = (int)$hoy->format('j');
+} else {
+    $primer_dia_visible = 1;
 }
 
-// Ajustar inicio real del calendario
+// Crear fecha de inicio real
 $primer_dia = new DateTime("$anio-$num_mes-$primer_dia_visible");
 $inicio_semana = (int)$primer_dia->format('N');
 
