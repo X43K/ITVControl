@@ -250,6 +250,30 @@ table.calendario {
     background:#4a90e2;
 }
 
+/* ===== CITAS SIN ASIGNAR (AMARILLO CORREGIDO) ===== */
+.cita.cita-primera-libre {
+    background: #FFD54F; /* 1ª → más oscuro */
+    color:#fff;
+}
+
+.cita.cita-segunda-libre {
+    background: #FFF9C4; /* 2ª → más claro */
+    color:#fff;
+}
+
+/* MODO OSCURO */
+@media (prefers-color-scheme: dark) {
+    .cita.cita-primera-libre {
+        background: #bfa134; /* más intenso */
+        color:#fff;
+    }
+
+    .cita.cita-segunda-libre {
+        background: #665c00; /* más apagado */
+        color:#fff;
+    }
+}
+
 .cita.cita-primera {
     background:#00bcd4;
 }
@@ -393,7 +417,13 @@ for ($d = $primer_dia_visible; $d <= $dias_mes; $d++, $col++) {
         $tipo = htmlspecialchars($c['tipo_cita'] ?? '');
         $est = htmlspecialchars($c['estacion_cita'] ?? '');
         $tipo_formateado = ($tipo === 'Segunda') ? '2ª' : '1ª';
-        $clase_tipo = ($tipo === 'Segunda') ? 'cita-segunda' : 'cita-primera';
+        $sin_asignar = empty($c['vehiculo']);
+
+if ($sin_asignar) {
+    $clase_tipo = ($tipo === 'Segunda') ? 'cita-segunda-libre' : 'cita-primera-libre';
+} else {
+    $clase_tipo = ($tipo === 'Segunda') ? 'cita-segunda' : 'cita-primera';
+}
 
         echo "<div class='cita {$clase_tipo}'>{$hora} {$est} {$tipo_formateado}<br>{$veh}</div>";
     }
