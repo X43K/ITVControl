@@ -90,12 +90,32 @@ if (!$is_superadmin && $flota_usuario) {
 
 // =====================
 // ORDENAR VEHÍCULOS
-usort($vehiculos, function($a,$b){
-    if ($a['estado'] === 'ITV RECHAZADA' && $b['estado'] !== 'ITV RECHAZADA') return -1;
-    if ($b['estado'] === 'ITV RECHAZADA' && $a['estado'] !== 'ITV RECHAZADA') return 1;
-    if ($a['estado'] === 'BAJA' && $b['estado'] !== 'BAJA') return 1;
-    if ($b['estado'] === 'BAJA' && $a['estado'] !== 'BAJA') return -1;
-    return calcular_dias_restantes($a['caducidad_itv']) - calcular_dias_restantes($b['caducidad_itv']);
+
+$orden = $_GET['orden'] ?? 'vehiculo';
+
+usort($vehiculos, function($a, $b) use ($orden){
+
+    switch($orden){
+
+        case 'matricula':
+            return strcasecmp($a['matricula'], $b['matricula']);
+
+        case 'tipo':
+            return strcasecmp($a['tipo'], $b['tipo']);
+
+        case 'estado':
+            return strcasecmp($a['estado'], $b['estado']);
+
+        case 'caducidad':
+            return strtotime($a['caducidad_itv']) - strtotime($b['caducidad_itv']);
+
+        case 'dias':
+            return calcular_dias_restantes($a['caducidad_itv']) - calcular_dias_restantes($b['caducidad_itv']);
+
+        case 'vehiculo':
+        default:
+            return strcasecmp($a['vehiculo'], $b['vehiculo']);
+    }
 });
 
 // =====================
@@ -267,6 +287,18 @@ setInterval(actualizarFechaHora,1000);
 <?php endif; ?>
 
 <h2>Lista de Vehículos</h2>
+<form method="GET">
+    <label>Ordenar por:</label>
+    <select name="orden" onchange="this.form.submit()">
+        <option value="vehiculo" <?= ($orden ?? '')=='vehiculo'?'selected':'' ?>>Vehículo</option>
+        <option value="matricula" <?= ($orden ?? '')=='matricula'?'selected':'' ?>>Matrícula</option>
+        <option value="tipo" <?= ($orden ?? '')=='tipo'?'selected':'' ?>>Tipo</option>
+        <option value="estado" <?= ($orden ?? '')=='estado'?'selected':'' ?>>Estado</option>
+        <option value="caducidad" <?= ($orden ?? '')=='caducidad'?'selected':'' ?>>Caducidad ITV</option>
+        <option value="dias" <?= ($orden ?? '')=='dias'?'selected':'' ?>>Días</option>
+    </select>
+</form>
+<br>
 <table>
 <thead>
 <tr>
