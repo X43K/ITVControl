@@ -84,7 +84,7 @@ if(file_exists($version_file)){
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>ITVGestion</title>
+<title>ITVControl</title>
 <link rel="icon" href="images/logo.webp">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" sizes="180x180" href="images/logo.webp">
