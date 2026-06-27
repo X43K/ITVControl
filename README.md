@@ -24,7 +24,7 @@
 - Usuario - Puede consultar e imprimir.
 - Colaborador - Todo lo anterior + añadir citas, vehículos y modificar estados/caducidades.
 - Administrador - Todo lo anterior + gestionar estaciones, ver IPs bloqueadas, añadir/modificar/desbloquear/eliminar usuarios.
-- SuperAdministrador - Todo lo anterior + editar id, matricula y flota vehiculo + desbloquear IPs bloqueadas.
+- SuperAdministrador - Todo lo anterior + crear/editar/eliminar claves app cliente offline + editar id, matricula y flota vehiculo + desbloquear IPs bloqueadas.
 
 - El SuperAdministrador es el unico que puede interactuar con todas las flotas. los demas usuarios includos los Administradores unicamente podran interactuar con su flota asignada no pudiento interferir en las demás. 
 
@@ -45,7 +45,6 @@
 - Reporta errores en la sección Issues.
 - Sugiere mejoras.
 - Prueba la aplicación y envía feedback.
-
 
 
 

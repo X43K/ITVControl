@@ -62,6 +62,26 @@ if ($_SESSION['tipo'] === 'Administrador') {
     $usuarios = $usuarios_filtrados;
 }
 
+/* ================= CLAVES OFFLINE ================= */
+$claves_file = 'sync_offline_claves.json';
+
+if (!file_exists($claves_file)) {
+    file_put_contents($claves_file, json_encode(new stdClass(), JSON_PRETTY_PRINT));
+}
+
+$claves_offline = json_decode(file_get_contents($claves_file), true);
+if (!is_array($claves_offline)) $claves_offline = [];
+$flotas_disponibles = [];
+
+foreach ($usuarios as $u) {
+    if (!empty($u['flota'])) {
+        $flotas_disponibles[] = strtoupper(trim($u['flota']));
+    }
+}
+
+$flotas_disponibles = array_values(array_unique($flotas_disponibles));
+sort($flotas_disponibles);
+
 /* ================= ORDENAR ================= */
 usort($usuarios, function($a, $b) {
     return strcasecmp($a['usuario'], $b['usuario']);
@@ -270,6 +290,47 @@ if ($is_superadmin && isset($_POST['borrar_logs_anteriores'])) {
     } else {
         $mensaje = "El archivo de logs no existe.";
     }
+}
+
+if ($is_superadmin && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['gestionar_claves'])) {
+
+    $accion = $_POST['accion'] ?? '';
+
+    // CREAR / EDITAR
+    if ($accion === 'crear') {
+        $clave = strtoupper(trim($_POST['nueva_clave'] ?? ''));
+        $flotas = $_POST['flotas'] ?? [];
+
+        if ($clave !== '') {
+            $claves_offline[$clave] = $flotas;
+        }
+    }
+
+    if ($accion === 'editar') {
+        $clave = $_POST['clave'] ?? '';
+        $flotas = $_POST['flotas'] ?? [];
+
+        if ($clave !== '') {
+            $claves_offline[$clave] = $flotas;
+        }
+    }
+
+    // ❌ ELIMINAR (ESTO ES LO IMPORTANTE)
+    if ($accion === 'eliminar') {
+        $clave = trim($_POST['clave'] ?? '');
+
+        if ($clave !== '') {
+            unset($claves_offline[$clave]);
+        }
+    }
+
+    file_put_contents(
+        $claves_file,
+        json_encode($claves_offline, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
+    );
+
+    header("Location: usuarios.php");
+    exit();
 }
 
 ?>
@@ -596,6 +657,90 @@ Flota:<input type="text" name="flota" <?= $is_superadmin ? '' : 'required' ?> st
 </tbody>
 </table>
 
+ <br><br><br>
+ 
+  <?php if ($is_superadmin): ?>
+
+<br><br>
+<h2>Gestión de Claves Offline</h2>
+
+<!-- CREAR CLAVE -->
+<form method="POST">
+    <input type="hidden" name="gestionar_claves" value="1">
+    <input type="hidden" name="accion" value="crear">
+
+    <label>Nueva clave:</label>
+    <input type="text" name="nueva_clave" required style="text-transform:uppercase;">
+
+    <label>Flotas:</label>
+<div style="border:1px solid #ccc; padding:10px; border-radius:6px; max-height:150px; overflow:auto;">
+    <?php foreach ($flotas_disponibles as $flota): ?>
+        <label style="display:block; cursor:pointer;">
+            <input type="checkbox" name="flotas[]" value="<?= htmlspecialchars($flota) ?>">
+            <?= htmlspecialchars($flota) ?>
+        </label>
+    <?php endforeach; ?>
+</div>
+
+    <button type="submit">Crear clave</button>
+</form>
+
+<br>
+
+<!-- TABLA -->
+<table>
+    <thead>
+        <tr>
+            <th>Clave</th>
+            <th>Flotas asignadas</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+    <?php foreach ($claves_offline as $clave => $flotas): ?>
+        <tr>
+            <td><strong><?= htmlspecialchars($clave) ?></strong></td>
+
+            <td>
+                <form method="POST" style="display:flex; gap:10px; align-items:center;">
+                    <input type="hidden" name="gestionar_claves" value="1">
+                    <input type="hidden" name="accion" value="editar">
+                    <input type="hidden" name="clave" value="<?= htmlspecialchars($clave) ?>">
+
+                    <div style="border:1px solid #ccc; padding:10px; border-radius:6px; max-height:150px; overflow:auto;">
+    <?php foreach ($flotas_disponibles as $flota): ?>
+        <label style="display:block; cursor:pointer;">
+            <input type="checkbox"
+                   name="flotas[]"
+                   value="<?= htmlspecialchars($flota) ?>"
+                   <?= in_array($flota, $flotas ?? []) ? 'checked' : '' ?>>
+            <?= htmlspecialchars($flota) ?>
+        </label>
+    <?php endforeach; ?>
+</div>
+
+                    <button type="submit">Guardar</button>
+                </form>
+            </td>
+
+            <td>
+                <form method="POST" onsubmit="return confirm('¿Eliminar clave?');">
+    <input type="hidden" name="gestionar_claves" value="1">
+    <input type="hidden" name="accion" value="eliminar">
+    <input type="hidden" name="clave" value="<?= htmlspecialchars($clave) ?>">
+
+    <button type="submit" style="background:red;color:white;">
+        Eliminar
+    </button>
+</form>
+            </td>
+        </tr>
+    <?php endforeach; ?>
+    </tbody>
+</table>
+
+<?php endif; ?>
+  
 <br><br><br>
   
 <?php if ($is_superadmin): ?>
