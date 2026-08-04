@@ -74,6 +74,7 @@ function log_login($usuario, $success, $ip, $userAgent, $intentos=0) {
 }
 /* ===== FIN NUEVO LOG ===== */
 
+session_name('ITVCONTROL_SESSID');
 session_start();
 
 if (isset($_SESSION['usuario'])) {

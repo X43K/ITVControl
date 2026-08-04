@@ -1,4 +1,5 @@
 <?php
+session_name('ITVCONTROL_SESSID');
 session_start();
 
 if (!isset($_SESSION['tipo']) || !in_array($_SESSION['tipo'], ['Administrador','SuperAdministrador'])) {
