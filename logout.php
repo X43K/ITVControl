@@ -1,4 +1,5 @@
 <?php
+session_name('ITVCONTROL_SESSID');
 session_start();
 session_unset();
 session_destroy();

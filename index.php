@@ -1,4 +1,5 @@
 <?php 
+session_name('ITVCONTROL_SESSID');
 session_start();
 
 // Redirigir al login si no hay usuario logueado
