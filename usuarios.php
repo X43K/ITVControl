@@ -109,7 +109,95 @@ if (isset($_GET['ver_historico'])) {
         $log_modal_historico = [];
     }
 }
+/* ================= USUARIOS DESCONOCIDOS ================= */
 
+$usuarios_desconocidos = [];
+$total_intentos_desconocidos = 0;
+
+$usuarios_completos = json_decode(
+    file_get_contents($usuarios_file),
+    true
+);
+
+if (!is_array($usuarios_completos)) {
+    $usuarios_completos = [];
+}
+
+$usuarios_registrados = [];
+
+foreach ($usuarios_completos as $u) {
+    if (isset($u['usuario'])) {
+        $usuarios_registrados[strtolower(trim($u['usuario']))] = true;
+    }
+}
+
+if (file_exists($log_file)) {
+    $lineas_desconocidos = file(
+        $log_file,
+        FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES
+    );
+
+    foreach ($lineas_desconocidos as $linea) {
+        $posicion = stripos($linea, 'Usuario:');
+
+        if ($posicion === false) {
+            continue;
+        }
+
+        $nombre = trim(substr($linea, $posicion + strlen('Usuario:')));
+
+        // Si el registro contiene un separador, quedarse con el nombre.
+        $separador = strcspn($nombre, "|;");
+        $nombre = trim(substr($nombre, 0, $separador));
+
+        if ($nombre === '') {
+            continue;
+        }
+
+        $nombre_normalizado = strtolower($nombre);
+
+        if (isset($usuarios_registrados[$nombre_normalizado])) {
+            continue;
+        }
+
+        if (!isset($usuarios_desconocidos[$nombre_normalizado])) {
+            $usuarios_desconocidos[$nombre_normalizado] = [
+                'usuario' => $nombre,
+                'intentos' => 0,
+                'ultimo' => '',
+                'registros' => []
+            ];
+        }
+
+        $usuarios_desconocidos[$nombre_normalizado]['intentos']++;
+        $usuarios_desconocidos[$nombre_normalizado]['ultimo'] = $linea;
+        $usuarios_desconocidos[$nombre_normalizado]['registros'][] = $linea;
+
+        $total_intentos_desconocidos++;
+    }
+
+    uasort($usuarios_desconocidos, function ($a, $b) {
+        return $b['intentos'] - $a['intentos'];
+    });
+}
+/* ================= BORRAR LOGS DE USUARIOS DESCONOCIDOS ================= */
+
+if (
+    $_SERVER['REQUEST_METHOD'] === 'POST'
+    && isset($_POST['borrar_logs_desconocidos'])
+    && $is_superadmin
+) {
+    if (file_exists($log_file)) {
+        if (file_put_contents($log_file, '', LOCK_EX) === false) {
+            $_SESSION['error_msg'] = 'No se pudieron borrar los registros de acceso.';
+        } else {
+            $_SESSION['mensaje_msg'] = 'Se han borrado todos los intentos registrados.';
+        }
+    }
+
+    header('Location: usuarios.php');
+    exit();
+}
 /* ================= VER LOG ================= */
 $log_modal = null;
 $total_intentos = 0;
@@ -658,9 +746,108 @@ Flota:<input type="text" name="flota" <?= $is_superadmin ? '' : 'required' ?> st
 </tbody>
 </table>
 
- <br><br><br>
- 
-  <?php if ($is_superadmin): ?>
+<br><br>
+
+<!-- ===== INTENTOS DE ACCESO CON USUARIOS DESCONOCIDOS ===== -->
+
+<h2>Intentos de acceso con usuarios desconocidos</h2>
+
+<div style="padding:15px; border:2px solid #4a90e2; border-radius:10px; margin-bottom:20px;">
+
+    <p>
+<p>
+    <strong>Total de intentos:</strong>
+    <?= (int)$total_intentos_desconocidos ?>
+    &nbsp; | &nbsp;
+    <strong>Nombres diferentes:</strong>
+    <?= count($usuarios_desconocidos) ?>
+</p>
+
+<?php if ($is_superadmin): ?>
+<form method="POST"
+      style="margin:10px 0 15px 0;"
+      onsubmit="return confirm('¿Quieres borrar todos los registros de intentos de usuarios inexistentes?');">
+
+    <button type="submit"
+            name="borrar_logs_desconocidos"
+            value="1"
+            style="background:#cc0000 !important; color:#fff !important; border:1px solid #990000; padding:8px 14px; border-radius:6px; cursor:pointer; font-weight:bold;">
+        🗑️ Borrar todos los intentos de usuarios desconocidos
+    </button>
+
+</form>
+<?php endif; ?>
+
+    <?php if (empty($usuarios_desconocidos)): ?>
+
+        <p style="color:green; font-weight:bold;">
+            No hay intentos registrados con usuarios desconocidos.
+        </p>
+
+    <?php else: ?>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Usuario introducido</th>
+                    <th>Número de intentos</th>
+                    <th>Último intento</th>
+                    <th>Detalles</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <?php foreach ($usuarios_desconocidos as $desconocido): ?>
+                    <tr>
+                        <td>
+                            <strong><?= htmlspecialchars(
+                                $desconocido['usuario'],
+                                ENT_QUOTES,
+                                'UTF-8'
+                            ) ?></strong>
+                        </td>
+
+                        <td>
+                            <?= (int)$desconocido['intentos'] ?>
+                        </td>
+
+                        <td>
+                            <pre style="white-space:pre-wrap; word-break:break-word; margin:0; font-size:12px;"><?= htmlspecialchars(
+                                $desconocido['ultimo'],
+                                ENT_QUOTES,
+                                'UTF-8'
+                            ) ?></pre>
+                        </td>
+
+                        <td>
+                            <details>
+                                <summary style="cursor:pointer; color:#1c75bc;">
+                                    Ver todos los intentos
+                                </summary>
+
+                                <pre style="white-space:pre-wrap; word-break:break-word; font-size:12px; max-height:250px; overflow:auto;"><?php
+                                    foreach ($desconocido['registros'] as $registro) {
+                                        echo htmlspecialchars(
+                                            $registro,
+                                            ENT_QUOTES,
+                                            'UTF-8'
+                                        ) . "\n";
+                                    }
+                                ?></pre>
+                            </details>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+
+    <?php endif; ?>
+
+</div>
+
+<br><br>
+
+<?php if ($is_superadmin): ?>
 
 <br><br>
 <h2>Gestión de Claves Offline</h2>
