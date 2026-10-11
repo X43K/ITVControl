@@ -258,15 +258,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($pass !== $pass2) {
         $error = "Las contraseñas no coinciden.";
     } else {
-        $existe = false;
-        foreach ($usuarios as $u) {
-            if (strcasecmp($u['usuario'], $usuario_nuevo) === 0) {
-                $existe = true;
-                break;
-            }
-        }
+// Comprobar duplicados en TODOS los usuarios del sistema,
+// independientemente de la flota o del rol del usuario.
+$usuarios_completos = json_decode(
+    file_get_contents($usuarios_file),
+    true
+);
+
+if (!is_array($usuarios_completos)) {
+    $usuarios_completos = [];
+}
+
+$existe = false;
+
+foreach ($usuarios_completos as $u) {
+    if (
+        isset($u['usuario']) &&
+        strcasecmp(trim($u['usuario']), $usuario_nuevo) === 0
+    ) {
+        $existe = true;
+        break;
+    }
+}
         if ($existe) {
-            $error = "El usuario ya existe.";
+            $error = "El usuario ya existe en alguna de las flotas del sistema.";
         } else {
             $usuarios[] = [
                 'usuario' => $usuario_nuevo,
@@ -622,8 +637,10 @@ tr:hover td { background:#dce8ff; }
 
 <br><br><br>
 
-<?php if(isset($error)): ?>
-<p class="rojo_intenso"><?= htmlspecialchars($error) ?></p>
+<?php if (isset($error)): ?>
+    <p style="color:#ff0000; font-weight:bold;">
+        <?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?>
+    </p>
 <?php endif; ?>
 
 <h2>Añadir Usuario</h2>
