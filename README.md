@@ -1,13 +1,13 @@
 # ITVControl
 
-<img src="images/logo.webp" alt="ITVControl">
+<img src="https://github.com/X43K/ITVControl/blob/9e92a5770e969ec1b4de4d0f231d20bd77a7aae1/images/logo.webp" alt="ITVControl">
 
 Este proyecto permite gestionar una o varias flotas de vehículos, sus citas de ITV, las Estaciones de ITV y los usuarios que pueden acceder al sistema.
 
 ## Novedades de la v8
 
 - **Toda la aplicación en un único `index.php`.** Ya no hay 24 archivos PHP sueltos.
-- **Los archivos de datos no se publican en GitHub.** se crean automáticamente con datos de muestra la primera vez que se ejecuta la aplicación.
+- **Los archivos de datos no se publican en GitHub.** `usuarios.json`, `citas.json`, `vehiculos.json` y `estaciones.json` se crean automáticamente con datos de muestra la primera vez que se ejecuta la aplicación.
 - **`sync_offline.php` se mantiene aparte** porque es el endpoint que consume la aplicación HTA de sincronización offline.
 - Las rutas antiguas (`citas.php`, `usuarios.php`, `login.php`...) siguen funcionando: el `.htaccess` las reescribe a `index.php?p=...`.
 
@@ -42,7 +42,8 @@ images/             Iconos e imágenes
 Archivos que **no** están en el repositorio y se generan solos:
 
 ```
-*.json y *.log
+usuarios.json  citas.json  vehiculos.json  estaciones.json
+sync_offline_claves.json   *.log
 ```
 
 ## Rutas
@@ -79,8 +80,8 @@ El SuperAdministrador es el único que puede interactuar con todas las flotas. L
 - Los archivos `.json` de datos y los `.log` están bloqueados por `.htaccess` para acceso HTTP directo.
 - **No subas nunca `usuarios.json` al repositorio.** Ya está incluido en `.gitignore`.
 
-<img src="images/ejemplo1.webp" alt="Ejemplo 1">
-<img src="images/ejemplo2.webp" alt="Ejemplo 2">
+<img src="https://github.com/X43K/ITVControl/blob/9e92a5770e969ec1b4de4d0f231d20bd77a7aae1/images/ejemplo1.webp" alt="Ejemplo 1">
+<img src="https://github.com/X43K/ITVControl/blob/9e92a5770e969ec1b4de4d0f231d20bd77a7aae1/images/ejemplo2.webp" alt="Ejemplo 2">
 
 ## Actualizar
 
