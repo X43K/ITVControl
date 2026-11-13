@@ -396,46 +396,84 @@ if ($is_superadmin && isset($_POST['borrar_logs_anteriores'])) {
     }
 }
 
-if ($is_superadmin && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['gestionar_claves'])) {
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['gestionar_claves'])) {
 
     $accion = $_POST['accion'] ?? '';
 
-    // CREAR / EDITAR
-    if ($accion === 'crear') {
-        $clave = strtoupper(trim($_POST['nueva_clave'] ?? ''));
-        $flotas = $_POST['flotas'] ?? [];
+    // ================= SUPERADMINISTRADOR =================
+    if ($is_superadmin) {
 
-        if ($clave !== '') {
-            $claves_offline[$clave] = $flotas;
+        // CREAR / EDITAR
+        if ($accion === 'crear') {
+            $clave = strtoupper(trim($_POST['nueva_clave'] ?? ''));
+            $flotas = $_POST['flotas'] ?? [];
+
+            if ($clave !== '') {
+                $claves_offline[$clave] = $flotas;
+            }
         }
+
+        if ($accion === 'editar') {
+            $clave = $_POST['clave'] ?? '';
+            $flotas = $_POST['flotas'] ?? [];
+
+            if ($clave !== '') {
+                $claves_offline[$clave] = $flotas;
+            }
+        }
+
+        // ELIMINAR
+        if ($accion === 'eliminar') {
+            $clave = trim($_POST['clave'] ?? '');
+
+            if ($clave !== '') {
+                unset($claves_offline[$clave]);
+            }
+        }
+
     }
 
-    if ($accion === 'editar') {
-        $clave = $_POST['clave'] ?? '';
-        $flotas = $_POST['flotas'] ?? [];
+    // ================= ADMINISTRADOR =================
+    elseif ($_SESSION['tipo'] === 'Administrador') {
 
-        if ($clave !== '') {
-            $claves_offline[$clave] = $flotas;
-        }
-    }
+        if ($accion === 'editar_propia') {
 
-    // ❌ ELIMINAR (ESTO ES LO IMPORTANTE)
-    if ($accion === 'eliminar') {
-        $clave = trim($_POST['clave'] ?? '');
+            $clave_anterior = trim($_POST['clave_anterior'] ?? '');
+            $nueva_clave = strtoupper(trim($_POST['nueva_clave'] ?? ''));
 
-        if ($clave !== '') {
-            unset($claves_offline[$clave]);
+            // Comprobar que la clave pertenece a su propia flota
+            if (
+                $clave_anterior !== '' &&
+                isset($claves_offline[$clave_anterior]) &&
+                in_array(
+                    $flota_usuario,
+                    array_map('strtoupper', $claves_offline[$clave_anterior])
+                ) &&
+                $nueva_clave !== ''
+            ) {
+
+                // Mantener las demás flotas que pudieran compartir la clave
+                $flotas_clave = $claves_offline[$clave_anterior];
+
+                unset($claves_offline[$clave_anterior]);
+
+                $claves_offline[$nueva_clave] = $flotas_clave;
+
+            }
         }
     }
 
     file_put_contents(
         $claves_file,
-        json_encode($claves_offline, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
+        json_encode($claves_offline, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE),
+        LOCK_EX
     );
 
     header("Location: usuarios.php");
     exit();
 }
+
 
 ?>
 <!DOCTYPE html>
@@ -864,10 +902,13 @@ Flota:<input type="text" name="flota" <?= $is_superadmin ? '' : 'required' ?> st
 
 <br><br>
 
-<?php if ($is_superadmin): ?>
+
+<?php if ($is_superadmin || $_SESSION['tipo'] === 'Administrador'): ?>
 
 <br><br>
 <h2>Gestión de Claves Offline</h2>
+
+<?php if ($is_superadmin): ?>
 
 <!-- CREAR CLAVE -->
 <form method="POST">
@@ -878,33 +919,60 @@ Flota:<input type="text" name="flota" <?= $is_superadmin ? '' : 'required' ?> st
     <input type="text" name="nueva_clave" required style="text-transform:uppercase;">
 
     <label>Flotas:</label>
-<div style="border:1px solid #ccc; padding:10px; border-radius:6px; max-height:150px; overflow:auto;">
-    <?php foreach ($flotas_disponibles as $flota): ?>
-        <label style="display:block; cursor:pointer;">
-            <input type="checkbox" name="flotas[]" value="<?= htmlspecialchars($flota) ?>">
-            <?= htmlspecialchars($flota) ?>
-        </label>
-    <?php endforeach; ?>
-</div>
+    <div style="border:1px solid #ccc; padding:10px; border-radius:6px; max-height:150px; overflow:auto;">
+        <?php foreach ($flotas_disponibles as $flota): ?>
+            <label style="display:block; cursor:pointer;">
+                <input type="checkbox" name="flotas[]" value="<?= htmlspecialchars($flota) ?>">
+                <?= htmlspecialchars($flota) ?>
+            </label>
+        <?php endforeach; ?>
+    </div>
 
     <button type="submit">Crear clave</button>
 </form>
 
 <br>
 
+<?php endif; ?>
+
 <!-- TABLA -->
 <table>
     <thead>
         <tr>
             <th>Clave</th>
-            <th>Flotas asignadas</th>
-            <th>Acciones</th>
+            <?php if ($is_superadmin): ?>
+                <th>Flotas asignadas</th>
+                <th>Acciones</th>
+            <?php else: ?>
+                <th>Acción</th>
+            <?php endif; ?>
         </tr>
     </thead>
+
     <tbody>
+
     <?php foreach ($claves_offline as $clave => $flotas): ?>
+
+        <?php
+        // Los administradores únicamente ven claves de su propia flota
+        if (
+            !$is_superadmin &&
+            !in_array(
+                $flota_usuario,
+                array_map('strtoupper', $flotas ?? [])
+            )
+        ) {
+            continue;
+        }
+        ?>
+
         <tr>
-            <td><strong><?= htmlspecialchars($clave) ?></strong></td>
+
+            <td>
+                <strong><?= htmlspecialchars($clave) ?></strong>
+            </td>
+
+            <?php if ($is_superadmin): ?>
 
             <td>
                 <form method="POST" style="display:flex; gap:10px; align-items:center;">
@@ -913,16 +981,16 @@ Flota:<input type="text" name="flota" <?= $is_superadmin ? '' : 'required' ?> st
                     <input type="hidden" name="clave" value="<?= htmlspecialchars($clave) ?>">
 
                     <div style="border:1px solid #ccc; padding:10px; border-radius:6px; max-height:150px; overflow:auto;">
-    <?php foreach ($flotas_disponibles as $flota): ?>
-        <label style="display:block; cursor:pointer;">
-            <input type="checkbox"
-                   name="flotas[]"
-                   value="<?= htmlspecialchars($flota) ?>"
-                   <?= in_array($flota, $flotas ?? []) ? 'checked' : '' ?>>
-            <?= htmlspecialchars($flota) ?>
-        </label>
-    <?php endforeach; ?>
-</div>
+                        <?php foreach ($flotas_disponibles as $flota): ?>
+                            <label style="display:block; cursor:pointer;">
+                                <input type="checkbox"
+                                       name="flotas[]"
+                                       value="<?= htmlspecialchars($flota) ?>"
+                                       <?= in_array($flota, $flotas ?? []) ? 'checked' : '' ?>>
+                                <?= htmlspecialchars($flota) ?>
+                            </label>
+                        <?php endforeach; ?>
+                    </div>
 
                     <button type="submit">Guardar</button>
                 </form>
@@ -930,21 +998,50 @@ Flota:<input type="text" name="flota" <?= $is_superadmin ? '' : 'required' ?> st
 
             <td>
                 <form method="POST" onsubmit="return confirm('¿Eliminar clave?');">
-    <input type="hidden" name="gestionar_claves" value="1">
-    <input type="hidden" name="accion" value="eliminar">
-    <input type="hidden" name="clave" value="<?= htmlspecialchars($clave) ?>">
+                    <input type="hidden" name="gestionar_claves" value="1">
+                    <input type="hidden" name="accion" value="eliminar">
+                    <input type="hidden" name="clave" value="<?= htmlspecialchars($clave) ?>">
 
-    <button type="submit" style="background:red;color:white;">
-        Eliminar
-    </button>
-</form>
+                    <button type="submit" style="background:red;color:white;">
+                        Eliminar
+                    </button>
+                </form>
             </td>
+
+            <?php else: ?>
+
+            <td>
+                <form method="POST" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+
+                    <input type="hidden" name="gestionar_claves" value="1">
+                    <input type="hidden" name="accion" value="editar_propia">
+                    <input type="hidden" name="clave_anterior" value="<?= htmlspecialchars($clave) ?>">
+
+                    <input type="text"
+                           name="nueva_clave"
+                           value="<?= htmlspecialchars($clave) ?>"
+                           required
+                           style="text-transform:uppercase;">
+
+                    <button type="submit"
+                            onclick="return confirm('¿Guardar la nueva clave de tu flota?');">
+                        Cambiar clave
+                    </button>
+
+                </form>
+            </td>
+
+            <?php endif; ?>
+
         </tr>
+
     <?php endforeach; ?>
+
     </tbody>
 </table>
 
 <?php endif; ?>
+
   
 <br><br><br>
   
