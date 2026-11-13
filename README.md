@@ -1,5 +1,5 @@
 # ITVControl
-<img src="https://github.com/X43K/ITVControl/blob/c343d1baa2b6a1ef822edc28d58ec07b376d64ba/images/logo.webp">
+<img src="https://github.com/X43K/ITVControl/blob/4338a44184badc9fc06f2979e9ee75f68fedcae4/images/logo.webp">
 - Este proyecto permite gestionar una o varias flotas de vehículos, sus citas de ITV, las Estaciones de ITV y los usuarios que pueden acceder al sistema.
 
 ## Instrucciones de instalación
@@ -33,8 +33,8 @@
 - Se ha añadido una capa de seguridad para evitar la exposicion de los archivos con datos sensibles. Si es necesario, editar `apache2.conf` -> `sudo nano /etc/apache2/apache2.conf` editando en el bloque `<Directory /var/www/>` la linea `AllowOverride None` por `AllowOverride All`, por ultimo reinicie Apache2 `sudo systemctl restart apache2`. Aquellas IP que intenten acceder a contenidos no autorizados seran bloqueadas, pudiendo unicamente Administradores y SuperAdministradores acceder a la pestaña para ver y desbloquear dichas IP.
 - Se ha añadido una capa de seguridad que limita a 3 intentos fallidos de login. Se guarda un Log con los intentos fallidos y solo el SuperAdministrador podra desbloquear dichos usuarios bloqueados, ya que es el unico que puede acceder a la gestion de usuarios.
 
-<img src="https://github.com/X43K/ITVControl/blob/1a1353d5830b926422414690ca60931f1bb142c8/images/ejemplo1.webp">
-<img src="https://github.com/X43K/ITVControl/blob/1a1353d5830b926422414690ca60931f1bb142c8/images/ejemplo2.webp">
+<img src="https://github.com/X43K/ITVControl/blob/4338a44184badc9fc06f2979e9ee75f68fedcae4/images/ejemplo1.webp">
+<img src="https://github.com/X43K/ITVControl/blob/4338a44184badc9fc06f2979e9ee75f68fedcae4/images/ejemplo2.webp">
 
 ## Actualizar
 - Cuando exista una versión más reciente disponible en el canal oficial de GitHub, se mostrará un aviso en la página principal. Además del mensaje **“Nueva versión disponible”**, también se indicará la versión actualmente instalada y la nueva versión disponible.  
